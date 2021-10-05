@@ -1,0 +1,42 @@
+{
+    "name": "svelte-app",
+    "version": "1.0.0",
+    "scripts": {
+        "build": "rollup -c",
+        "dev": "rollup -c -w",
+        "start": "sirv public",
+        "prettier": "prettier --write ./src && prettier --write ./public/sw.js"
+    },
+    "devDependencies": {
+        "@rollup/plugin-commonjs": "11.0.2",
+        "@rollup/plugin-node-resolve": "^7.0.0",
+        "node-sass": "^4.14.1",
+        "prettier": "^2.4.1",
+        "prettier-plugin-svelte": "^1.4.2",
+        "rollup": "^1.20.0",
+        "rollup-plugin-livereload": "^1.0.0",
+        "rollup-plugin-postcss": "^3.1.8",
+        "rollup-plugin-svelte": "^5.2.3",
+        "rollup-plugin-terser": "^5.3.1",
+        "sass-loader": "^8.0.2",
+        "sirv-cli": "^1.0.14",
+        "svelte": "^3.43.1",
+        "svelte-material-ui": "^1.1.0"
+    },
+    "dependencies": {
+        "fflate": "^0.7.1",
+        "qrious": "^4.0.2",
+        "svelte-preprocess": "^3.9.12"
+    },
+    "prettier": {
+        "printWidth": 90,
+        "tabWidth": 4,
+        "semi": true,
+        "singleQuote": true,
+        "trailingComma": "all",
+        "bracketSpacing": true,
+        "svelteSortOrder": "scripts-markup-styles",
+        "svelteStrictMode": true,
+        "svelteBracketNewLine": false
+    }
+}
