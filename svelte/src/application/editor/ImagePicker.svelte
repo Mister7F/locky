@@ -1,13 +1,18 @@
 <script>
     import Textfield from '@smui/textfield';
+    import IconButton from '@smui/icon-button';
+    import Icon from '../../helpers/Icon.svelte';
     import { onMount } from 'svelte';
     import Field from '../../helpers/field/Field.svelte';
+    import Img from '../Img.svelte';
 
     export let src;
     export let chooseIcon = false;
     export let readonly = false;
     export let size = '100px';
     export let srcs = [];
+
+    let customSrc = src;
 
     $: currentSrcs =
         !searchValue || !searchValue.length
@@ -42,11 +47,17 @@
 <div class="image_picker" style="--size: {size}">
     <div class="img {readonly ? 'readonly' : ''}" on:click="{open}">
         {#if src}
-            <img src="{src}" alt="{src}" />
+            <Img src="{src}" alt="{src}" />
         {:else}<img src="img/accounts/default.svg" alt="default" />{/if}
     </div>
     <div class="icons {chooseIcon && !readonly ? 'visible' : ''}">
-        <div class="search">
+        <div class="img-header">
+            <div class="url">
+                <Field label="Image URL" copy="0" bind:value="{customSrc}" />
+                <IconButton on:click="{() => choose(customSrc)}">
+                    <Icon color="on-primary">save_alt</Icon>
+                </IconButton>
+            </div>
             <Field label="Search" copy="0" bind:value="{searchValue}" />
         </div>
         <div class="container">
@@ -72,6 +83,7 @@
     }
 
     .image_picker :global(svg),
+    .image_picker :global(Img),
     img {
         max-width: 100%;
         max-height: 100%;
@@ -115,7 +127,7 @@
         align-items: flex-start;
         flex-wrap: wrap;
         margin-top: 10px;
-        max-height: calc(100% - 75px);
+        max-height: calc(100% - 155px);
         overflow: hidden;
         overflow-y: auto;
         width: 90%;
@@ -129,10 +141,22 @@
         flex: auto;
     }
 
-    .search {
+    .img-header {
         width: 100%;
         position: sticky;
-        height: 60px;
+        height: 140px;
+    }
+
+    .url {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+    }
+
+    .url > :global(.field) {
+        width: 80%;
     }
 
 </style>

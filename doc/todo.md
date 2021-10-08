@@ -7,7 +7,6 @@ Bugs
 
 Less important
 - download image when adding the URL on an account
-- set manually an URL image (security ?)
 - grep Todo
 - improve readme
 - refactor Field.svelte

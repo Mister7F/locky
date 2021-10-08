@@ -3,6 +3,7 @@
     import Card, { PrimaryAction, Actions, ActionButtons, ActionIcons } from '@smui/card';
     import IconButton, { Icon } from '@smui/icon-button';
     import { createEventDispatcher } from 'svelte';
+    import Img from './Img.svelte';
     import { getTotpCode, passwordStrength } from '../helpers/crypto.js';
     import { isUrlValid, copyValue } from '../helpers/utils.js';
 
@@ -17,7 +18,7 @@
         <div class="card">
             <div class="row">
                 <div class="image">
-                    <img
+                    <Img
                         src="{account.icon || 'img/accounts/default.svg'}"
                         alt="Account" />
                 </div>
@@ -36,7 +37,7 @@
                 class="detail_primary_action"
                 on:click="{() => dispatch('click')}">
                 <div class="detail_img">
-                    <img
+                    <Img
                         src="{account.icon || 'img/accounts/default.svg'}"
                         alt="Account" />
                 </div>
@@ -175,7 +176,7 @@
         border: 1px solid var(--accent);
     }
 
-    img {
+    .image :global(Img) {
         pointer-events: none;
         max-height: 100%;
         max-width: 100%;
@@ -207,7 +208,7 @@
         padding: 8px;
         box-sizing: border-box;
     }
-    .detail_img img {
+    .detail_img :global(Img) {
         max-width: 100%;
         max-height: 100%;
         height: 100%;

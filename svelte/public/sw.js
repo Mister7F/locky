@@ -17,6 +17,7 @@ const preCache = async () => {
     }
     urlsToCache.push('img/accounts/files.txt');
     urlsToCache.push('img/accounts/default.svg');
+    urlsToCache.push('img/noimage.svg');
 
     // "addAll" fail if only 1 of the request fail
     // we want to store as much as possible in
