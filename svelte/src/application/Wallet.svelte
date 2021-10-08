@@ -75,7 +75,7 @@
         const toAccount = event.detail.destItem;
         wallet = await api.moveAccount(fromAccount, toAccount);
     }
-    function editAccount(account, read = true) {
+    function editAccount(account) {
         editedAccountIndex = wallet['accounts'].indexOf(account);
         // Deep copy, to not change the account before saving
         accountEdited = JSON.parse(JSON.stringify(account));
