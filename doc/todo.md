@@ -7,6 +7,7 @@ Bugs
 
 Less important
 - download image when adding the URL on an account
+- set manually an URL image (security ?)
 - grep Todo
 - improve readme
 - refactor Field.svelte
@@ -17,9 +18,17 @@ Less important
 - view to see leak or duplicated password
 - new folder: edit the folder in the list instead opening a dialog
   allow to edit the icon without the dialog (just a select component)
+- folders list in mobile view: close when clicking outside
+- generate password
+- clipboard: find a better solution
+  automatically remove the clipboard after 1 minute
+- mobile: automatically close the session after a period of inactivity
+- change theme color
 
 Refactor
 - try to remove bind:this
 - remove setTimeout
 - remove all smui Icon and use the one in the helpers
   remove `class="material-icons"` on those elements
+- firefox in incognito mode: IndexDB and service worker disabled
+  show an error message
