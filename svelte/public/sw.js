@@ -2,22 +2,22 @@ const cacheName = 'locky-1';
 
 const preCache = async () => {
     const urlsToCache = [];
-
     const cache = await caches.open(cacheName);
+    const indexPath = getIndexPath();
 
-    const accountsImagesResponse = await fetch('img/accounts/files.txt');
+    const accountsImagesResponse = await fetch(indexPath + '/img/accounts/files.txt');
     if (accountsImagesResponse.ok) {
         const accountsList = await accountsImagesResponse.text();
         urlsToCache.push(
             ...accountsList
                 .split('\n')
                 .filter((url) => url && url.length)
-                .map((url) => 'img/accounts/' + url),
+                .map((url) => indexPath + '/img/accounts/' + url),
         );
     }
-    urlsToCache.push('img/accounts/files.txt');
-    urlsToCache.push('img/accounts/default.svg');
-    urlsToCache.push('img/noimage.svg');
+    urlsToCache.push(indexPath + '/img/accounts/files.txt');
+    urlsToCache.push(indexPath + '/img/accounts/default.svg');
+    urlsToCache.push(indexPath + '/img/noimage.svg');
 
     // "addAll" fail if only 1 of the request fail
     // we want to store as much as possible in
@@ -25,7 +25,7 @@ const preCache = async () => {
     return Promise.all(
         urlsToCache.map((url) => {
             return cache.add(url).catch((reason) => {
-                console.log('Failed to pre-cache', url);
+                console.error('Failed to pre-cache', url);
             });
         }),
     );
@@ -37,11 +37,12 @@ self.addEventListener('install', (event) => {
 
 self.addEventListener('fetch', async (event) => {
     const currentHost = self.location.host;
+    const indexPath = getIndexPath();
 
     // Request information
     const url = event.request.url;
     const urlObj = new URL(url);
-    const urlPath = urlObj.pathname;
+    const urlPath = urlObj.pathname.replace(/\/*$/, ''); // remove trailing "/"
     const fileExtension = getFileExtension(urlPath);
     const method = event.request.method;
     const host = urlObj.host;
@@ -67,11 +68,12 @@ self.addEventListener('fetch', async (event) => {
             'svg',
             'ttf',
         ];
-        if (urlPath === '/img/accounts/files.txt') {
+        if (urlPath === indexPath + '/img/accounts/files.txt') {
             strategy = 'network-first';
         } else if (cachableExtension.indexOf(fileExtension) >= 0) {
             strategy = 'cache-first';
-        } else if (urlPath === '' || urlPath === '/') {
+        } else if (urlPath === indexPath || urlPath === indexPath + '/index.html') {
+            // index.html
             strategy = 'cache-first';
         } else {
             strategy = 'network-only';
@@ -97,7 +99,6 @@ const cacheFirst = async (request) => {
     try {
         const cacheResponse = await cache.match(request);
         if (cacheResponse && cacheResponse.ok) {
-            // console.log('Cache', request.url);
             return cacheResponse;
         }
     } catch {}
@@ -105,7 +106,6 @@ const cacheFirst = async (request) => {
     try {
         const networkResponse = await fetch(request);
         if (networkResponse && networkResponse.ok) {
-            // console.log('Network', request.url);
             cache.put(request, networkResponse.clone());
         }
         return networkResponse;
@@ -115,8 +115,6 @@ const cacheFirst = async (request) => {
 };
 
 const networkFirst = async (request) => {
-    console.log('networkFirst');
-
     try {
         const networkResponse = await fetch(request);
         if (networkResponse && networkResponse.ok) {
@@ -130,7 +128,6 @@ const networkFirst = async (request) => {
     try {
         const cacheResponse = await cache.match(request);
         if (cacheResponse && cacheResponse.ok) {
-            console.log('return from cache');
             return cacheResponse;
         }
     } catch {}
@@ -139,7 +136,6 @@ const networkFirst = async (request) => {
 };
 
 const networkOnly = async (request) => {
-    // console.log('Network only', request.url)
     try {
         return await fetch(request);
     } catch {}
@@ -149,4 +145,14 @@ const networkOnly = async (request) => {
 
 const getFileExtension = (fname) => {
     return fname.slice(((fname.lastIndexOf('.') - 1) >>> 0) + 2).toLowerCase();
+};
+
+const getIndexPath = () => {
+    // If the index of the website is *not* "https://domain.com/"
+    // but "https://domain.com/public/", we should adapt the cache
+    const swPathname = self.location.pathname;
+    let indexPath = self.location.pathname.split('/');
+    indexPath.pop();
+    indexPath = indexPath.join('/').replace(/\/*$/, '');
+    return indexPath;
 };
