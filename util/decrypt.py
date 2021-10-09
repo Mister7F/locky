@@ -5,29 +5,39 @@
 import gzip
 import json
 
-from Crypto.Cipher import AES
-from Crypto.Hash import SHA256
-from Crypto.Protocol.KDF import PBKDF2
+from Crypto.Cipher import AES, ChaCha20_Poly1305
 from Crypto.Util import Padding
 
+from derive_key import derive_key
 
-password = b"azerty"
+
+password = b"qsd"
 with open("wallet.lck", "rb") as file:
     data = file.read()
 
 
+# Key derivation
 salt = data[:16]
+key = derive_key(password, salt)
+
+
+# AES-CBC decryption
 ciphertext = data[16:]
-key = PBKDF2(password, salt, 32, count=100000, hmac_hash_module=SHA256)
-
 cipher = AES.new(key, AES.MODE_CBC)
-plaintext = cipher.decrypt(ciphertext)
+data = cipher.decrypt(ciphertext)
+data = data[16:]  # Remove the IV
+data = Padding.unpad(data, 16, style="pkcs7")  # remove the padding
 
-# Remove the IV
-plaintext = plaintext[16:]
 
-plaintext = Padding.unpad(plaintext, 16, style='pkcs7')
+# xChaCha20 decryption
+nonce = data[:24]
+ciphertext = data[24:-16]
+signature = data[-16:]
+cipher = ChaCha20_Poly1305.new(key=key, nonce=nonce)
+plaintext = cipher.decrypt_and_verify(ciphertext, signature)
 
+
+# GZIP decompression
 decompressed = gzip.decompress(plaintext)
 
 print(json.dumps(json.loads(decompressed.decode()), indent=4))

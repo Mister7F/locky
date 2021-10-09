@@ -3,10 +3,12 @@ import { encrypt, decrypt } from '../helpers/crypto.js';
 
 export async function encryptDatabase(database, password) {
     const strDatabase = JSON.stringify(database);
+
     const compressed = compressSync(strToU8(strDatabase));
-    console.log('Compress wallet from', strDatabase.length, 'to', compressed.byteLength);
-    const encrypted = await encrypt(compressed, password);
-    return encrypted;
+
+    console.debug('Compress from', strDatabase.length, 'to', compressed.byteLength);
+
+    return await encrypt(compressed, password);
 }
 
 // data: ArrayBuffer
@@ -20,14 +22,7 @@ export async function decryptDatabase(data, password) {
         return null;
     }
 
-    let decrypted = null;
-    try {
-        decrypted = await decrypt(data, password);
-    } catch {
-        console.error('Decryption failed');
-        return null;
-    }
-
+    const decrypted = await decrypt(data, password);
     if (!decrypted) {
         console.error('Decryption failed');
         return null;

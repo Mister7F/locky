@@ -6,16 +6,18 @@ import gzip
 import json
 import os
 
-from Crypto.Cipher import AES
-from Crypto.Hash import SHA256
-from Crypto.Protocol.KDF import PBKDF2
+from Crypto.Cipher import AES, ChaCha20_Poly1305
 from Crypto.Util import Padding
+
+from derive_key import derive_key
 
 
 wallet = {
-    'accounts': [
-        {'name': 'Account test %i' % i} for i in range(1000)
-    ],
+    'accounts': [{
+        'name': 'Account test %i' % i,
+        'login': 'account_%i@example.com' % i,
+        'password': 'azerty_' * 30,
+    } for i in range(200)],
     'folders': [
         {'id': 0, 'name': 'All', 'icon': 'home'},
     ],
@@ -24,18 +26,30 @@ wallet = {
 password = b"azerty"
 plaintext = json.dumps(wallet).encode()
 
-salt = os.urandom(16)
-iv = os.urandom(16)
-
-key = PBKDF2(password, salt, 32, count=100000, hmac_hash_module=SHA256)
-
+# GZIP compression
 compressed = gzip.compress(plaintext)
-data = iv + Padding.pad(compressed, 16, style='pkcs7')
 
+
+# Key derivation
+salt = os.urandom(16)
+key = derive_key(password, salt)
+
+
+# xChaCha20 encryption
+nonce = os.urandom(24)
+cipher = ChaCha20_Poly1305.new(key=key, nonce=nonce)
+ciphertext, signature = cipher.encrypt_and_digest(compressed)
+ciphertext = nonce + ciphertext + signature
+
+
+# AES-CBC encryption
+iv = os.urandom(16)
+ciphertext = iv + Padding.pad(ciphertext, 16, style='pkcs7')
 cipher = AES.new(key, AES.MODE_CBC)
-ciphertext = cipher.encrypt(data)
-
+ciphertext = cipher.encrypt(ciphertext)
 ciphertext = salt + ciphertext
 
+
+# Write the file
 with open('encrypted.lck', 'wb') as file:
     file.write(ciphertext)

@@ -10,7 +10,7 @@ export async function getTotpCode(token) {
 
     let hash;
     try {
-        hash = await hmac(token, encodedTime);
+        hash = await hmac(b32Decode(token), encodedTime);
     } catch {
         return null;
     }
@@ -27,16 +27,20 @@ export async function getTotpCode(token) {
     return totp.padStart(6, 0);
 }
 
-export async function hmac(key, data) {
-    const encoder = new TextEncoder('utf-8');
-    const bKey = b32Decode(key);
-
+/**
+ * Sign the given message with the given key using HMAC
+ *
+ * @param {Uint8Array} Key to use to sign the message
+ * @param {Uint8Array} The message to authenticate
+ * @param {string} The algorithm to use ('SHA-1', 'SHA-256', 'SHA-384', or 'SHA-512')
+ */
+export async function hmac(key, data, hash = 'SHA-1') {
     const hmac = await window.crypto.subtle.importKey(
         'raw',
-        bKey,
+        key,
         {
             name: 'HMAC',
-            hash: { name: 'SHA-1' },
+            hash: { name: hash },
         },
         false,
         ['sign'],
@@ -74,95 +78,12 @@ export function b32Decode(s) {
     return new Uint8Array(bytesArray.map((i) => parseInt(i)));
 }
 
-export async function encrypt(plaintext, password) {
-    const iv = window.crypto.getRandomValues(new Uint8Array(16));
-    const salt = window.crypto.getRandomValues(new Uint8Array(16));
-
-    const enc = new TextEncoder();
-    const keyMaterial = await window.crypto.subtle.importKey(
-        'raw',
-        enc.encode(password),
-        'PBKDF2',
-        false,
-        ['deriveBits', 'deriveKey'],
-    );
-
-    const key = await window.crypto.subtle.deriveKey(
-        {
-            name: 'PBKDF2',
-            salt: salt,
-            iterations: 100000,
-            hash: 'SHA-256',
-        },
-        keyMaterial,
-        {
-            name: 'AES-CBC',
-            length: 256,
-        },
-        true,
-        ['encrypt', 'decrypt'],
-    );
-
-    const ciphertext = await window.crypto.subtle.encrypt(
-        { name: 'AES-CBC', iv },
-        key,
-        plaintext,
-    );
-
-    const fullCiphertext = concatenate(salt, iv, new Uint8Array(ciphertext));
-
-    return fullCiphertext;
-}
-
-export async function decrypt(ciphertext, password) {
-    if (!password || !password.length) {
-        return null;
-    }
-
-    if (!ciphertext || ciphertext.length < 48) {
-        // 16 bytes for the salt, 16 for the IV and 16 for at least 1 AES block
-        return null;
-    }
-
-    const salt = ciphertext.slice(0, 16);
-    const iv = ciphertext.slice(16, 32);
-    const encrypted = ciphertext.slice(32);
-
-    const enc = new TextEncoder();
-    const keyMaterial = await window.crypto.subtle.importKey(
-        'raw',
-        enc.encode(password),
-        'PBKDF2',
-        false,
-        ['deriveBits', 'deriveKey'],
-    );
-
-    const key = await window.crypto.subtle.deriveKey(
-        {
-            name: 'PBKDF2',
-            salt: salt,
-            iterations: 100000,
-            hash: 'SHA-256',
-        },
-        keyMaterial,
-        {
-            name: 'AES-CBC',
-            length: 256,
-        },
-        true,
-        ['encrypt', 'decrypt'],
-    );
-
-    const decrypted = await window.crypto.subtle.decrypt(
-        { name: 'AES-CBC', iv },
-        key,
-        encrypted,
-    );
-
-    return new Uint8Array(decrypted);
-}
-
-// Uint8Array[]
+/**
+ * Concatenate the given list of bytes array
+ *
+ * @param {Uint8Array[]} List of bytes array to concatenate
+ * @return {Uint8Array} A single bytes array containing all other
+ */
 export function concatenate(...arrays) {
     const size = arrays.reduce((a, b) => a + b.byteLength, 0);
     const result = new Uint8Array(size);
@@ -197,4 +118,224 @@ export function passwordStrength(password) {
     // Password with all character types, with length >= 10 has maximum strength
     const computedStrength = parseInt(password.length * charsetSize * 2);
     return Math.min(computedStrength, 100);
+}
+
+/**
+ * Encrypt the given plaintext with the password
+ *
+ * 1. Use Argon2id to derive the password into an encryption key
+ * 2. Encrypt using xChaCha20
+ * 3. Encrypt the result with AES-256 (PKCS7 padding)
+ */
+export async function encrypt(plaintext, password) {
+    const [key, salt] = await derivePassword(password);
+
+    password = null;
+
+    const ciphertext = await encryptXChaCha20Poly1305(plaintext, key);
+
+    const ciphertext2 = await encryptAES(ciphertext, key);
+
+    return concatenate(salt, ciphertext2);
+}
+
+/**
+ * Decrypt the given plaintext with the password
+ *
+ * 1. Use Argon2id to derive the password into an encryption key
+ * 2. Decrypt the result with AES-256 (PKCS7 padding)
+ * 3. Decrypt using xChaCha20
+ *
+ * @param {Uint8Array} The ciphertext to decrypt
+ * @param {string} The password to used (bill be derived)
+ * @return {Uint8Array} The decrypted message or null if something bad happened
+ */
+export async function decrypt(ciphertext, password) {
+    const salt = ciphertext.slice(0, 16);
+    const encrypted = ciphertext.slice(16);
+
+    const [key, _] = await derivePassword(password, salt);
+
+    const encrypted2 = await decryptAES(encrypted, key);
+
+    return await decryptXChaCha20Poly1305(encrypted2, key);
+}
+
+/**
+ * Encrypt the given plaintext with the given key using AES-256
+ *
+ * @param {Uint8Array} The plaintext to encrypt
+ * @param {Uint8Array} The key to use (32 bytes)
+ * @return {Uint8Array} The encrypted message or null if something bad happened
+ */
+export async function encryptAES(plaintext, key) {
+    const iv = window.crypto.getRandomValues(new Uint8Array(16));
+
+    const cryptoKey = await rawKeyToCryptoKey(key);
+
+    let t = performance.now();
+
+    try {
+        const ciphertext = await window.crypto.subtle.encrypt(
+            { name: 'AES-CBC', iv },
+            cryptoKey,
+            plaintext,
+        );
+
+        console.debug('AES encryption took', performance.now() - t, 'ms');
+
+        return concatenate(iv, new Uint8Array(ciphertext));
+    } catch {}
+
+    return null;
+}
+
+/**
+ * Decrypt the given ciphertext with the given key using AES-256
+ *
+ * @param {Uint8Array} The ciphertext to decrypt
+ * @param {Uint8Array} The key to use (32 bytes)
+ * @return {Uint8Array} The decrypted message or null if something bad happened
+ */
+export async function decryptAES(ciphertext, key) {
+    if (!ciphertext || ciphertext.length < 32) {
+        // 16 for the IV and 16 for at least 1 AES block
+        return null;
+    }
+
+    const cryptoKey = await rawKeyToCryptoKey(key);
+
+    const iv = ciphertext.slice(0, 16);
+    const encrypted = ciphertext.slice(16);
+
+    let t = performance.now();
+
+    try {
+        const decrypted = await window.crypto.subtle.decrypt(
+            { name: 'AES-CBC', iv },
+            cryptoKey,
+            encrypted,
+        );
+
+        console.debug('AES decryption took', performance.now() - t, 'ms');
+
+        return new Uint8Array(decrypted);
+    } catch {}
+
+    return null;
+}
+
+/**
+ * Encrypt the given plaintext with the given key using xChaCha20
+ *
+ * @param {Uint8Array} The plaintext to encrypt
+ * @param {Uint8Array} The key to use (32 bytes)
+ * @return {Uint8Array} The encrypted message or null if something bad happened
+ */
+export async function encryptXChaCha20Poly1305(plaintext, key) {
+    // xChaCha20: nonce need 24 bytes
+    const nonce = sodium.randombytes_buf(24);
+
+    let t = performance.now();
+
+    try {
+        const encrypted = sodium.crypto_aead_xchacha20poly1305_ietf_encrypt(
+            plaintext,
+            null,
+            null,
+            nonce,
+            key,
+        );
+
+        console.debug('xChacha encryption took', performance.now() - t, 'ms');
+
+        return concatenate(nonce, encrypted);
+    } catch {}
+
+    return null;
+}
+
+/**
+ * Decrypt the given ciphertext with the given key using xChaCha20
+ *
+ * @param {Uint8Array} The ciphertext to decrypt
+ * @param {Uint8Array} The key to use (32 bytes)
+ * @return {Uint8Array} The decrypted message or null if something bad happened
+ */
+export async function decryptXChaCha20Poly1305(ciphertext, key) {
+    if (!ciphertext || ciphertext.length < 40) {
+        return null;
+    }
+
+    const nonce = ciphertext.slice(0, 24);
+    const encrypted = ciphertext.slice(24);
+
+    try {
+        let t = performance.now();
+
+        const plaintext = sodium.crypto_aead_xchacha20poly1305_ietf_decrypt(
+            null,
+            encrypted,
+            null,
+            nonce,
+            key,
+        );
+
+        console.debug('xChacha decryption took', performance.now() - t, 'ms');
+
+        return plaintext;
+    } catch {}
+
+    return null;
+}
+
+/**
+ * Derive the password using Argon2id
+ *
+ * @param {String} Password to derive
+ * @param {Uint8Array} Salt to use for the derivation, will be generated if null
+ * @return {[Uint8Array, Uint8Array]} The derived key and the salt used
+ */
+async function derivePassword(password, salt = null) {
+    if (!salt) {
+        salt = window.crypto.getRandomValues(new Uint8Array(16));
+    } else if (salt.length !== 16) {
+        console.error('Salt length must be 16');
+    }
+
+    const hashLength = 32;
+    const rounds = 3;
+    const memLimit = 8192 * 1024;
+
+    let t = performance.now();
+
+    const hash = sodium.crypto_pwhash(
+        hashLength,
+        password,
+        salt,
+        rounds,
+        memLimit,
+        sodium.crypto_pwhash_ALG_ARGON2ID13,
+        'uint8array',
+    );
+
+    console.debug('Password derivation took', performance.now() - t, 'ms');
+
+    return [hash, salt];
+}
+
+/**
+ * Transform a Uint8Array key into a CryptoKey compatible with `crypto.subtle.encrypt`
+ *
+ * @param rawKey {Uint8Array} Key to transform
+ * @return CryptoKey
+ */
+async function rawKeyToCryptoKey(rawKey) {
+    return await window.crypto.subtle.importKey(
+        'raw',
+        rawKey,
+        { name: 'AES-CBC' },
+        true,
+        ['decrypt', 'encrypt'],
+    );
 }

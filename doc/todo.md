@@ -1,4 +1,7 @@
 # Todo
+Important
+- use web worker to encrypt the wallet to not freeze the UI
+
 Bugs
 - search then keep the search and try to open a folder
   expected result: clear the search and open the folder
