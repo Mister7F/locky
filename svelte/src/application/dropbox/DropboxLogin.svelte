@@ -30,7 +30,8 @@
         if (isAuthenticated) {
             try {
                 const walletExist = await dropbox.fileExist('wallet.lck');
-                if (walletExist) {
+                if (!walletExist) {
+                    state = 'no_wallet';
                     return;
                 }
             } catch {
@@ -38,7 +39,6 @@
                 return;
             }
         }
-        state = 'no_wallet';
     });
 
 </script>
