@@ -26,6 +26,7 @@
     "dependencies": {
         "fflate": "^0.7.1",
         "qrious": "^4.0.2",
+        "scrypt-async": "^2.0.1",
         "svelte-preprocess": "^3.9.12"
     },
     "prettier": {

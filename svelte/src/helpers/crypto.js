@@ -1,3 +1,5 @@
+import scrypt from 'scrypt-async';
+
 export async function getTotpCode(token) {
     const epoch = Math.floor(Date.now() / 1000 / 30);
 
@@ -123,18 +125,21 @@ export function passwordStrength(password) {
 /**
  * Encrypt the given plaintext with the password
  *
- * 1. Use Argon2id to derive the password into an encryption key
+ * 1. Use Scrypt to derive the password into an encryption key
  * 2. Encrypt using xChaCha20
  * 3. Encrypt the result with AES-256 (PKCS7 padding)
  */
 export async function encrypt(plaintext, password) {
     const [key, salt] = await derivePassword(password);
 
+    const keyChaCha = key.slice(0, 32);
+    const keyAes = key.slice(32, 64);
+
     password = null;
 
-    const ciphertext = await encryptXChaCha20Poly1305(plaintext, key);
+    const ciphertext = await encryptXChaCha20Poly1305(plaintext, keyChaCha);
 
-    const ciphertext2 = await encryptAES(ciphertext, key);
+    const ciphertext2 = await encryptAES(ciphertext, keyAes);
 
     return concatenate(salt, ciphertext2);
 }
@@ -142,7 +147,7 @@ export async function encrypt(plaintext, password) {
 /**
  * Decrypt the given plaintext with the password
  *
- * 1. Use Argon2id to derive the password into an encryption key
+ * 1. Use Scrypt to derive the password into an encryption key
  * 2. Decrypt the result with AES-256 (PKCS7 padding)
  * 3. Decrypt using xChaCha20
  *
@@ -156,9 +161,12 @@ export async function decrypt(ciphertext, password) {
 
     const [key, _] = await derivePassword(password, salt);
 
-    const encrypted2 = await decryptAES(encrypted, key);
+    const keyChaCha = key.slice(0, 32);
+    const keyAes = key.slice(32, 64);
 
-    return await decryptXChaCha20Poly1305(encrypted2, key);
+    const encrypted2 = await decryptAES(encrypted, keyAes);
+
+    return await decryptXChaCha20Poly1305(encrypted2, keyChaCha);
 }
 
 /**
@@ -290,7 +298,7 @@ export async function decryptXChaCha20Poly1305(ciphertext, key) {
 }
 
 /**
- * Derive the password using Argon2id
+ * Derive the password using Scrypt
  *
  * @param {String} Password to derive
  * @param {Uint8Array} Salt to use for the derivation, will be generated if null
@@ -303,25 +311,23 @@ async function derivePassword(password, salt = null) {
         console.error('Salt length must be 16');
     }
 
-    const hashLength = 32;
-    const rounds = 3;
-    const memLimit = 8192 * 1024;
-
     let t = performance.now();
 
-    const hash = sodium.crypto_pwhash(
-        hashLength,
-        password,
-        salt,
-        rounds,
-        memLimit,
-        sodium.crypto_pwhash_ALG_ARGON2ID13,
-        'uint8array',
-    );
+    const options = {
+        dkLen: 64,
+        N: 32768,
+        r: 15,
+        p: 1,
+        encoding: 'binary',
+        interruptStep: 5000,
+    };
 
-    console.debug('Password derivation took', performance.now() - t, 'ms');
-
-    return [hash, salt];
+    return new Promise((resolve) => {
+        scrypt(password, salt, options, (hash) => {
+            console.debug('Password derivation took', performance.now() - t, 'ms');
+            resolve([hash, salt]);
+        });
+    });
 }
 
 /**

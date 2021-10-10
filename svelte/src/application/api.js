@@ -61,8 +61,11 @@ export async function walletInMemory() {
 }
 
 async function saveWallet() {
-    const encryptedWallet = await encryptDatabase(wallet, masterPassword);
-    await indexdb.set('wallet', encryptedWallet);
+    setTimeout(async () => {
+        // do not block the UI while encrypting the database
+        const encryptedWallet = await encryptDatabase(wallet, masterPassword);
+        await indexdb.set('wallet', encryptedWallet);
+    });
     return wallet;
 }
 

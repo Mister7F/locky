@@ -28,7 +28,7 @@ It's a PWA server-less, it means that your data will never be uploaded on a serv
 can download them or save them to Dropbox to synchronize your accounts among your devices.
 
 Your accounts are encrypted 2 times with modern algorithms;
-- [Argon2id](https://en.wikipedia.org/wiki/Argon2): for the key derivation (resistant to brute force on GPU)
+- [Scrypt](https://en.wikipedia.org/wiki/Scrypt): for the key derivation
 - [xChaCha20](https://www.cryptopp.com/wiki/XChaCha20): for a first encryption
 - [AES-256](https://fr.wikipedia.org/wiki/Advanced_Encryption_Standard): for the second encryption
 

@@ -22,9 +22,14 @@ https://dropbox.github.io/dropbox-sdk-js/
 https://github.com/101arrowz/fflate
 
 ## Lib Sodium
-To encrypt with xChaCha20 and derive key with Argon2id
+To encrypt with xChaCha20
 
 https://github.com/jedisct1/libsodium.js/
+
+## scrypt-async-js
+To derive the password with scrypt
+
+https://github.com/dchest/scrypt-async-js
 
 ## Svelte material UI
 https://github.com/hperrin/svelte-material-ui
