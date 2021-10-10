@@ -20,7 +20,7 @@
     {#if folder.id !== 0}
         <Meta on:click="{onClickEdit}">
             <IconButton>
-                <Icon color="surface">create</Icon>
+                <Icon color="on-surface">create</Icon>
             </IconButton>
         </Meta>
     {/if}
