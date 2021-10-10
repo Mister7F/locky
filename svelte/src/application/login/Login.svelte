@@ -90,6 +90,9 @@
     }
 
     async function setMethod(newMethod) {
+        loading = false;
+        wrongPassword = false;
+
         if (newMethod === 'login') {
             showOptions = false;
             method = newMethod;
