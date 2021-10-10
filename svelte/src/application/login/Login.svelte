@@ -4,7 +4,7 @@
     import List, { Item, Separator, Text } from '@smui/list';
     import FormField from '@smui/form-field';
     import Select, { Option } from '@smui/select';
-    import Icon from '@smui/select/icon/index';
+    import Icon from '../../helpers/Icon.svelte';
     import Switch from '@smui/switch';
     import { createEventDispatcher } from 'svelte';
     import * as dropbox from '../dropbox/dropbox.js';
@@ -28,6 +28,7 @@
     let filedata = null; // File uploaded
     let dropboxFile = null;
     let dropboxState = '';
+    let loading = false;
 
     $: loginDisabled =
         (method === 'upload' && !filedata) ||
@@ -35,12 +36,14 @@
 
     let password = '';
     let wrongPassword = false;
-    $: svgValue = wrongPassword
-        ? 0
-        : ((100 - 33) * (maxLen - Math.min(password.length, maxLen))) / maxLen + 33;
+    $: svgValue =
+        wrongPassword || loading
+            ? 0
+            : ((100 - 33) * (maxLen - Math.min(password.length, maxLen))) / maxLen + 33;
     $: fillColor = wrongPassword ? 'var(--error-color)' : 'var(--secondary)';
 
     async function onLogin() {
+        loading = true;
         if (method === 'login') {
             const newWallet = await api.unlock(password);
             if (!newWallet) {
@@ -72,9 +75,11 @@
             wallet = newWallet;
             dispatch('wallet_openned');
         }
+        loading = false;
     }
 
     function setWrongPassword() {
+        loading = false;
         password = '';
         wrongPassword = true;
         const lockSvg = document.querySelector('svg');
@@ -172,10 +177,14 @@
                 copy="0" />
 
             <Button
+                class="login-button {loading ? 'loading' : ''}"
                 color="secondary"
                 variant="raised"
                 on:click="{onLogin}"
-                disabled="{loginDisabled}">
+                disabled="{loginDisabled || loading}">
+                {#if loading}
+                    <Icon class="login-loading" color="on-primary">sync</Icon>
+                {/if}
                 <Label>{method === 'create' ? 'Create' : 'Login'}</Label>
             </Button>
         </div>
@@ -278,6 +287,22 @@
     .fields > :global(button) {
         /* Login button */
         max-height: 35px;
+    }
+
+    @-webkit-keyframes rotating {
+        from {
+            -webkit-transform: rotate(0deg);
+        }
+        to {
+            -webkit-transform: rotate(-360deg);
+        }
+    }
+    .lock :global(.login-loading) {
+        -webkit-animation: rotating 2s linear infinite;
+    }
+
+    .lock :global(.login-button.loading) {
+        color: var(--on-primary);
     }
 
 </style>
