@@ -84,6 +84,10 @@
 
 </script>
 
+{#if visible && floating}
+    <div class="folders-overlay" on:click="{() => (visible = false)}"></div>
+{/if}
+
 <div class="foldersList {visible ? 'visible' : ''} {floating ? 'floating' : ''}">
     <Group>
         <Subheader>
@@ -230,6 +234,15 @@
 
     .deleteFolder.visible {
         left: 150px;
+    }
+
+    .folders-overlay {
+        position: absolute;
+        height: 100%;
+        width: 100%;
+        background-color: var(--primary);
+        top: 0;
+        opacity: 0.4;
     }
 
 </style>
