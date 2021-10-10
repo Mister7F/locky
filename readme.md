@@ -29,7 +29,7 @@ can download them or save them to Dropbox to synchronize your accounts among you
 
 Your accounts are encrypted 2 times with modern algorithms;
 - [Scrypt](https://en.wikipedia.org/wiki/Scrypt): for the key derivation
-- [xChaCha20](https://www.cryptopp.com/wiki/XChaCha20): for a first encryption
+- [XChaCha20-Poly1305](https://www.cryptopp.com/wiki/XChaCha20): for a first encryption
 - [AES-256](https://fr.wikipedia.org/wiki/Advanced_Encryption_Standard): for the second encryption
 
 
