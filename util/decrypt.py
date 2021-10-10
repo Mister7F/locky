@@ -11,7 +11,7 @@ from Crypto.Util import Padding
 from derive_key import derive_key
 
 
-password = b"qsd"
+password = b"azerty"
 with open("wallet.lck", "rb") as file:
     data = file.read()
 

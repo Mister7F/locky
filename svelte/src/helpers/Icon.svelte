@@ -20,9 +20,9 @@
 <Icon
     class="icon-import material-icons {className}"
     on:click
+    on="{on}"
     title="{title}"
     color="{color}"
-    on="{on}"
     style="--color: {cssColor}">
     <slot />
 </Icon>

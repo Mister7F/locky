@@ -42,6 +42,8 @@
     function onKeyPress(e) {
         if (!e) e = window.event;
         if ((e.keyCode || e.which) == 13) {
+            e.preventDefault();
+            e.stopPropagation();
             dispatch('enter');
             return false;
         }
@@ -79,7 +81,7 @@
                     <div class="value">{value}</div>
                 {/if}
             {:else}
-                <div class="text-field-container">
+                <form class="text-field-container">
                     <Textfield
                         class="text-field"
                         bind:label
@@ -91,7 +93,8 @@
                         on:input
                         on:keydown
                         on:blur
-                        input$aria-controls="helper-text-standard-field" />
+                        input$aria-controls="helper-text-standard-field"
+                        input$autocomplete="off" />
                     {#if computedMessage}
                         <HelperText
                             id="helper-text-standard-fields"
@@ -99,13 +102,16 @@
                             {computedMessage}
                         </HelperText>
                     {/if}
-                </div>
+                </form>
             {/if}
 
             {#if type === 'password'}
                 <IconButton toggle bind:pressed="{passwordVisible}" ripple="{false}">
-                    <Icon class="material-icons" on>visibility</Icon>
-                    <Icon class="material-icons">visibility_off</Icon>
+                    {#if passwordVisible}
+                        <Icon on>visibility</Icon>
+                    {:else}
+                        <Icon>visibility_off</Icon>
+                    {/if}
                 </IconButton>
             {:else if type === 'totp' && value}
                 <IconButton on:click="{() => dispatch('show_qrcode')}">
@@ -137,9 +143,9 @@
             {#if parseInt(copy) && value}
                 <IconButton on:click="{onCopyClick}">
                     {#if !copied}
-                        <Icon class="material-icons">content_copy</Icon>
+                        <Icon>content_copy</Icon>
                     {:else}
-                        <Icon class="material-icons">check</Icon>
+                        <Icon>check</Icon>
                     {/if}
                 </IconButton>
             {/if}

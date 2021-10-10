@@ -180,10 +180,14 @@
             }
         }
     }
-    window.addEventListener('mouseup', mouseUp);
-    window.addEventListener('touchend', mouseUp);
-    window.addEventListener('mousemove', mouseMove);
-    window.addEventListener('touchmove', mouseMove);
+
+    onMount(() => {
+        const body = document.body;
+        body.addEventListener('mouseup', mouseUp, { passive: true });
+        body.addEventListener('touchend', mouseUp, { passive: true });
+        body.addEventListener('mousemove', mouseMove, { passive: true });
+        body.addEventListener('touchmove', mouseMove, { passive: true });
+    });
 
 </script>
 
