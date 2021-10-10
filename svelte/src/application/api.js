@@ -67,7 +67,11 @@ async function saveWallet() {
 }
 
 export async function downloadWallet() {
-    const encrypted = await encryptDatabase(wallet, masterPassword);
+    let encrypted = await getEncryptedWallet();
+    if (!encrypted) {
+        encrypted = await encryptDatabase(wallet, masterPassword);
+    }
+
     const filename = 'wallet.lck';
     const blob = new Blob([encrypted]);
     const elem = window.document.createElement('a');
