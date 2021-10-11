@@ -54,6 +54,7 @@
             dispatch('wallet_openned');
         } else if (method === 'create') {
             wallet = await api.newWallet(password);
+            dropbox.logout();
             dispatch('wallet_openned');
         } else if (method === 'upload') {
             const newWallet = await api.login(filedata, password);
@@ -61,6 +62,7 @@
                 setWrongPassword();
                 return;
             }
+            dropbox.logout();
             wallet = newWallet;
             dispatch('wallet_openned');
         } else if (method === 'dropbox') {
@@ -92,6 +94,7 @@
     async function setMethod(newMethod) {
         loading = false;
         wrongPassword = false;
+        dropboxFile = null;
 
         if (newMethod === 'login') {
             showOptions = false;
