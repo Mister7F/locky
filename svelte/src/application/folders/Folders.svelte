@@ -33,39 +33,7 @@
     let folderDialog;
     let folderIconOpen = false;
     let draggingFolder = false;
-    let folderIcons = [
-        // https://material.io/resources/icons/?style=baseline
-        'home',
-        'folder',
-        'games',
-        'work',
-        'account_balance',
-        'cloud',
-        'build',
-        'delete',
-        'grade',
-        'label',
-        'alternate_email',
-        'drafts',
-        'functions',
-        'computer',
-        'mouse',
-        'security',
-        'smartphone',
-        'toys',
-        'watch',
-        'local_bar',
-        'local_airport',
-        'local_phone',
-        'sms',
-        'thumb_up',
-        'thumb_down',
-        'code',
-        'vpn_key',
-        'music_note',
-        'star',
-        'wifi',
-    ];
+
     async function onEditFolder(folder) {
         folderDialog.editFolder(folder);
     }
@@ -201,30 +169,6 @@
         background-color: var(--primary);
     }
 
-    :global(.menu_folder_icon) {
-        position: absolute;
-        min-width: 60px;
-        width: 60px;
-        z-index: 999999;
-        box-sizing: border-box;
-
-        background-color: var(--surface);
-        max-height: 300px;
-        width: 300px;
-    }
-
-    :global(.menu_folder_icon > ul) {
-        display: flex;
-        flex-direction: row;
-        justify-content: space-between;
-        flex-wrap: wrap;
-        width: 100%;
-    }
-
-    :global(.menu_folder_icon > *) {
-        display: block;
-        width: 60px;
-    }
     .deleteFolder {
         position: absolute;
         margin-top: 180px;

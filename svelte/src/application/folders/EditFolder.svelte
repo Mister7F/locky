@@ -46,12 +46,22 @@
         'local_phone',
         'sms',
         'thumb_up',
-        'thumb_down',
         'code',
         'vpn_key',
         'music_note',
         'star',
         'wifi',
+        'shopping_cart',
+        'credit_card',
+        'attach_money',
+        'sms',
+        'vpn_lock',
+        'sd_card',
+        'smartphone',
+        'computer',
+        'headset',
+        'family_restroom',
+        'free_breakfast',
     ];
     export function editFolder(folder) {
         // Deep copy to not change the folder before saving
@@ -96,3 +106,31 @@
         {/if}
     </Content>
 </Dialog>
+
+<style>
+    :global(.menu_folder_icon) {
+        position: absolute;
+        min-width: 60px;
+        width: 60px;
+        z-index: 999999;
+        box-sizing: border-box;
+
+        background-color: var(--surface);
+        max-height: 400px;
+        width: 300px;
+    }
+
+    :global(.menu_folder_icon > ul) {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        width: 100%;
+    }
+
+    :global(.menu_folder_icon > *) {
+        display: block;
+        width: 60px;
+    }
+
+</style>
