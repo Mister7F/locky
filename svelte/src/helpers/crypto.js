@@ -53,10 +53,11 @@ export async function hmac(key, data, hash = 'SHA-1') {
 }
 
 export function b32Decode(s) {
-    s = s.toUpperCase();
     const alpha = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
+    s = s.toUpperCase().replace(/[^A-Z2-7]/, '');
 
     let number = BigInt(0);
+    let bitLength = 0;
     for (let l of s) {
         const value = alpha.indexOf(l);
         if (value < 0) {
@@ -64,10 +65,10 @@ export function b32Decode(s) {
         }
         number *= BigInt(Math.pow(2, 5));
         number += BigInt(value);
+        // Each character encode 5 bits
+        bitLength += 5;
     }
 
-    // Each character encode 5 bits
-    const bitLength = s.length * 5;
     // Remove trailing bits
     number >>= BigInt(bitLength % 8);
 
