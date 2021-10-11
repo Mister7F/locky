@@ -17,7 +17,7 @@ export async function decryptDatabase(data, password) {
         data = new Uint8Array(data);
     }
 
-    if (!data || !data.byteLength) {
+    if (!data || !data.length) {
         console.error('Empty file');
         return null;
     }

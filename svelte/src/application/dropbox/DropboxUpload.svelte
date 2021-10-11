@@ -1,6 +1,7 @@
 <script>
     import IconButton, { Icon } from '@smui/icon-button';
     import Button, { Label } from '@smui/button';
+    import Dialog, { Title, Content, Actions } from '@smui/dialog';
     import { createEventDispatcher } from 'svelte';
     import * as dropbox from './dropbox.js';
     import * as api from '../api.js';
@@ -9,6 +10,7 @@
     export let isAuthenticated = false;
     let authenticationUrl = null;
     let uploadingState = 'wait';
+    let confirmationDialog;
 
     $: title = isAuthenticated ? 'Upload your wallet on Dropbox' : 'Login';
 
@@ -18,12 +20,37 @@
 
     async function onUpload() {
         uploadingState = 'uploading';
+        if (await shouldAskConfirmation()) {
+            confirmationDialog.open();
+            uploadingState = 'wait';
+            return;
+        }
+        await uploadWallet();
+    }
+
+    async function uploadWallet() {
+        uploadingState = 'uploading';
+        confirmationDialog.close();
+
         const encryptedWallet = await api.getEncryptedWallet();
         const ok = await dropbox.upload('wallet.lck', encryptedWallet);
         if (!ok) {
             isAuthenticated = false;
         }
         uploadingState = ok ? 'wait' : 'error';
+    }
+
+    async function shouldAskConfirmation() {
+        const lastHash = dropbox.getDropboxHash();
+        if (!lastHash || !lastHash.length) {
+            return true;
+        }
+        const dropboxFile = await dropbox.fileExist('wallet.lck');
+        console.log(dropboxFile)
+        if (dropboxFile && dropboxFile.content_hash !== lastHash) {
+            return true;
+        }
+        return false;
     }
 
     onMount(async () => {
@@ -58,6 +85,29 @@
             <Icon class="material-icons">sync_problem</Icon>
         {/if}
     </IconButton>
+    <Dialog bind:this="{confirmationDialog}">
+        <Title>Are you sure ?</Title>
+        <Content>
+            The file on Dropbox has changes you do not have locally, are you sure you want
+            to upload your local changes and overwrite the current wallet on Dropbox ?
+        </Content>
+        <Actions>
+            <Button
+                on:click="{() => confirmationDialog.close()}"
+                color="secondary"
+                variant="raised">
+                No
+            </Button>
+            <Button
+                on:click="{() => {
+                    confirmationDialog.close();
+                    uploadWallet();
+                }}"
+                color="primary">
+                Yes
+            </Button>
+        </Actions>
+    </Dialog>
 </div>
 
 <style>
@@ -103,6 +153,14 @@
 
     .container :global(.dropbox-uploading) {
         -webkit-animation: rotating 2s linear infinite;
+    }
+
+    .container :global(.mdc-dialog__surface) {
+        max-width: 400px !important;
+    }
+
+    .container :global(.mdc-dialog__surface .mdc-dialog__button) {
+        color: var(--primary);
     }
 
 </style>

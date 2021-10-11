@@ -3,7 +3,10 @@ const CLIENT_ID = 'c53nc5eenquwokp';
 let accessToken = null;
 
 export async function getAuthenticationUrl() {
-    const redirectUrl = document.location.href.replace(/\/+$/, '');
+    const redirectUrl = (document.location.origin + document.location.pathname).replace(
+        /\/+$/,
+        '',
+    );
 
     const dbx = new Dropbox.Dropbox({ clientId: CLIENT_ID });
     const authUrl = await dbx.auth.getAuthenticationUrl(redirectUrl);
@@ -17,6 +20,7 @@ export function isAuthenticated() {
 
 export function logout() {
     accessToken = null;
+    setDropboxHash('');
     localStorage.removeItem('dropboxAccessToken');
 }
 
@@ -30,7 +34,7 @@ export async function fileExist(filename) {
     const files = await listDir();
     const file = files && files.find((f) => f.name === filename);
     if (file) {
-        return file.name;
+        return file;
     }
     return false;
 }
@@ -43,9 +47,7 @@ export async function download(filename) {
         return null;
     }
 
-    const fileName = response.result;
-
-    console.log('Dropbox: download:', fileName);
+    setDropboxHash(response.result.content_hash);
 
     const fileContent = await response.result.fileBlob.arrayBuffer();
 
@@ -66,6 +68,9 @@ export async function upload(filename, content) {
         console.error(error);
         return false;
     }
+
+    setDropboxHash(response.result.content_hash);
+
     return response && response.status === 200;
 }
 
@@ -93,4 +98,12 @@ export function getAccessTokenFromUrl() {
         accessTokenParam && accessTokenParam.length === 2 ? accessTokenParam[1] : null;
     window.location.hash = '';
     return accessToken && accessToken.length ? accessToken : null;
+}
+
+export function setDropboxHash(hash) {
+    window.localStorage.setItem('dropboxHash', hash);
+}
+
+export function getDropboxHash(hash) {
+    return window.localStorage.getItem('dropboxHash');
 }
