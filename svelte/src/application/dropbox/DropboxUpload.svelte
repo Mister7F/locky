@@ -11,6 +11,7 @@
     let authenticationUrl = null;
     let uploadingState = 'wait';
     let confirmationDialog;
+    let downloadWalletDialog;
 
     $: title = isAuthenticated ? 'Upload your wallet on Dropbox' : 'Login';
 
@@ -40,22 +41,53 @@
         uploadingState = ok ? 'wait' : 'error';
     }
 
+    function downloadWallet() {
+        api.logout();
+        document.cookie = 'login_method=dropbox';
+        document.location.reload();
+    }
+
     async function shouldAskConfirmation() {
         const lastHash = dropbox.getDropboxHash();
         if (!lastHash || !lastHash.length) {
             return true;
         }
-        const dropboxFile = await dropbox.fileExist('wallet.lck');
-        console.log(dropboxFile)
-        if (dropboxFile && dropboxFile.content_hash !== lastHash) {
+
+        const currentRemoteHash = await getDropboxRemoteHash();
+        console.log(currentRemoteHash);
+        if (currentRemoteHash && currentRemoteHash !== lastHash) {
             return true;
         }
         return false;
     }
 
+    async function getDropboxRemoteHash() {
+        try {
+            const dropboxFile = await dropbox.fileExist('wallet.lck');
+            return dropboxFile && dropboxFile.content_hash;
+        } catch {}
+        isAuthenticated = false;
+        return null;
+    }
+
     onMount(async () => {
         isAuthenticated = dropbox.isAuthenticated();
         authenticationUrl = await dropbox.getAuthenticationUrl();
+
+        if (isAuthenticated) {
+            const currentRemoteHash = await getDropboxRemoteHash();
+            const localHash = dropbox.getDropboxHash();
+
+            console.log(currentRemoteHash, localHash);
+
+            if (
+                currentRemoteHash &&
+                currentRemoteHash.length &&
+                currentRemoteHash !== localHash
+            ) {
+                downloadWalletDialog.open();
+            }
+        }
     });
 
 </script>
@@ -102,6 +134,29 @@
                 on:click="{() => {
                     confirmationDialog.close();
                     uploadWallet();
+                }}"
+                color="primary">
+                Yes
+            </Button>
+        </Actions>
+    </Dialog>
+    <Dialog bind:this="{downloadWalletDialog}">
+        <Title>New wallet available</Title>
+        <Content>
+            The file on Dropbox has changes you do not have locally, do you want to
+            download the wallet on Dropbox and overwrite this one ?
+        </Content>
+        <Actions>
+            <Button
+                on:click="{() => downloadWalletDialog.close()}"
+                color="secondary"
+                variant="raised">
+                No
+            </Button>
+            <Button
+                on:click="{() => {
+                    downloadWalletDialog.close();
+                    downloadWallet();
                 }}"
                 color="primary">
                 Yes
