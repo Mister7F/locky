@@ -171,12 +171,6 @@
 </Snackbar>
 
 <style>
-    .wallet {
-        height: calc(100vh - 50px);
-        padding-top: 20px;
-        background-color: var(--wallet-background);
-    }
-
     :global(.new_account) {
         position: absolute;
         bottom: -65px;
@@ -195,6 +189,11 @@
 
     /* Folder list */
     .wallet {
+        position: initial !important;
+        background-color: var(--wallet-background);
+        box-sizing: border-box;
+        overflow-y: scroll;
+        height: inherit;
         display: flex;
         flex-direction: row;
         overflow: hidden;

@@ -106,8 +106,6 @@
         width: var(--folder-width);
         min-width: var(--folder-width);
         transition: 0.3s;
-        padding-top: 10px;
-        margin-top: -30px;
         box-sizing: border-box;
     }
 

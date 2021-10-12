@@ -65,19 +65,16 @@
     }
 
     .root {
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
         font-family: 'Open Sans';
         font-size: 15px;
-        height: 100vh;
+        height: 100%;
         width: 100vw;
         margin: 0;
         overflow: hidden;
         overflow-x: hidden;
-    }
-
-    :global(.wallet) {
-        height: calc(100% - 56px);
-        overflow-y: scroll;
-        margin-top: 56px;
     }
 
     /* Scroll bar */

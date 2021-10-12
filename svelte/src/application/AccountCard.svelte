@@ -186,9 +186,9 @@
     /* Detail mode */
     .detail-card {
         margin: 10px;
+        margin-bottom: 20px;
         color: var(--on-surface);
         width: 280px;
-        height: 170px;
         overflow: hidden;
     }
     :global(.detail_primary_action) {

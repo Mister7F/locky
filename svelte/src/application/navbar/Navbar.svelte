@@ -43,7 +43,7 @@
 </script>
 
 <Settings bind:visible="{settingsVisible}" bind:isDropboxAuthenticated on:lock />
-<TopAppBar fixed color="primary" class="header">
+<TopAppBar class="wallet-navbar" color="primary">
     <Row>
         <Section>
             {#if floatingFolder}
@@ -97,17 +97,20 @@
 </TopAppBar>
 
 <style>
+    :global(.mdc-top-app-bar.wallet-navbar) {
+        position: sticky !important;
+    }
     h1 {
         color: var(--on-primary);
         font-size: 20px;
     }
-    :global(.header .field) {
+    :global(.wallet-navbar .field) {
         margin-top: -20px;
         width: 100%;
         z-index: 10;
     }
 
-    :global(.header .menu_navbar) {
+    :global(.wallet-navbar .menu_navbar) {
         margin-top: 220px;
         margin-left: -60px;
         min-width: 60px;
