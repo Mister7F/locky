@@ -41,8 +41,8 @@
         uploadingState = ok ? 'wait' : 'error';
     }
 
-    function downloadWallet() {
-        api.logout();
+    async function downloadWallet() {
+        await api.logout(false);
         document.cookie = 'login_method=dropbox';
         document.location.reload();
     }
@@ -54,7 +54,6 @@
         }
 
         const currentRemoteHash = await getDropboxRemoteHash();
-        console.log(currentRemoteHash);
         if (currentRemoteHash && currentRemoteHash !== lastHash) {
             return true;
         }
@@ -77,8 +76,6 @@
         if (isAuthenticated) {
             const currentRemoteHash = await getDropboxRemoteHash();
             const localHash = dropbox.getDropboxHash();
-
-            console.log(currentRemoteHash, localHash);
 
             if (
                 currentRemoteHash &&
@@ -154,9 +151,9 @@
                 No
             </Button>
             <Button
-                on:click="{() => {
+                on:click="{async () => {
                     downloadWalletDialog.close();
-                    downloadWallet();
+                    await downloadWallet();
                 }}"
                 color="primary">
                 Yes

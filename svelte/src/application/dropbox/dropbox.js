@@ -21,7 +21,7 @@ export function isAuthenticated() {
 export function logout() {
     accessToken = null;
     setDropboxHash('');
-    localStorage.removeItem('dropboxAccessToken');
+    localStorage.setItem('dropboxAccessToken', '');
 }
 
 export async function listDir() {
