@@ -1,6 +1,7 @@
 <script>
     import Button, { Label } from '@smui/button';
     import Card, { PrimaryAction, Actions, ActionButtons, ActionIcons } from '@smui/card';
+    import { Item } from '@smui/list';
     import IconButton, { Icon } from '@smui/icon-button';
     import { createEventDispatcher } from 'svelte';
     import Img from './Img.svelte';
@@ -27,7 +28,7 @@
         </div>
         <div class="strength" style="--force: {passwordStrength(account.password)}"></div>
     </div>
-{:else}
+{:else if viewMode === 'detail'}
     <div class="detail-card">
         <Card>
             <div
@@ -96,6 +97,51 @@
             </Actions>
         </Card>
     </div>
+{:else}
+    <Item class="account_list_item" on:click="{() => dispatch('click')}">
+        <div class="account_list_item_title">
+            <Img src="{account.icon || 'img/accounts/default.svg'}" alt="Account" />
+            <h5>{account.name}</h5>
+        </div>
+        <div>
+            {#if account.login}
+                <IconButton
+                    class="material-icons"
+                    on:click="{(event) => {
+                        event.stopPropagation();
+                        dispatch('notify', 'Login copied');
+                        copyValue(account.login);
+                    }}"
+                    title="More options">
+                    alternate_email
+                </IconButton>
+            {/if}
+            {#if account.password}
+                <IconButton
+                    class="material-icons"
+                    on:click="{(event) => {
+                        event.stopPropagation();
+                        dispatch('notify', 'Password copied');
+                        copyValue(account.password);
+                    }}"
+                    title="Share">
+                    vpn_key
+                </IconButton>
+            {/if}
+            {#if account.totp}
+                <IconButton
+                    class="material-icons"
+                    on:click="{async (event) => {
+                        event.stopPropagation();
+                        dispatch('notify', '2FA copied');
+                        copyValue((await getTotpCode(account.totp)).replace(' ', ''));
+                    }}"
+                    title="Share">
+                    schedule
+                </IconButton>
+            {/if}
+        </div>
+    </Item>
 {/if}
 
 <style>
@@ -139,7 +185,7 @@
         width: 100%;
     }
 
-    h5 {
+    .account h5 {
         font-size: 1.2em;
         max-width: calc(100% - 50px);
         overflow: hidden;
@@ -245,6 +291,46 @@
     }
 
     :global(.detail_account_actions) {
+    }
+
+    :global(.account_list_item) {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        height: 30px;
+        min-width: 55vw;
+        overflow: hidden;
+        padding: 10px;
+        margin-top: 10px;
+        border: 1px solid var(--on-surface);
+        border-radius: 4px;
+        box-shadow: 0 1px 3px rgb(0 0 0 / 12%), 0 1px 2px rgb(0 0 0 / 24%);
+    }
+
+    :global(.account_list_item Img) {
+        pointer-events: none;
+        max-height: 30px;
+        max-width: 100%;
+        height: 30px;
+    }
+
+    .account_list_item_title {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        max-height: 100%;
+        min-width: 110px;
+    }
+    .account_list_item_title h5 {
+        font-size: 1.2em;
+        max-width: 100%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        line-height: 1.2rem;
+        margin: 0;
+        margin-left: 10px;
     }
 
 </style>

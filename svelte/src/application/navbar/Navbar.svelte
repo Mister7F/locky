@@ -23,8 +23,18 @@
     let isDropboxAuthenticated = false;
     let settingsVisible = false;
 
+    const viewModes = ['detail', 'minimalist', 'list'];
+
+    $: viewModeIcon =
+        {
+            detail: 'view_module',
+            minimalist: 'view_comfy',
+            list: 'list',
+        }[viewMode] || 'view_module';
+
     function changeViewMode() {
-        viewMode = viewMode === 'detail' ? 'minimalist' : 'detail';
+        const nextModeIndex = (viewModes.indexOf(viewMode) + 1) % viewModes.length;
+        viewMode = viewModes[nextModeIndex];
         document.cookie = 'viewMode=' + viewMode;
     }
 
@@ -84,7 +94,7 @@
                 class="material-icons"
                 title="Change mode"
                 on:click="{changeViewMode}">
-                {#if viewMode === 'detail'}view_module{:else}view_comfy{/if}
+                {viewModeIcon}
             </IconButton>
             <IconButton
                 class="material-icons"
