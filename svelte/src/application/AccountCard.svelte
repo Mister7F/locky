@@ -103,7 +103,16 @@
             <Img src="{account.icon || 'img/accounts/default.svg'}" alt="Account" />
             <h5>{account.name}</h5>
         </div>
-        <div>
+        <div class="account_list_item_actions">
+            {#if account.url && isUrlValid(account.url)}
+                <IconButton
+                    class="material-icons account_list_item_url"
+                    title="Open URL"
+                    href="{account.url}"
+                    target="_blank">
+                    launch
+                </IconButton>
+            {/if}
             {#if account.login}
                 <IconButton
                     class="material-icons"
@@ -290,22 +299,21 @@
         margin-left: calc(100% - 30px);
     }
 
-    :global(.detail_account_actions) {
-    }
-
     :global(.account_list_item) {
         display: flex;
         flex-direction: row;
         justify-content: space-between;
         align-items: center;
         height: 30px;
-        min-width: 55vw;
+        width: 400px;
+        max-width: 90vw;
         overflow: hidden;
         padding: 10px;
-        margin-top: 10px;
+        margin: 10px 5px;
         border: 1px solid var(--on-surface);
         border-radius: 4px;
         box-shadow: 0 1px 3px rgb(0 0 0 / 12%), 0 1px 2px rgb(0 0 0 / 24%);
+        color: var(--on-surface);
     }
 
     :global(.account_list_item Img) {
@@ -331,6 +339,21 @@
         line-height: 1.2rem;
         margin: 0;
         margin-left: 10px;
+    }
+
+    :global(.account_list_item_actions) {
+        overflow: hidden;
+        height: 100%;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: flex-end;
+        min-width: fit-content;
+    }
+
+    :global(a.account_list_item_url) {
+        color: var(--on-surface);
+        text-decoration: none;
     }
 
 </style>
