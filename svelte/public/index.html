@@ -28,10 +28,20 @@
     <script defer src="build/bundle.js"></script>
 
     <!-- Color of the header on mobile (android, windows phone & safari) -->
+    <!-- Android -->
     <meta name="theme-color" content="#344955" />
-    <meta name="msapplication-navbutton-color" content="#344955">
+    <meta name="mobile-web-app-capable" content="yes">
+
+    <!-- iOS -->
+    <meta name="apple-mobile-web-app-title" content="Locky">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="#344955">
+
+    <!-- Windows -->
+    <meta name="msapplication-navbutton-color" content="#344955">
+    <meta name="msapplication-TileColor" content="#344955">
+    <meta name="msapplication-TileImage" content="img/favicon/64.png">
+
     <!-- Allow to send the application to the home screen on mobile -->
     <!-- https://developer.mozilla.org/fr/docs/Web/Manifest -->
     <link rel="manifest" href="mobile-manifest.json">
