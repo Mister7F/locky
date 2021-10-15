@@ -11,6 +11,7 @@
     import ImagePicker from './ImagePicker.svelte';
     import DialogTotpQrCode from './DialogTotpQrCode.svelte';
     import DialogRemoveAccount from './DialogRemoveAccount.svelte';
+    import GeneratePassword from './GeneratePassword.svelte';
 
     export let account = null;
     export let readonly = 0;
@@ -18,6 +19,7 @@
     const dispatch = createEventDispatcher();
     let qrCodeDialog;
     let removeAccountDialog;
+    let generatePasswordDialog;
 
     // TOTP
     let totpCode = null;
@@ -182,6 +184,16 @@
             on:click="{() => removeAccountDialog.open()}">
             <Icon color="secondary">delete</Icon>
         </Fab>
+    {:else}
+        <GeneratePassword
+            bind:this="{generatePasswordDialog}"
+            on:use="{(event) => (account.password = event.detail)}" />
+        <Fab
+            class="generate_password"
+            color="primary"
+            on:click="{() => generatePasswordDialog.open()}">
+            <Icon color="secondary">password</Icon>
+        </Fab>
     {/if}
     <Fab
         class="save_account"
@@ -222,6 +234,7 @@
         bottom: 20px;
         right: 20px;
     }
+    .account :global(.generate_password),
     .account :global(.remove_account) {
         position: absolute;
         bottom: 20px;
