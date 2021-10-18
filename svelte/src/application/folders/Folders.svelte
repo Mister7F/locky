@@ -64,7 +64,13 @@
                 <Icon color="on-surface">create_new_folder</Icon>
             </IconButton>
         </Subheader>
-
+        <Item
+            class="account_audit"
+            on:click="{() => (currentFolderId = -1)}"
+            selected="{currentFolderId < 0}">
+            <Icon color="on-surface">policy</Icon>
+            <Text>Security panel</Text>
+        </Item>
         {#if folders}
             <Folder
                 folder="{folders[0]}"
@@ -156,6 +162,7 @@
         opacity: 0.2;
     }
 
+    .foldersList :global(.account_audit .mdc-list-item__text),
     .foldersList :global(.folder_item .mdc-list-item__text) {
         margin-left: 10px;
     }

@@ -32,6 +32,21 @@ export async function getTotpCode(token) {
 /**
  * Sign the given message with the given key using HMAC
  *
+ * @param {string} The message to hash
+ * @param {string} The algorithm to use ('SHA-1', 'SHA-256', 'SHA-384', or 'SHA-512')
+ */
+export async function digest(message, algorithm = 'SHA-1') {
+    const encoder = new TextEncoder();
+    const data = encoder.encode(message);
+    const hash = await crypto.subtle.digest(algorithm, data);
+    const hashArray = Array.from(new Uint8Array(hash));
+    const hashHex = hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
+    return hashHex.toUpperCase();
+}
+
+/**
+ * Sign the given message with the given key using HMAC
+ *
  * @param {Uint8Array} Key to use to sign the message
  * @param {Uint8Array} The message to authenticate
  * @param {string} The algorithm to use ('SHA-1', 'SHA-256', 'SHA-384', or 'SHA-512')
@@ -209,6 +224,7 @@ export async function encryptAES(plaintext, key) {
 export async function decryptAES(ciphertext, key) {
     if (!ciphertext || ciphertext.length < 32) {
         // 16 for the IV and 16 for at least 1 AES block
+        console.error('Empty ciphertext');
         return null;
     }
 

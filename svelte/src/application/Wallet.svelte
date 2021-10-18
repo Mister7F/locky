@@ -18,6 +18,7 @@
     import Snackbar, { Actions } from '@smui/snackbar';
     import Textfield from '@smui/textfield';
     import { createEventDispatcher } from 'svelte';
+    import Audit from './Audit.svelte';
     import AccountCard from './AccountCard.svelte';
     import AccountEditor from './editor/AccountEditor.svelte';
     import * as api from './api.js';
@@ -57,6 +58,7 @@
     let dragging;
     let viewMode = getCookie('viewMode') || 'detail';
     let searchText = '';
+
     // folders variable
     let walletWidth;
     let foldersVisible = false;
@@ -70,6 +72,10 @@
             folderDomIds = folderDomIds.concat(['item_folder_' + folder.id]);
         }
     }
+
+    // Accounts audit
+    $: auditVisible = currentFolderId < 0;
+
     async function onMoveAccount(event) {
         const fromAccount = event.detail.fromItem;
         const toAccount = event.detail.destItem;
@@ -141,26 +147,30 @@
         bind:floating="{floatingFolder}"
         bind:visible="{foldersVisible}"
         bind:currentFolderId />
-    <Sortablegrid
-        class="accountsGrid"
-        on:move="{onMoveAccount}"
-        on:action="{onAccountAction}"
-        on:move_blocked="{() => onNotify('Can not move accounts in this folder')}"
-        bind:items="{accounts}"
-        let:item
-        bind:dragging
-        bind:customActions="{folderDomIds}">
-        <div slot="item">
-            <AccountCard
-                account="{item}"
-                on:click="{() => editAccount(item)}"
-                bind:viewMode
-                on:notify="{onNotify}" />
-        </div>
-    </Sortablegrid>
-    <Fab class="new_account {dragging ? '' : 'visible'}" on:click="{onNewAccount}">
-        <Icon class="material-icons" color="on-secondary">add</Icon>
-    </Fab>
+    {#if auditVisible}
+        <Audit wallet="{wallet}" on:edit="{(event) => editAccount(event.detail)}" />
+    {:else}
+        <Sortablegrid
+            class="accountsGrid"
+            on:move="{onMoveAccount}"
+            on:action="{onAccountAction}"
+            on:move_blocked="{() => onNotify('Can not move accounts in this folder')}"
+            bind:items="{accounts}"
+            let:item
+            bind:dragging
+            bind:customActions="{folderDomIds}">
+            <div slot="item">
+                <AccountCard
+                    account="{item}"
+                    on:click="{() => editAccount(item)}"
+                    bind:viewMode
+                    on:notify="{onNotify}" />
+            </div>
+        </Sortablegrid>
+        <Fab class="new_account {dragging ? '' : 'visible'}" on:click="{onNewAccount}">
+            <Icon class="material-icons" color="on-secondary">add</Icon>
+        </Fab>
+    {/if}
 </div>
 
 <Snackbar bind:this="{snackbar}" bind:labelText="{snackbarText}">
