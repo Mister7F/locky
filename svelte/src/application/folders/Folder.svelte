@@ -17,9 +17,11 @@
 <Item class="folder_item {selected && 'selected'}" id="item_folder_{folder.id}" on:click>
     <Icon color="on-surface">{folder.icon || 'folder'}</Icon>
     <Text>{folder.name}</Text>
-    <Meta on:click="{onClickEdit}">
-        <IconButton>
-            <Icon color="on-surface">create</Icon>
-        </IconButton>
-    </Meta>
+    {#if folder.id !== 0}
+        <Meta on:click="{onClickEdit}">
+            <IconButton>
+                <Icon color="on-surface">create</Icon>
+            </IconButton>
+        </Meta>
+    {/if}
 </Item>
