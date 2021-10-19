@@ -134,6 +134,7 @@
     .foldersList :global(.folders) {
         width: 100%;
         height: auto;
+        max-height: calc(100vh - 240px)!important;
     }
     .foldersList :global(.folders .container) {
         width: 100%;
@@ -176,7 +177,7 @@
 
     .deleteFolder {
         position: absolute;
-        margin-top: 180px;
+        bottom:  60px;
         left: -60px;
         transition: all 0.5s cubic-bezier(0.47, 1.64, 0.41, 0.8);
     }
