@@ -2,7 +2,7 @@
 First, install `npm`
 
 Then,
-> `cd web && npm install`
+> `cd svelte && npm install`
 
 To run your development server just run,
 > `npm run dev`
