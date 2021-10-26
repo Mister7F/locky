@@ -89,7 +89,7 @@ export function getAccessTokenFromUrl() {
         return null;
     }
     const parameters = url.split('&');
-    let accessTokenParam = parameters.find((p) => p.indexOf('access_token=') === 0);
+    let accessTokenParam = parameters.find((p) => p.includes('access_token='));
     if (!accessTokenParam) {
         return null;
     }
