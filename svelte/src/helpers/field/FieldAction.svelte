@@ -17,6 +17,17 @@
 
     let openMenu = false;
 
+    function doAction(action) {
+        if (action === 'remove') {
+            dispatch('remove');
+        } else if (action === 'rename') {
+            fieldNameDialog.open();
+        } else {
+            type = action;
+        }
+        openMenu = false;
+    }
+
     function onKeyPressFieldLabel(e) {
         if (!e) e = window.event;
         if ((e.keyCode || e.which) == 13) {
@@ -26,11 +37,19 @@
         }
     }
 
+    function onBlur(event) {
+        if (!event.relatedTarget || !event.relatedTarget.closest('.menu_field_type')) {
+            // close the menu only if the focused element is not a menu item
+            openMenu = false;
+        } else {
+            // otherwise keep the focus on the icon
+            event.currentTarget.focus();
+        }
+    }
+
 </script>
 
-<IconButton
-    on:click="{() => (openMenu = !openMenu)}"
-    on:blur="{() => setTimeout(() => (openMenu = false), 100)}">
+<IconButton on:click="{() => (openMenu = !openMenu)}" on:blur="{onBlur}">
     <!-- Todo: Use Select: https://sveltematerialui.com/demo/select -->
     <Icon>
         {#if type === 'text'}
@@ -71,7 +90,7 @@
 {#if openMenu}
     <Menu static class="menu_field_type">
         <List>
-            <Item on:click="{() => (type = 'text')}">
+            <Item on:click="{() => doAction('text')}">
                 <Icon color="on-surface">
                     <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -82,7 +101,7 @@
                     </svg>
                 </Icon>
             </Item>
-            <Item on:click="{() => (type = 'password')}">
+            <Item on:click="{() => doAction('password')}">
                 <Icon color="on-surface">
                     <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -96,7 +115,7 @@
                     </svg>
                 </Icon>
             </Item>
-            <Item on:click="{() => (type = 'url')}">
+            <Item on:click="{() => doAction('url')}">
                 <Icon color="on-surface">
                     <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -113,7 +132,7 @@
                 </Icon>
             </Item>
             <hr style="margin: 0 10px;" />
-            <Item on:click="{() => fieldNameDialog.open()}">
+            <Item on:click="{() => doAction('rename')}">
                 <Icon color="on-surface">
                     <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -128,7 +147,7 @@
                     </svg>
                 </Icon>
             </Item>
-            <Item on:click="{() => dispatch('remove')}">
+            <Item on:click="{() => doAction('remove')}">
                 <Icon color="on-surface">
                     <svg
                         xmlns="http://www.w3.org/2000/svg"
