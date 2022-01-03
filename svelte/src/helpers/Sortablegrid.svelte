@@ -15,11 +15,15 @@
     const dispatch = createEventDispatcher();
 
     function getElementIndex(element) {
-        // Return the index of the elemnt in its parent
+        // Return the index of the element in its parent
         return [].indexOf.call(element.parentNode.children, element);
     }
 
+    // On desktop, the drag even is triggered when a threshold is reached
+    // for the movement of the mouse. So we do not interpret "click" events as
+    // drag events
     let pressedElementEvent = null;
+    let desktopDragMove = [0, 0];
 
     let draggedElement = null;
     let draggedIndex = -1;
@@ -78,6 +82,7 @@
 
         // on desktop, we start to drag if we press the mouse and move it
         pressedElementEvent = cloneEvent(event);
+        desktopDragMove = [0, 0];
     }
 
     function mouseUp(event) {
@@ -129,9 +134,18 @@
 
     function mouseMove(event) {
         if (pressedElementEvent) {
-            // on desktop, start to drag with a mouse move
-            initDrag(pressedElementEvent);
-            pressedElementEvent = null;
+            desktopDragMove[0] += event.movementX;
+            desktopDragMove[1] += event.movementY;
+            const dragMove = Math.sqrt(
+                desktopDragMove[0] * desktopDragMove[0] +
+                    desktopDragMove[1] * desktopDragMove[1],
+            );
+
+            if (dragMove > 15) {
+                // on desktop, start to drag with a mouse move
+                initDrag(pressedElementEvent);
+                pressedElementEvent = null;
+            }
         }
 
         if (mouseTimer) {
