@@ -23,7 +23,6 @@
     import AccountEditor from './editor/AccountEditor.svelte';
     import * as api from './api.js';
     import Folders from './folders/Folders.svelte';
-    import { getCookie } from '../helpers/utils.js';
     import Icon from '../helpers/Icon.svelte';
     import Navbar from './navbar/Navbar.svelte';
     import Sidepanel from '../helpers/Sidepanel.svelte';
@@ -56,7 +55,7 @@
     $: menuVisible = !!accountEdited;
 
     let dragging;
-    let viewMode = getCookie('viewMode') || 'detail';
+    let viewMode = window.localStorage.getItem('viewMode') || 'detail';
     let searchText = '';
 
     // folders variable

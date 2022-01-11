@@ -35,7 +35,7 @@
     function changeViewMode() {
         const nextModeIndex = (viewModes.indexOf(viewMode) + 1) % viewModes.length;
         viewMode = viewModes[nextModeIndex];
-        document.cookie = 'viewMode=' + viewMode;
+        window.localStorage.setItem('viewMode', viewMode);
     }
 
     onMount(() => {
