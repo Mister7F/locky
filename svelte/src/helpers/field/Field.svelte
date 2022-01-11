@@ -215,5 +215,9 @@
     .field {
         color: var(--on-primary);
     }
+    .field .label {
+        color: var(--on-primary);
+        filter: brightness(85%);
+    }
 
 </style>

@@ -125,7 +125,7 @@
             label="Name"
             bind:value="{account.name}"
             bind:readonly
-            on:copy="{() => copyValue(account.name)}"
+            copy="0"
             on:blur="{onFindImage}" />
         <Field
             label="Login"
