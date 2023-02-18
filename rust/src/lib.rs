@@ -1,4 +1,8 @@
 extern crate crypto;
+// sudo snap install rustup --classic
+// curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sudo sh
+// cargo install wasm-pack
+
 // cargo test --release
 // rustfmt ./src/*.rs
 // wasm-pack build --target web
@@ -41,8 +45,6 @@ fn derive_key(password: String, salt: &[u8]) -> Vec<u8> {
         15, // r
         1,  // p
     );
-
-    yield;
 
     scrypt(password.as_bytes(), salt, &params, &mut result);
     result
@@ -116,8 +118,6 @@ pub fn encrypt(plaintext: String, password: String) -> Vec<u8> {
     getrandom::getrandom(&mut salt).unwrap();
 
     let key = derive_key(password, &salt);
-
-    wasm_utils::log("bouh");
 
     let chacha_key = &key[0..32];
     let aes_key = &key[32..64];
@@ -198,7 +198,6 @@ pub fn test() {
     ];
     let key = derive_key(password.clone(), &salt);
 
-    wasm_utils::log("end");
 }
 
 #[cfg(test)]
