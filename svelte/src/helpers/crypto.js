@@ -115,27 +115,36 @@ export function concatenate(...arrays) {
     return result;
 }
 
-export function passwordStrength(password) {
-    if (!password || !password.length) {
-        return;
+// 32 bits representation of the given string
+function passwordKey(s) {
+    let h = 0,
+        l = s.length,
+        i = 0;
+    if (l > 0) while (i < l) h = ((h << 5) - h + s.charCodeAt(i++)) | 0;
+    return h;
+}
+
+// zxcvbn is relatively slow (3 ms / passwords)
+// so we cache the result
+const strength_cache = {};
+let total_time = 0;
+export function passwordStrength(password, detail) {
+    const key = passwordKey(password);
+    let result = strength_cache[key];
+
+    if (result === undefined) {
+        result = zxcvbn(password);
+        delete result.password;
+
+        const strength = Math.min(Math.floor(result.guesses_log10 * 5), 100);
+        if (strength >= 80) {
+            result = {};
+        }
+        result.strength = strength;
+        strength_cache[key] = result;
     }
 
-    let charsetSize = 0;
-    if (password.match(/[a-z]/)) {
-        charsetSize++;
-    }
-    if (password.match(/[A-Z]/)) {
-        charsetSize++;
-    }
-    if (password.match(/[0-9]/)) {
-        charsetSize++;
-    }
-    if (password.match(/[^a-zA-Z0-9]/)) {
-        charsetSize += 2;
-    }
-    // Password with all character types, with length >= 10 has maximum strength
-    const computedStrength = parseInt(password.length * charsetSize * 2);
-    return Math.min(computedStrength, 100);
+    return detail ? [result.strength, result] : result.strength;
 }
 
 /**

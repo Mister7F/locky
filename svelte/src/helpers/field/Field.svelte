@@ -6,6 +6,7 @@
     import HelperText from '@smui/textfield/helper-text/index';
     import { createEventDispatcher } from 'svelte';
     import FieldAction from './FieldAction.svelte';
+    import PasswordWarning from './PasswordWarning.svelte';
     import { passwordStrength } from '../crypto.js';
     import { isUrlValid } from '../utils.js';
     import Icon from '../Icon.svelte';
@@ -29,12 +30,20 @@
     let copied = false;
 
     $: computedType = passwordVisible ? 'text' : type;
-    $: computedMessage =
-        message && message.length
-            ? message
-            : type === 'password' && showPasswordStrength
-            ? 'Strength: ' + (passwordStrength(value) || 0) + ' / 100'
-            : null;
+
+    $: [strength, strengthResult] =
+        type === 'password' && showPasswordStrength && value && value.length
+            ? passwordStrength(value, true)
+            : [null, null];
+
+    const getMessage = (message, strength) => {
+        if (message && message.length) {
+            return message;
+        } else if (strength !== null) {
+            return 'Strength: ' + (strength || 0) + ' / 100';
+        }
+    };
+    $: computedMessage = getMessage(message, strength);
 
     /**
      * Generate the event "enter" when pressing enter.
@@ -113,6 +122,9 @@
                         <Icon>visibility_off</Icon>
                     {/if}
                 </IconButton>
+                {#if strengthResult && strengthResult.feedback}
+                    <PasswordWarning bind:strengthResult />
+                {/if}
             {:else if type === 'totp' && value}
                 <IconButton on:click="{() => dispatch('show_qrcode')}">
                     <Icon>

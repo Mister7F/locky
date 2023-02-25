@@ -12,6 +12,8 @@
     export let account;
     export let viewMode = 'detail';
 
+    const strength = passwordStrength(account.password);
+
 </script>
 
 {#if viewMode === 'minimalist'}
@@ -26,14 +28,12 @@
                 <h5>{account.name}</h5>
             </div>
         </div>
-        <div class="strength" style="--force: {passwordStrength(account.password)}"></div>
+        <div class="strength" style="--force: {strength}"></div>
     </div>
 {:else if viewMode === 'detail'}
     <div class="detail-card">
         <Card>
-            <div
-                class="strength"
-                style="--force: {passwordStrength(account.password)}"></div>
+            <div class="strength" style="--force: {strength}"></div>
             <PrimaryAction
                 class="detail_primary_action"
                 on:click="{() => dispatch('click')}">

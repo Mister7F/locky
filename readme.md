@@ -32,6 +32,7 @@ Your accounts are encrypted 2 times with modern algorithms;
 - [XChaCha20-Poly1305](https://www.cryptopp.com/wiki/XChaCha20): for a first encryption
 - [AES-256](https://fr.wikipedia.org/wiki/Advanced_Encryption_Standard): for the second encryption
 
+It uses [zxcvbn](https://github.com/dropbox/zxcvbn) for passwords strength computation.
 
 ## Summary
 - [Installation](doc/installation.md)
