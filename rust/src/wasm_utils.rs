@@ -5,9 +5,8 @@
 static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 use wasm_bindgen::prelude::*;
 
-
 #[wasm_bindgen]
-extern {
+extern "C" {
     pub fn alert(s: &str);
 }
 
@@ -29,7 +28,7 @@ pub struct Timeout {
 impl Timeout {
     pub fn new<F: 'static>(millis: u32, f: F) -> Timeout
     where
-        F: FnMut()
+        F: FnMut(),
     {
         let closure = Closure::new(f);
         let token = setTimeout(&closure, millis);

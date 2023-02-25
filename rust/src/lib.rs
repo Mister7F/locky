@@ -1,9 +1,18 @@
 extern crate crypto;
 // sudo snap install rustup --classic
+// rustup install stable
 // curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sudo sh
 // cargo install wasm-pack
+// cargo install wasm-gc
+// rustup target add wasm32-unknown-unknown
+
+// wget https://static.rust-lang.org/dist/rust-std-1.33.0-wasm32-unknown-unknown.tar.gz
+// tar -xf rust-std-1.33.0-wasm32-unknown-unknown.tar.gz
+// sudo mv rust-std-1.33.0-wasm32-unknown-unknown/rust-std-wasm32-unknown-unknown/lib/rustlib/wasm32-unknown-unknown /usr/lib/rustlib/
 
 // cargo test --release
+// cargo build --target wasm32-unknown-unknown
+
 // rustfmt ./src/*.rs
 // wasm-pack build --target web
 
@@ -35,7 +44,6 @@ use std::str;
 #[global_allocator]
 static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 use wasm_bindgen::prelude::*;
-
 
 fn derive_key(password: String, salt: &[u8]) -> Vec<u8> {
     assert!(salt.len() == 16);
@@ -185,7 +193,6 @@ pub fn decrypt(ciphertext: &[u8], password: String) -> String {
     str::from_utf8(&plaintext).unwrap().to_string()
 }
 
-
 #[wasm_bindgen]
 pub fn test() {
     wasm_utils::log("encrypt");
@@ -197,7 +204,6 @@ pub fn test() {
         4, 54, 154, 21, 59, 78, 188, 101, 17, 207, 254, 9, 181, 89, 11, 3,
     ];
     let key = derive_key(password.clone(), &salt);
-
 }
 
 #[cfg(test)]
