@@ -1,23 +1,4 @@
 extern crate crypto;
-// sudo snap install rustup --classic
-// rustup install stable
-// curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sudo sh
-// cargo install wasm-pack
-// cargo install wasm-gc
-// rustup target add wasm32-unknown-unknown
-
-// wget https://static.rust-lang.org/dist/rust-std-1.33.0-wasm32-unknown-unknown.tar.gz
-// tar -xf rust-std-1.33.0-wasm32-unknown-unknown.tar.gz
-// sudo mv rust-std-1.33.0-wasm32-unknown-unknown/rust-std-wasm32-unknown-unknown/lib/rustlib/wasm32-unknown-unknown /usr/lib/rustlib/
-
-// cargo test --release
-// cargo build --target wasm32-unknown-unknown
-
-// rustfmt ./src/*.rs
-// wasm-pack build --target web
-
-// https://github.com/DaGenix/rust-crypto
-// https://github.com/buttercup/rust-crypto-wasm
 
 use getrandom;
 mod wasm_utils;
@@ -38,14 +19,15 @@ use crypto::{aes, blockmodes, buffer, symmetriccipher};
 use std::io::Read;
 use std::str;
 
-// When the `wee_alloc` feature is enabled, use `wee_alloc` as the global
-// allocator.
+// When the `wee_alloc` feature is enabled, use `wee_alloc` as the global allocator.
 #[cfg(feature = "wee_alloc")]
 #[global_allocator]
 static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 use wasm_bindgen::prelude::*;
 
-fn derive_key(password: String, salt: &[u8]) -> Vec<u8> {
+
+#[wasm_bindgen]
+pub fn derive_key(password: String, salt: &[u8]) -> Vec<u8> {
     assert!(salt.len() == 16);
     let mut result = vec![0u8; 64];
     let params = ScryptParams::new(
@@ -191,19 +173,6 @@ pub fn decrypt(ciphertext: &[u8], password: String) -> String {
     let mut z = GzDecoder::new(&compressed_plaintext[..]);
     z.read_to_end(&mut plaintext).unwrap();
     str::from_utf8(&plaintext).unwrap().to_string()
-}
-
-#[wasm_bindgen]
-pub fn test() {
-    wasm_utils::log("encrypt");
-
-    wasm_utils::Timeout::new(0, || wasm_utils::log("timeout"));
-
-    let password = "azerty".to_string();
-    let salt: [u8; 16] = [
-        4, 54, 154, 21, 59, 78, 188, 101, 17, 207, 254, 9, 181, 89, 11, 3,
-    ];
-    let key = derive_key(password.clone(), &salt);
 }
 
 #[cfg(test)]

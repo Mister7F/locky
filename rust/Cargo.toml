@@ -1,37 +1,36 @@
 [package]
-name = "encryption"
+name = "rust_encryptor"
 version = "0.1.0"
-authors = ["Mister7F <mister7f@gmail.com>"]
 edition = "2021"
+authors = ["Mister7F <mister7f@gmail.com>"]
+description = "Encrypt / Decrypt Locky wallet"
+repository = "https://github.com/mister7f/locky"
 
 [lib]
-crate-type = ["cdylib", "rlib"]
-
-[features]
-default = ["console_error_panic_hook"]
+crate-type = ["cdylib"]
 
 [dependencies]
+wasm-bindgen = "0.2"
+
 getrandom = { version = "0.2", features = ["js"] }
-wasm-bindgen = "0.2.83"
 rust-crypto-wasm = "0.3.1"
 chacha20poly1305 = "0.10.1"
 flate2 = "1.0.25"
 rand = "0.8.5"
 
-# The `console_error_panic_hook` crate provides better debugging of panics by
-# logging them with `console.error`. This is great for development, but requires
-# all the `std::fmt` and `std::panicking` infrastructure, so isn't great for
-# code size when deploying.
-console_error_panic_hook = { version = "0.1.6", optional = true }
+# console.error when panic
+console_error_panic_hook = "0.1.6"
 
-# `wee_alloc` is a tiny allocator for wasm that is only ~1K in code size
-# compared to the default allocator's ~10K. It is slower than the default
-# allocator, however.
-wee_alloc = { version = "0.4.5", optional = true }
+# tiny allocator (gut slower) for wasm that is only ~1K in code size
+# compared to the default allocator's ~10K
+wee_alloc = "0.4.5"
 
 [profile.release]
+# optimize for binary size
 opt-level = "s"
 strip = true
+lto = true
+
 
 [package.metadata.wasm-pack.profile.release]
 wasm-opt = false

@@ -6,18 +6,17 @@
   </head>
   <body>
     <script type="module">
-
-      setInterval(() => {
-          console.log('a')
-      }, 500)
-
-      import init, { encrypt, test } from "./pkg/encryption.js";
+      import init, { encrypt, derive_key } from "./pkg/rust_encryptor.js";
       init().then(() => {
-        console.log("start call")
-        // const ciphertext = encrypt("WebAssembly", "test");
-        test();
-      });
+        console.time('Execution Time');
 
+        const salt = new Uint8Array(16);
+
+        const key = derive_key("plaintext", salt);
+        console.timeEnd('Execution Time');
+
+        console.log(key)
+      });
     </script>
   </body>
 </html>
