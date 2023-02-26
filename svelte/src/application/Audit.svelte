@@ -44,6 +44,7 @@
     async function onStartAudit() {
         loading = true;
         leakedAccountsIndex = [];
+        weakAccountsIndex = [];
 
         const passwords = wallet['accounts']
             .map((account) => account.password)

@@ -103,7 +103,7 @@
     <Item class="account_list_item" on:click="{() => dispatch('click')}">
         <div class="account_list_item_title">
             <Img src="{account.icon || 'img/accounts/default.svg'}" alt="Account" />
-            <h5>{account.name}</h5>
+            <h5 title="{account.login}">{account.name}</h5>
         </div>
         <div class="account_list_item_actions">
             {#if account.url && isUrlValid(account.url)}
