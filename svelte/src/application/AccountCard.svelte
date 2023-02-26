@@ -10,7 +10,7 @@
 
     const dispatch = createEventDispatcher();
     export let account;
-    export let viewMode = 'detail';
+    export let viewMode = 'list';
 
     const strength = passwordStrength(account.password);
 
@@ -33,7 +33,9 @@
 {:else if viewMode === 'detail'}
     <div class="detail-card">
         <Card>
-            <div class="strength" style="--force: {strength}"></div>
+            {#if strength !== 0}
+                <div class="strength" style="--force: {strength}"></div>
+            {/if}
             <PrimaryAction
                 class="detail_primary_action"
                 on:click="{() => dispatch('click')}">
@@ -150,6 +152,9 @@
                 </IconButton>
             {/if}
         </div>
+        {#if strength !== 0}
+            <div class="strength" style="--force: {strength}"></div>
+        {/if}
     </Item>
 {/if}
 
@@ -297,6 +302,14 @@
         margin-bottom: -30px;
         transform: rotate(270deg);
         margin-left: calc(100% - 30px);
+    }
+
+    :global(.account_list_item) .strength {
+        margin-bottom: -50px;
+        margin-right: -10px;
+        position: absolute;
+        right: 10px;
+        bottom: 50px;
     }
 
     :global(.account_list_item) {
