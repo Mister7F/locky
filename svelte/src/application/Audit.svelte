@@ -10,7 +10,7 @@
     import { createEventDispatcher } from 'svelte';
     import Icon from '../helpers/Icon.svelte';
 
-    import { digest } from '../helpers/crypto.js';
+    import { digest, passwordStrength } from '../helpers/crypto.js';
 
     const dispatch = createEventDispatcher();
 
@@ -20,6 +20,7 @@
 
     let loading = false;
     let leakedAccountsIndex = [];
+    let weakAccountsIndex = [];
 
     async function isPasswordLeaked(password) {
         const hash = await digest(password);
@@ -60,9 +61,17 @@
             if (leakedPassword.includes(wallet['accounts'][i].password)) {
                 leakedAccountsIndex.push(i);
             }
+
+            if (
+                passwordStrength(wallet['accounts'][i].password) < 90 &&
+                wallet['accounts'][i].password.length
+            ) {
+                weakAccountsIndex.push(i);
+            }
         }
 
         leakedAccountsIndex = leakedAccountsIndex;
+        weakAccountsIndex = weakAccountsIndex;
         loading = false;
     }
 
@@ -82,11 +91,31 @@
 
     {#if leakedAccountsIndex.length}
         <span class="title">
-            The passwords of these accounts have been leaked, you must change them!
+            The passwords of those accounts have been
+            <a href="https://haveibeenpwned.com/Passwords" target="_blank">leaked</a>, you
+            must change them!
         </span>
     {/if}
     <div class="container">
         {#each leakedAccountsIndex as accountIndex, index}
+            <div index="{index}">
+                <AccountCard
+                    account="{wallet['accounts'][accountIndex]}"
+                    on:click="{() => dispatch('edit', wallet['accounts'][accountIndex])}"
+                    viewMode="minimalist" />
+            </div>
+        {/each}
+    </div>
+
+    {#if weakAccountsIndex.length}
+        <span class="title">
+            The passwords of those accounts are
+            <a href="https://github.com/dropbox/zxcvbn" target="_blank">weak</a>
+            and must be changed!
+        </span>
+    {/if}
+    <div class="container">
+        {#each weakAccountsIndex as accountIndex, index}
             <div index="{index}">
                 <AccountCard
                     account="{wallet['accounts'][accountIndex]}"
