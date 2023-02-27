@@ -103,7 +103,10 @@
     <Item class="account_list_item" on:click="{() => dispatch('click')}">
         <div class="account_list_item_title">
             <Img src="{account.icon || 'img/accounts/default.svg'}" alt="Account" />
-            <h5 title="{account.login}">{account.name}</h5>
+            <div>
+                <h5>{account.name}</h5>
+                <p>{account.login.split('@')[0]}</p>
+            </div>
         </div>
         <div class="account_list_item_actions">
             {#if account.url && isUrlValid(account.url)}
@@ -317,7 +320,7 @@
         flex-direction: row;
         justify-content: space-between;
         align-items: center;
-        height: 30px;
+        height: 36px;
         width: 400px;
         max-width: 90vw;
         overflow: hidden;
@@ -331,9 +334,9 @@
 
     :global(.account_list_item Img) {
         pointer-events: none;
-        max-height: 30px;
+        max-height: 36px;
         max-width: 100%;
-        height: 30px;
+        height: 36px;
     }
 
     .account_list_item_title {
@@ -343,7 +346,8 @@
         max-height: 100%;
         min-width: 110px;
     }
-    .account_list_item_title h5 {
+    .account_list_item_title h5,
+    .account_list_item_title p {
         font-size: 1.2em;
         max-width: 100%;
         overflow: hidden;
@@ -352,6 +356,12 @@
         line-height: 1.2rem;
         margin: 0;
         margin-left: 10px;
+    }
+
+    .account_list_item_title p {
+        max-width: 180px;
+        font-size: 0.9em;
+        margin-top: 2px;
     }
 
     :global(.account_list_item_actions) {
