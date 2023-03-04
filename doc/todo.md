@@ -16,7 +16,7 @@ Less important
 - new folder: edit the folder in the list instead opening a dialog
   allow to edit the icon without the dialog (just a select component)
 - folders list in mobile view: close when clicking outside
-- generate password
+- better password generation (list of word...)
 - clipboard: find a better solution
   automatically remove the clipboard after 1 minute
 - mobile: automatically close the session after a period of inactivity
