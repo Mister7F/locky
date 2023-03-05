@@ -2,19 +2,29 @@ const CLIENT_ID = 'c53nc5eenquwokp';
 
 let accessToken = null;
 
-export async function getAuthenticationUrl() {
-    const redirectUrl = (document.location.origin + document.location.pathname).replace(
-        /\/+$/,
-        '',
-    );
+const redirectUrl = (document.location.origin + document.location.pathname).replace(
+    /\/+$/,
+    '',
+);
 
+export async function getAuthenticationUrl() {
+    const state = undefined;
     const dbx = new Dropbox.Dropbox({ clientId: CLIENT_ID });
-    const authUrl = await dbx.auth.getAuthenticationUrl(redirectUrl);
+    const authUrl = await dbx.auth.getAuthenticationUrl(
+        redirectUrl,
+        state,
+        'code',
+        'offline',
+        undefined,
+        undefined,
+        true,
+    );
+    window.localStorage.setItem('dropboxCodeVerifier', dbx.auth.codeVerifier);
     return authUrl;
 }
 
-export function isAuthenticated() {
-    accessToken = getAccessToken();
+export async function isAuthenticated() {
+    accessToken = await getConnection();
     return !!accessToken;
 }
 
@@ -25,7 +35,7 @@ export function logout() {
 }
 
 export async function listDir() {
-    const dbx = new Dropbox.Dropbox({ accessToken: getAccessToken() });
+    const dbx = await getConnection();
     const response = await dbx.filesListFolder({ path: '' });
     return response.result.entries;
 }
@@ -40,7 +50,7 @@ export async function fileExist(filename) {
 }
 
 export async function download(filename) {
-    const dbx = new Dropbox.Dropbox({ accessToken: getAccessToken() });
+    const dbx = await getConnection();
 
     const response = await dbx.filesDownload({ path: '/' + filename });
     if (response.status !== 200) {
@@ -55,7 +65,7 @@ export async function download(filename) {
 }
 
 export async function upload(filename, content) {
-    const dbx = new Dropbox.Dropbox({ accessToken: getAccessToken() });
+    const dbx = await getConnection();
 
     let response;
     try {
@@ -74,30 +84,56 @@ export async function upload(filename, content) {
     return response && response.status === 200;
 }
 
-export function getAccessToken() {
-    const accessTokenFromUrl = getAccessTokenFromUrl();
-    if (accessTokenFromUrl) {
-        localStorage.setItem('dropboxAccessToken', accessTokenFromUrl);
-        return accessTokenFromUrl;
+export async function getConnection() {
+    const codeFromUrl = getCodeFromUrl();
+    const dbx = new Dropbox.Dropbox({ clientId: CLIENT_ID });
+    if (codeFromUrl) {
+        // authentication process just happened, fetch the access token
+        // and the refresh token from the code in the URL
+        dbx.auth.setCodeVerifier(window.localStorage.getItem('dropboxCodeVerifier'));
+        const token = await dbx.auth.getAccessTokenFromCode(redirectUrl, codeFromUrl);
+
+        if (token.status !== 200) {
+            console.error(token);
+            return;
+        }
+
+        localStorage.setItem('dropboxAccessToken', token.result.access_token);
+        localStorage.setItem('dropboxRefreshToken', token.result.refresh_token);
+
+        // refresh the page
+        document.location = redirectUrl;
+        return;
     }
-    return localStorage.getItem('dropboxAccessToken');
+
+    const accessToken = localStorage.getItem('dropboxAccessToken');
+    const refreshToken = localStorage.getItem('dropboxRefreshToken');
+
+    if (!accessToken || !refreshToken) {
+        return;
+    }
+
+    dbx.auth.setAccessToken(accessToken);
+    dbx.auth.setRefreshToken(refreshToken);
+
+    return dbx;
 }
 
-export function getAccessTokenFromUrl() {
-    const url = window.location.hash;
+export function getCodeFromUrl() {
+    const url = window.location.search;
     if (!url) {
         return null;
     }
     const parameters = url.split('&');
-    let accessTokenParam = parameters.find((p) => p.includes('access_token='));
-    if (!accessTokenParam) {
+    console.log(parameters);
+    let codeParam = parameters.find((p) => p.includes('code='));
+    if (!codeParam) {
         return null;
     }
-    accessTokenParam = accessTokenParam.split('=');
-    const accessToken =
-        accessTokenParam && accessTokenParam.length === 2 ? accessTokenParam[1] : null;
+    codeParam = codeParam.split('=');
+    const code = codeParam && codeParam.length === 2 ? codeParam[1] : null;
     window.location.hash = '';
-    return accessToken && accessToken.length ? accessToken : null;
+    return code && code.length ? code : null;
 }
 
 export function setDropboxHash(hash) {

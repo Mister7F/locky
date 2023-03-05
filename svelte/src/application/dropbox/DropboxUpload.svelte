@@ -70,7 +70,7 @@
     }
 
     onMount(async () => {
-        isAuthenticated = dropbox.isAuthenticated();
+        isAuthenticated = await dropbox.isAuthenticated();
         authenticationUrl = await dropbox.getAuthenticationUrl();
 
         if (isAuthenticated) {

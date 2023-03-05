@@ -24,7 +24,7 @@
     }
 
     onMount(async () => {
-        let isAuthenticated = dropbox.isAuthenticated();
+        let isAuthenticated = await dropbox.isAuthenticated();
         state = isAuthenticated ? 'logged' : 'not_logged';
         authenticationUrl = await dropbox.getAuthenticationUrl();
         if (isAuthenticated) {

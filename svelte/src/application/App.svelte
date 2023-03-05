@@ -23,7 +23,7 @@
 
     setTimeout(async () => {
         // Parse the URL to fetch the access token and store it in the local storage
-        dropbox.isAuthenticated();
+        await dropbox.isAuthenticated();
     }, 500);
 
 </script>
