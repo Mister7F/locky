@@ -15,6 +15,7 @@
     import FileInput from '../../helpers/FileInput.svelte';
     import DropboxLogin from '../dropbox/DropboxLogin.svelte';
     import ChooseMethod from './ChooseMethod.svelte';
+    import DropboxUpload from './../dropbox/DropboxUpload.svelte';
 
     const dispatch = createEventDispatcher();
     const maxLen = 8;
@@ -171,6 +172,10 @@
                 <DropboxLogin
                     bind:state="{dropboxState}"
                     on:logout="{() => (dropboxFile = null)}" />
+            {:else if method === 'login'}
+                <div class="dropbox_button">
+                    <DropboxUpload />
+                </div>
             {/if}
 
             <Field
@@ -309,6 +314,11 @@
 
     .lock :global(.login-button.loading) {
         color: var(--on-primary);
+    }
+
+    .dropbox_button {
+        text-align: center;
+        pointer-events: none;
     }
 
 </style>
