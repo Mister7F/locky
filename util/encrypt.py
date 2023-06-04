@@ -33,7 +33,7 @@ compressed = gzip.compress(plaintext)
 # Key derivation
 salt = os.urandom(16)
 key = derive_key(password, salt)
-key_chacha, kye_aes = key[:32], key[32:]
+key_chacha, key_aes = key[:32], key[32:]
 
 
 # xChaCha20 encryption
@@ -46,7 +46,7 @@ ciphertext = nonce + ciphertext + signature
 # AES-CBC encryption
 iv = os.urandom(16)
 ciphertext = iv + Padding.pad(ciphertext, 16, style='pkcs7')
-cipher = AES.new(kye_aes, AES.MODE_CBC)
+cipher = AES.new(key_aes, AES.MODE_CBC)
 ciphertext = cipher.encrypt(ciphertext)
 ciphertext = salt + ciphertext
 

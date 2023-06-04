@@ -19,11 +19,11 @@ with open("wallet.lck", "rb") as file:
 # Key derivation
 salt = data[:16]
 key = derive_key(password, salt)
-key_chacha, kye_aes = key[:32], key[32:]
+key_chacha, key_aes = key[:32], key[32:]
 
 # AES-CBC decryption
 ciphertext = data[16:]
-cipher = AES.new(kye_aes, AES.MODE_CBC)
+cipher = AES.new(key_aes, AES.MODE_CBC)
 data = cipher.decrypt(ciphertext)
 data = data[16:]  # Remove the IV
 data = Padding.unpad(data, 16, style="pkcs7")  # remove the padding
