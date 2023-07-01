@@ -1,8 +1,12 @@
 # Development
-First, install `npm`
+You first need to create the docker image
+> `docker build . -t "locky-docker"`
+
+Then you can start the container
+> `./docker_start.sh`
 
 Then,
-> `cd svelte && npm install`
+> `npm install`
 
 To run your development server just run,
 > `npm run dev`
