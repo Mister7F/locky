@@ -27,6 +27,7 @@
     "dependencies": {
         "fflate": "^0.7.1",
         "qrious": "^4.0.2",
+        "sass": "^1.70.0",
         "scrypt-async": "^2.0.1",
         "svelte-preprocess": "^3.9.12"
     },
