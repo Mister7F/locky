@@ -1,10 +1,10 @@
 <script>
-    import { Icon } from '@smui/icon-button';
-    export let title = '';
-    let className = '';
-    export { className as class };
-    export let color = 'on-primary';
-    export let on = null;
+    import { Icon } from '@smui/icon-button'
+    export let title = ''
+    let className = ''
+    export { className as class }
+    export let color = 'on-primary'
+    export let on = null
     $: cssColor =
         {
             primary: 'var(--primary)',
@@ -13,17 +13,17 @@
             'on-primary': 'var(--on-primary)',
             'on-secondary': 'var(--on-secondary)',
             'on-surface': 'var(--on-surface)',
-        }[color] || 'var(--on-surface)';
-
+        }[color] || 'var(--on-surface)'
 </script>
 
 <Icon
     class="icon-import material-icons {className}"
     on:click
-    on="{on}"
-    title="{title}"
-    color="{color}"
-    style="--color: {cssColor}">
+    {on}
+    {title}
+    {color}
+    style="--color: {cssColor}"
+>
     <slot />
 </Icon>
 
@@ -38,5 +38,4 @@
         min-width: 24px;
         min-height: 24px;
     }
-
 </style>

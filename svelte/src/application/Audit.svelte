@@ -5,85 +5,85 @@
     See https://haveibeenpwned.com/API/v3#SearchingPwnedPasswordsByRange
  -->
 <script>
-    import Button, { Label } from '@smui/button';
-    import AccountCard from './AccountCard.svelte';
-    import { createEventDispatcher } from 'svelte';
-    import Icon from '../helpers/Icon.svelte';
+    import Button, { Label } from '@smui/button'
+    import AccountCard from './AccountCard.svelte'
+    import { createEventDispatcher } from 'svelte'
+    import Icon from '../helpers/Icon.svelte'
 
-    import { digest, passwordStrength } from '../helpers/crypto.js';
+    import { digest, passwordStrength } from '../helpers/crypto.js'
 
-    const dispatch = createEventDispatcher();
+    const dispatch = createEventDispatcher()
 
-    const url = 'https://api.pwnedpasswords.com/range/';
+    const url = 'https://api.pwnedpasswords.com/range/'
 
-    export let wallet;
+    export let wallet
 
-    let loading = false;
-    let leakedAccountsIndex = [];
-    let weakAccountsIndex = [];
+    let loading = false
+    let leakedAccountsIndex = []
+    let weakAccountsIndex = []
 
     async function isPasswordLeaked(password) {
-        const hash = await digest(password);
-        const shortHash = hash.slice(0, 5);
-        const suffixHash = hash.slice(5);
+        const hash = await digest(password)
+        const shortHash = hash.slice(0, 5)
+        const suffixHash = hash.slice(5)
 
-        let response;
+        let response
         try {
-            response = await window.fetch(url + shortHash);
+            response = await window.fetch(url + shortHash)
             if (!response.ok) {
-                return false;
+                return false
             }
         } catch {
-            return false;
+            return false
         }
 
-        const responseText = await response.text();
-        return responseText.includes(suffixHash);
+        const responseText = await response.text()
+        return responseText.includes(suffixHash)
     }
 
     async function onStartAudit() {
-        loading = true;
-        leakedAccountsIndex = [];
-        weakAccountsIndex = [];
+        loading = true
+        leakedAccountsIndex = []
+        weakAccountsIndex = []
 
         const passwords = wallet['accounts']
             .map((account) => account.password)
             .filter((password) => password && password.length)
-            .filter((v, i, a) => a.indexOf(v) === i); // keep only unique values
+            .filter((v, i, a) => a.indexOf(v) === i) // keep only unique values
 
-        const leakedPassword = [];
+        const leakedPassword = []
         for (const password of passwords) {
             if (await isPasswordLeaked(password)) {
-                leakedPassword.push(password);
+                leakedPassword.push(password)
             }
         }
 
         for (let i = 0; i < wallet['accounts'].length; i++) {
             if (leakedPassword.includes(wallet['accounts'][i].password)) {
-                leakedAccountsIndex.push(i);
+                leakedAccountsIndex.push(i)
             }
 
             if (
                 passwordStrength(wallet['accounts'][i].password) < 90 &&
                 wallet['accounts'][i].password.length
             ) {
-                weakAccountsIndex.push(i);
+                weakAccountsIndex.push(i)
             }
         }
 
-        leakedAccountsIndex = leakedAccountsIndex;
-        weakAccountsIndex = weakAccountsIndex;
-        loading = false;
+        leakedAccountsIndex = leakedAccountsIndex
+        weakAccountsIndex = weakAccountsIndex
+        loading = false
     }
-
 </script>
 
 <div class="audit wallet">
     <Button
         color="secondary"
         variant="raised"
-        on:click="{onStartAudit}"
-        disabled="{loading}">
+        on:click={onStartAudit}
+        disabled={loading}
+    >
         {#if loading}
             <Icon class="audit-loading" color="on-secondary">sync</Icon>
         {/if}
@@ -93,17 +93,20 @@
     {#if leakedAccountsIndex.length}
         <span class="title">
             The passwords of those accounts have been
-            <a href="https://haveibeenpwned.com/Passwords" target="_blank">leaked</a>, you
-            must change them!
+            <a href="https://haveibeenpwned.com/Passwords" target="_blank"
+                >leaked</a
+            >, you must change them!
         </span>
     {/if}
     <div class="container">
         {#each leakedAccountsIndex as accountIndex, index}
-            <div index="{index}">
+            <div {index}>
                 <AccountCard
-                    account="{wallet['accounts'][accountIndex]}"
-                    on:click="{() => dispatch('edit', wallet['accounts'][accountIndex])}"
-                    viewMode="minimalist" />
+                    account={wallet['accounts'][accountIndex]}
+                    on:click={() =>
+                        dispatch('edit', wallet['accounts'][accountIndex])}
+                    viewMode="minimalist"
+                />
             </div>
         {/each}
     </div>
@@ -117,11 +120,13 @@
     {/if}
     <div class="container">
         {#each weakAccountsIndex as accountIndex, index}
-            <div index="{index}">
+            <div {index}>
                 <AccountCard
-                    account="{wallet['accounts'][accountIndex]}"
-                    on:click="{() => dispatch('edit', wallet['accounts'][accountIndex])}"
-                    viewMode="minimalist" />
+                    account={wallet['accounts'][accountIndex]}
+                    on:click={() =>
+                        dispatch('edit', wallet['accounts'][accountIndex])}
+                    viewMode="minimalist"
+                />
             </div>
         {/each}
     </div>
@@ -168,5 +173,4 @@
     .audit :global(.audit-loading) {
         -webkit-animation: rotating 2s linear infinite;
     }
-
 </style>

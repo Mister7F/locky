@@ -1,45 +1,45 @@
 {
-    "name": "svelte-app",
-    "version": "1.0.0",
+    "name": "locky",
+    "private": true,
+    "version": "0.0.0",
+    "type": "module",
     "scripts": {
-        "build": "rollup -c",
-        "dev": "rollup -c -w",
-        "start": "sirv public",
-        "prettier": "prettier --write ./src && prettier --write ./public/sw.js"
-    },
-    "devDependencies": {
-        "@rollup/plugin-commonjs": "11.0.2",
-        "@rollup/plugin-node-resolve": "^7.0.0",
-        "node-sass": "^8.0.0",
-        "postcss": "^8.3.9",
-        "prettier": "^2.4.1",
-        "prettier-plugin-svelte": "^1.4.2",
-        "rollup": "^1.20.0",
-        "rollup-plugin-livereload": "^1.0.0",
-        "rollup-plugin-postcss": "^4.0.1",
-        "rollup-plugin-svelte": "^v6.1.1",
-        "rollup-plugin-terser": "^5.3.1",
-        "sass-loader": "^8.0.2",
-        "sirv-cli": "^1.0.14",
-        "svelte": "^3.43.2",
-        "svelte-material-ui": "^1.1.0"
+        "dev": "vite",
+        "build": "vite build",
+        "preview": "vite preview",
+        "check": "svelte-check --tsconfig ./tsconfig.json",
+        "prepare": "smui-theme compile public/smui.css -i src/theme"
     },
     "dependencies": {
         "fflate": "^0.7.1",
         "qrious": "^4.0.2",
-        "sass": "^1.70.0",
-        "scrypt-async": "^2.0.1",
-        "svelte-preprocess": "^3.9.12"
+        "scrypt-async": "^2.0.1"
     },
-    "prettier": {
-        "printWidth": 90,
-        "tabWidth": 4,
-        "semi": true,
-        "singleQuote": true,
-        "trailingComma": "all",
-        "bracketSpacing": true,
-        "svelteSortOrder": "scripts-markup-styles",
-        "svelteStrictMode": true,
-        "svelteBracketNewLine": false
+    "devDependencies": {
+        "@smui/button": "^7.0.0",
+        "@smui/card": "^7.0.0",
+        "@smui/dialog": "^7.0.0",
+        "@smui/fab": "^7.0.0",
+        "@smui/form-field": "^7.0.0",
+        "@smui/icon-button": "^7.0.0",
+        "@smui/list": "^7.0.0",
+        "@smui/menu": "^7.0.0",
+        "@smui/select": "^7.0.0",
+        "@smui/slider": "^7.0.0",
+        "@smui/snackbar": "^7.0.0",
+        "@smui/switch": "^7.0.0",
+        "@smui/textfield": "^7.0.0",
+        "@smui/top-app-bar": "^7.0.0",
+        "@sveltejs/vite-plugin-svelte": "^3.0.2",
+        "@tsconfig/svelte": "^5.0.2",
+        "prettier": "^3.2.5",
+        "prettier-plugin-svelte": "^3.2.3",
+        "smui": "^0.0.4",
+        "smui-theme": "^7.0.0",
+        "svelte": "^4.2.12",
+        "svelte-check": "^3.6.7",
+        "tslib": "^2.6.2",
+        "typescript": "^5.2.2",
+        "vite": "^5.2.0"
     }
 }

@@ -1,38 +1,37 @@
 <script>
-    import * as api from './api.js';
-    import * as dropbox from './dropbox/dropbox.js';
-    import Login from './login/Login.svelte';
-    import Wallet from './Wallet.svelte';
+    import * as api from './api.js'
+    import * as dropbox from './dropbox/dropbox.js'
+    import Login from './login/Login.svelte'
+    import Wallet from './Wallet.svelte'
 
-    let locked = true;
-    let walletElement;
-    let wallet = null;
+    let locked = true
+    let walletElement
+    let wallet = null
 
     async function lock() {
-        await api.logout(true);
-        locked = true;
+        await api.logout(true)
+        locked = true
     }
 
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', async () => {
-            await navigator.serviceWorker.register('sw.js');
-        });
+            await navigator.serviceWorker.register('sw.js')
+        })
     } else {
-        console.error('Service Worker will not work');
+        console.error('Service Worker will not work')
     }
 
     setTimeout(async () => {
         // Parse the URL to fetch the access token and store it in the local storage
-        await dropbox.isAuthenticated();
-    }, 500);
-
+        await dropbox.isAuthenticated()
+    }, 500)
 </script>
 
 <div class="root">
     {#if locked}
-        <Login on:wallet_openned="{() => (locked = false)}" bind:wallet />
+        <Login on:wallet_openned={() => (locked = false)} bind:wallet />
     {:else}
-        <Wallet bind:wallet on:lock="{lock}" bind:this="{walletElement}" />
+        <Wallet bind:wallet on:lock={lock} bind:this={walletElement} />
     {/if}
 </div>
 
@@ -44,6 +43,15 @@
         src: url('font/OpenSans-Regular.ttf');
     }
     :global(*) {
+        --primary: #282c34;
+        --on-primary: #dfe1e2;
+
+        --secondary: #fc6d26;
+        --on-secondary: #282c34;
+
+        --surface: #fff;
+        --on-surface: #4a6572;
+
         /* Svelte MUI */
         --background: #fcfcfc;
 
@@ -52,6 +60,8 @@
         --error-color: #e53935;
         --wallet-background: #edf0f2;
         --account-background: #fff;
+
+        color: #4a6572;
 
         transition-timing-function: ease;
         user-select: none;
@@ -95,5 +105,4 @@
     :global(::-webkit-scrollbar-thumb:hover) {
         background: var(--primary);
     }
-
 </style>

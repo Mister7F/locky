@@ -1,8 +1,8 @@
 <script>
-    import Button from '@smui/button';
-    import Dialog, { Title, Content } from '@smui/dialog';
-    import Fab, { Label } from '@smui/fab';
-    import IconButton from '@smui/icon-button';
+    import Button from '@smui/button'
+    import Dialog, { Title, Content } from '@smui/dialog'
+    import Fab, { Label } from '@smui/fab'
+    import IconButton from '@smui/icon-button'
     import List, {
         Group,
         Item,
@@ -13,89 +13,95 @@
         Text,
         PrimaryText,
         SecondaryText,
-    } from '@smui/list';
-    import Menu, { SelectionGroup, SelectionGroupIcon } from '@smui/menu';
-    import Textfield from '@smui/textfield';
-    import { createEventDispatcher } from 'svelte';
-    import * as api from '../api.js';
-    import Icon from '../../helpers/Icon.svelte';
-    import Sortablegrid from '../../helpers/Sortablegrid.svelte';
-    import EditFolder from './EditFolder.svelte';
-    import Folder from './Folder.svelte';
-    const dispatch = createEventDispatcher();
-    export let wallet;
-    export let currentFolderId;
-    export let visible = true;
-    export let floating = false;
-    $: folders = wallet && wallet['folders'];
-    $: categoryFolders = folders && folders.slice(1);
-    let editedFolderId = -1;
-    let folderDialog;
-    let folderIconOpen = false;
-    let draggingFolder = false;
+    } from '@smui/list'
+    import Menu, { SelectionGroup, SelectionGroupIcon } from '@smui/menu'
+    import Textfield from '@smui/textfield'
+    import { createEventDispatcher } from 'svelte'
+    import * as api from '../api.js'
+    import Icon from '../../helpers/Icon.svelte'
+    import Sortablegrid from '../../helpers/Sortablegrid.svelte'
+    import EditFolder from './EditFolder.svelte'
+    import Folder from './Folder.svelte'
+    const dispatch = createEventDispatcher()
+    export let wallet
+    export let currentFolderId
+    export let visible = true
+    export let floating = false
+    $: folders = wallet && wallet['folders']
+    $: categoryFolders = folders && folders.slice(1)
+    let editedFolderId = -1
+    let folderDialog
+    let folderIconOpen = false
+    let draggingFolder = false
 
     async function onEditFolder(folder) {
-        folderDialog.editFolder(folder);
+        folderDialog.editFolder(folder)
     }
     async function onDropDelete(event) {
-        wallet = await api.deleteFolder(event.detail.item);
+        wallet = await api.deleteFolder(event.detail.item)
     }
     async function onSaveFolder(event) {
-        wallet = await api.updateFolder(event.detail);
+        wallet = await api.updateFolder(event.detail)
     }
     async function onNewFolder() {
-        folderDialog.editFolder({ icon: null, name: '' });
+        folderDialog.editFolder({ icon: null, name: '' })
     }
     async function onMoveFolder(event) {
-        wallet = await api.moveFolder(event.detail.fromItem, event.detail.to);
+        wallet = await api.moveFolder(event.detail.fromItem, event.detail.to)
     }
-
 </script>
 
 {#if visible && floating}
-    <div class="folders-overlay" on:click="{() => (visible = false)}"></div>
+    <div class="folders-overlay" on:click={() => (visible = false)}></div>
 {/if}
 
-<div class="foldersList {visible ? 'visible' : ''} {floating ? 'floating' : ''}">
+<div
+    class="foldersList {visible ? 'visible' : ''} {floating ? 'floating' : ''}"
+>
     <Group>
         <Subheader>
             Folders
-            <IconButton on:click="{onNewFolder}">
+            <IconButton on:click={onNewFolder}>
                 <Icon color="on-surface">create_new_folder</Icon>
             </IconButton>
         </Subheader>
         <Item
             class="account_audit"
-            on:click="{() => (currentFolderId = -1)}"
-            selected="{currentFolderId < 0}">
+            on:click={() => (currentFolderId = -1)}
+            selected={currentFolderId < 0}
+        >
             <Icon color="on-surface">policy</Icon>
             <Text>Security panel</Text>
         </Item>
         {#if folders}
             <Folder
-                folder="{folders[0]}"
-                on:edit="{onEditFolder(folders[0])}"
-                selected="{currentFolderId === folders[0].id}"
-                on:click="{() => (currentFolderId = folders[0].id)}" />
+                folder={folders[0]}
+                on:edit={onEditFolder(folders[0])}
+                selected={currentFolderId === folders[0].id}
+                on:click={() => (currentFolderId = folders[0].id)}
+            />
             <Sortablegrid
                 class="folders"
-                bind:items="{categoryFolders}"
+                bind:items={categoryFolders}
                 let:item
-                bind:dragging="{draggingFolder}"
-                on:action="{onDropDelete}"
-                customActions="{['delete_folder']}"
-                on:move="{onMoveFolder}">
+                bind:dragging={draggingFolder}
+                on:action={onDropDelete}
+                customActions={['delete_folder']}
+                on:move={onMoveFolder}
+            >
                 <div slot="item">
                     <Folder
-                        folder="{item}"
-                        on:edit="{onEditFolder(item)}"
-                        selected="{currentFolderId === item.id}"
-                        on:click="{() => (currentFolderId = item.id)}" />
+                        folder={item}
+                        on:edit={onEditFolder(item)}
+                        selected={currentFolderId === item.id}
+                        on:click={() => (currentFolderId = item.id)}
+                    />
                 </div>
             </Sortablegrid>
             <div
                 id="delete_folder"
-                class="deleteFolder {draggingFolder ? 'visible' : ''}">
+                class="deleteFolder {draggingFolder ? 'visible' : ''}"
+            >
                 <Fab color="primary">
                     <Icon>delete</Icon>
                 </Fab>
@@ -103,7 +109,7 @@
         {/if}
     </Group>
 
-    <EditFolder bind:this="{folderDialog}" on:save="{onSaveFolder}" />
+    <EditFolder bind:this={folderDialog} on:save={onSaveFolder} />
 </div>
 
 <style>
@@ -194,5 +200,4 @@
         top: 0;
         opacity: 0.4;
     }
-
 </style>

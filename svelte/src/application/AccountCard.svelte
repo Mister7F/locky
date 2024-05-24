@@ -1,29 +1,34 @@
 <script>
-    import Button, { Label } from '@smui/button';
-    import Card, { PrimaryAction, Actions, ActionButtons, ActionIcons } from '@smui/card';
-    import { Item } from '@smui/list';
-    import IconButton, { Icon } from '@smui/icon-button';
-    import { createEventDispatcher } from 'svelte';
-    import Img from './Img.svelte';
-    import { getTotpCode, passwordStrength } from '../helpers/crypto.js';
-    import { isUrlValid, copyValue } from '../helpers/utils.js';
+    import Button, { Label } from '@smui/button'
+    import Card, {
+        PrimaryAction,
+        Actions,
+        ActionButtons,
+        ActionIcons,
+    } from '@smui/card'
+    import { Item } from '@smui/list'
+    import IconButton, { Icon } from '@smui/icon-button'
+    import { createEventDispatcher } from 'svelte'
+    import Img from './Img.svelte'
+    import { getTotpCode, passwordStrength } from '../helpers/crypto.js'
+    import { isUrlValid, copyValue } from '../helpers/utils.js'
 
-    const dispatch = createEventDispatcher();
-    export let account;
-    export let viewMode = 'list';
+    const dispatch = createEventDispatcher()
+    export let account
+    export let viewMode = 'list'
 
-    const strength = passwordStrength(account.password);
-
+    const strength = passwordStrength(account.password)
 </script>
 
 {#if viewMode === 'minimalist'}
-    <div class="account" on:click="{() => dispatch('click')}">
+    <div class="account" on:click={() => dispatch('click')}>
         <div class="card">
             <div class="row">
                 <div class="image">
                     <Img
-                        src="{account.icon || 'img/accounts/default.svg'}"
-                        alt="Account" />
+                        src={account.icon || 'img/accounts/default.svg'}
+                        alt="Account"
+                    />
                 </div>
                 <h5>{account.name}</h5>
             </div>
@@ -38,11 +43,13 @@
             {/if}
             <PrimaryAction
                 class="detail_primary_action"
-                on:click="{() => dispatch('click')}">
+                on:click={() => dispatch('click')}
+            >
                 <div class="detail_img">
                     <Img
-                        src="{account.icon || 'img/accounts/default.svg'}"
-                        alt="Account" />
+                        src={account.icon || 'img/accounts/default.svg'}
+                        alt="Account"
+                    />
                 </div>
                 <div class="detail_title">
                     <div class="detail_name">{account.name}</div>
@@ -55,8 +62,9 @@
                         <IconButton
                             class="material-icons"
                             title="Open URL"
-                            href="{account.url}"
-                            target="_blank">
+                            href={account.url}
+                            target="_blank"
+                        >
                             launch
                         </IconButton>
                     {/if}
@@ -65,33 +73,41 @@
                     {#if account.login}
                         <IconButton
                             class="material-icons"
-                            on:click="{() => {
-                                dispatch('notify', 'Login copied');
-                                copyValue(account.login);
-                            }}"
-                            title="More options">
+                            on:click={() => {
+                                dispatch('notify', 'Login copied')
+                                copyValue(account.login)
+                            }}
+                            title="More options"
+                        >
                             alternate_email
                         </IconButton>
                     {/if}
                     {#if account.password}
                         <IconButton
                             class="material-icons"
-                            on:click="{() => {
-                                dispatch('notify', 'Password copied');
-                                copyValue(account.password);
-                            }}"
-                            title="Share">
+                            on:click={() => {
+                                dispatch('notify', 'Password copied')
+                                copyValue(account.password)
+                            }}
+                            title="Share"
+                        >
                             vpn_key
                         </IconButton>
                     {/if}
                     {#if account.totp}
                         <IconButton
                             class="material-icons"
-                            on:click="{async () => {
-                                dispatch('notify', '2FA copied');
-                                copyValue((await getTotpCode(account.totp)).replace(' ', ''));
-                            }}"
-                            title="Share">
+                            on:click={async () => {
+                                dispatch('notify', '2FA copied')
+                                copyValue(
+                                    (await getTotpCode(account.totp)).replace(
+                                        ' ',
+                                        ''
+                                    )
+                                )
+                            }}
+                            title="Share"
+                        >
                             schedule
                         </IconButton>
                     {/if}
@@ -100,9 +116,12 @@
         </Card>
     </div>
 {:else}
-    <Item class="account_list_item" on:click="{() => dispatch('click')}">
+    <Item class="account_list_item" on:click={() => dispatch('click')}>
         <div class="account_list_item_title">
-            <Img src="{account.icon || 'img/accounts/default.svg'}" alt="Account" />
+            <Img
+                src={account.icon || 'img/accounts/default.svg'}
+                alt="Account"
+            />
             <div>
                 <h5>{account.name}</h5>
                 <p>{account.login.split('@')[0]}</p>
@@ -113,44 +132,50 @@
                 <IconButton
                     class="material-icons account_list_item_url"
                     title="Open URL"
-                    href="{account.url}"
-                    target="_blank">
+                    href={account.url}
+                    target="_blank"
+                >
                     launch
                 </IconButton>
             {/if}
             {#if account.login}
                 <IconButton
                     class="material-icons"
-                    on:click="{(event) => {
-                        event.stopPropagation();
-                        dispatch('notify', 'Login copied');
-                        copyValue(account.login);
-                    }}"
-                    title="More options">
+                    on:click={(event) => {
+                        event.stopPropagation()
+                        dispatch('notify', 'Login copied')
+                        copyValue(account.login)
+                    }}
+                    title="More options"
+                >
                     alternate_email
                 </IconButton>
             {/if}
             {#if account.password}
                 <IconButton
                     class="material-icons"
-                    on:click="{(event) => {
-                        event.stopPropagation();
-                        dispatch('notify', 'Password copied');
-                        copyValue(account.password);
-                    }}"
-                    title="Share">
+                    on:click={(event) => {
+                        event.stopPropagation()
+                        dispatch('notify', 'Password copied')
+                        copyValue(account.password)
+                    }}
+                    title="Share"
+                >
                     vpn_key
                 </IconButton>
             {/if}
             {#if account.totp}
                 <IconButton
                     class="material-icons"
-                    on:click="{async (event) => {
-                        event.stopPropagation();
-                        dispatch('notify', '2FA copied');
-                        copyValue((await getTotpCode(account.totp)).replace(' ', ''));
-                    }}"
-                    title="Share">
+                    on:click={async (event) => {
+                        event.stopPropagation()
+                        dispatch('notify', '2FA copied')
+                        copyValue(
+                            (await getTotpCode(account.totp)).replace(' ', '')
+                        )
+                    }}
+                    title="Share"
+                >
                     schedule
                 </IconButton>
             {/if}
@@ -172,7 +197,9 @@
     }
 
     .account:hover {
-        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.19), 0 6px 6px rgba(0, 0, 0, 0.23);
+        box-shadow:
+            0 10px 20px rgba(0, 0, 0, 0.19),
+            0 6px 6px rgba(0, 0, 0, 0.23);
     }
 
     .card {
@@ -185,7 +212,9 @@
         border: 1px solid var(--on-surface);
         border-radius: 2px;
         transition: 0.1s;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+        box-shadow:
+            0 1px 3px rgba(0, 0, 0, 0.12),
+            0 1px 2px rgba(0, 0, 0, 0.24);
         width: 200px;
         height: 70px;
         margin: 0;
@@ -328,7 +357,9 @@
         margin: 10px 5px;
         border: 1px solid var(--on-surface);
         border-radius: 4px;
-        box-shadow: 0 1px 3px rgb(0 0 0 / 12%), 0 1px 2px rgb(0 0 0 / 24%);
+        box-shadow:
+            0 1px 3px rgb(0 0 0 / 12%),
+            0 1px 2px rgb(0 0 0 / 24%);
         color: var(--on-surface);
     }
 
@@ -378,5 +409,4 @@
         color: var(--on-surface);
         text-decoration: none;
     }
-
 </style>

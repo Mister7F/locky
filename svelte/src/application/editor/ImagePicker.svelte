@@ -1,68 +1,69 @@
 <script>
-    import Textfield from '@smui/textfield';
-    import IconButton from '@smui/icon-button';
-    import Icon from '../../helpers/Icon.svelte';
-    import { onMount } from 'svelte';
-    import Field from '../../helpers/field/Field.svelte';
-    import Img from '../Img.svelte';
+    import Textfield from '@smui/textfield'
+    import IconButton from '@smui/icon-button'
+    import Icon from '../../helpers/Icon.svelte'
+    import { onMount } from 'svelte'
+    import Field from '../../helpers/field/Field.svelte'
+    import Img from '../Img.svelte'
 
-    export let src;
-    export let chooseIcon = false;
-    export let readonly = false;
-    export let size = '100px';
-    export let srcs = [];
+    export let src
+    export let chooseIcon = false
+    export let readonly = false
+    export let size = '100px'
+    export let srcs = []
 
-    let customSrc = src;
+    let customSrc = src
 
     $: currentSrcs =
         !searchValue || !searchValue.length
             ? srcs
             : srcs.filter((url) => {
-                  return url.toLowerCase().indexOf(searchValue.toLowerCase()) > 0;
-              });
+                  return (
+                      url.toLowerCase().indexOf(searchValue.toLowerCase()) > 0
+                  )
+              })
 
-    let searchValue = '';
+    let searchValue = ''
 
     // Fetch the list of account logos
     onMount(async () => {
-        let response = await fetch('img/accounts/files.txt');
+        let response = await fetch('img/accounts/files.txt')
         srcs = (await response.text())
             .split(/\r?\n/)
             .filter((url) => url && url.length)
-            .map((src) => 'img/accounts/' + src);
-    });
+            .map((src) => 'img/accounts/' + src)
+    })
 
     function open() {
-        chooseIcon = readonly ? false : true;
+        chooseIcon = readonly ? false : true
     }
 
     function choose(isrc) {
-        searchValue = '';
-        src = isrc;
-        chooseIcon = false;
+        searchValue = ''
+        src = isrc
+        chooseIcon = false
     }
-
 </script>
 
 <div class="image_picker" style="--size: {size}">
-    <div class="img {readonly ? 'readonly' : ''}" on:click="{open}">
+    <div class="img {readonly ? 'readonly' : ''}" on:click={open}>
         {#if src}
-            <Img src="{src}" alt="{src}" />
+            <Img {src} alt={src} />
         {:else}<img src="img/accounts/default.svg" alt="default" />{/if}
     </div>
     <div class="icons {chooseIcon && !readonly ? 'visible' : ''}">
         <div class="img-header">
             <div class="url">
-                <Field label="Image URL" copy="0" bind:value="{customSrc}" />
-                <IconButton on:click="{() => choose(customSrc)}">
+                <Field label="Image URL" copy="0" bind:value={customSrc} />
+                <IconButton on:click={() => choose(customSrc)}>
                     <Icon color="on-primary">save_alt</Icon>
                 </IconButton>
             </div>
-            <Field label="Search" copy="0" bind:value="{searchValue}" />
+            <Field label="Search" copy="0" bind:value={searchValue} />
         </div>
         <div class="container">
             {#each currentSrcs as src}
-                <img src="{src}" on:click="{() => choose(src)}" alt="{src}" />
+                <img {src} on:click={() => choose(src)} alt={src} />
             {/each}
         </div>
     </div>
@@ -158,5 +159,4 @@
     .url > :global(.field) {
         width: 80%;
     }
-
 </style>

@@ -33,3 +33,12 @@ https://github.com/dchest/scrypt-async-js
 
 ## Svelte material UI
 https://github.com/hperrin/svelte-material-ui
+
+## Icons
+https://fonts.google.com/icons
+
+```html
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons"
+      rel="stylesheet">
+<span class="material-icons">family_restroom</span>
+```

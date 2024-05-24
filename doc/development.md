@@ -9,10 +9,10 @@ Then,
 > `npm install`
 
 To run your development server just run,
-> `npm run dev`
+> `npm run dev -- --port 5000 --host`
 
 Before committing, please run prettier to automatically format your code,
-> `npm run prettier`
+> `npx prettier --write .`
 
 ## Documentation
 

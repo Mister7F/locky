@@ -1,54 +1,59 @@
-import { compressSync, decompressSync, strToU8, strFromU8 } from 'fflate';
-import { encrypt, decrypt } from '../helpers/crypto.js';
+import { compressSync, decompressSync, strToU8, strFromU8 } from 'fflate'
+import { encrypt, decrypt } from '../helpers/crypto.js'
 
 export async function encryptDatabase(database, password) {
-    const strDatabase = JSON.stringify(database);
+    const strDatabase = JSON.stringify(database)
 
-    const compressed = compressSync(strToU8(strDatabase));
+    const compressed = compressSync(strToU8(strDatabase))
 
-    console.debug('Compress from', strDatabase.length, 'to', compressed.byteLength);
+    console.debug(
+        'Compress from',
+        strDatabase.length,
+        'to',
+        compressed.byteLength
+    )
 
-    return await encrypt(compressed, password);
+    return await encrypt(compressed, password)
 }
 
 // data: ArrayBuffer
 export async function decryptDatabase(data, password) {
     if (data instanceof ArrayBuffer) {
-        data = new Uint8Array(data);
+        data = new Uint8Array(data)
     }
 
     if (!data || !data.length) {
-        console.error('Empty file');
-        return null;
+        console.error('Empty file')
+        return null
     }
 
-    const decrypted = await decrypt(data, password);
+    const decrypted = await decrypt(data, password)
     if (!decrypted) {
-        console.error('Decryption failed');
-        return null;
+        console.error('Decryption failed')
+        return null
     }
 
-    let decompressed = null;
+    let decompressed = null
     try {
-        decompressed = decompressSync(decrypted);
+        decompressed = decompressSync(decrypted)
     } catch (error) {
-        console.error('Decompression failed');
-        return null;
+        console.error('Decompression failed')
+        return null
     }
 
     if (!decompressed || !decompressed.length) {
-        console.error('Decompression failed');
-        return null;
+        console.error('Decompression failed')
+        return null
     }
 
     try {
-        const database = JSON.parse(strFromU8(decompressed));
+        const database = JSON.parse(strFromU8(decompressed))
         if (!database.accounts || !database.folders) {
-            return null;
+            return null
         }
-        return database;
+        return database
     } catch {
-        console.error('Not a JSON file');
-        return;
+        console.error('Not a JSON file')
+        return
     }
 }

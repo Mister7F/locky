@@ -1,7 +1,7 @@
 <script>
-    import Button from '@smui/button';
-    import Dialog, { Title, Content } from '@smui/dialog';
-    import IconButton from '@smui/icon-button';
+    import Button from '@smui/button'
+    import Dialog, { Title, Content } from '@smui/dialog'
+    import IconButton from '@smui/icon-button'
     import List, {
         Group,
         Item,
@@ -12,14 +12,14 @@
         Text,
         PrimaryText,
         SecondaryText,
-    } from '@smui/list';
-    import Textfield from '@smui/textfield';
-    import { createEventDispatcher } from 'svelte';
-    import Icon from '../../helpers/Icon.svelte';
-    const dispatch = createEventDispatcher();
-    let editedFolder = null;
-    let folderDialog = null;
-    let folderIconOpen = false;
+    } from '@smui/list'
+    import Textfield from '@smui/textfield'
+    import { createEventDispatcher } from 'svelte'
+    import Icon from '../../helpers/Icon.svelte'
+    const dispatch = createEventDispatcher()
+    let editedFolder = null
+    let folderDialog = null
+    let folderIconOpen = false
     let folderIcons = [
         // https://material.io/resources/icons/?style=baseline
         'home',
@@ -62,33 +62,36 @@
         'headset',
         'family_restroom',
         'free_breakfast',
-    ];
+    ]
     export function editFolder(folder) {
         // Deep copy to not change the folder before saving
-        editedFolder = JSON.parse(JSON.stringify(folder));
-        folderDialog.open();
+        editedFolder = JSON.parse(JSON.stringify(folder))
+        folderDialog.open()
     }
     function onSaveFolder() {
-        dispatch('save', editedFolder);
-        folderDialog.close();
+        dispatch('save', editedFolder)
+        folderDialog.close()
     }
-
 </script>
 
-<Dialog class="wallet_folder_dialog" bind:this="{folderDialog}">
+<Dialog class="wallet_folder_dialog" bind:this={folderDialog}>
     <Title>Folder</Title>
     <Content>
         {#if editedFolder}
             <IconButton
-                on:click="{() => (folderIconOpen = !folderIconOpen)}"
-                on:blur="{() => setTimeout(() => (folderIconOpen = false), 100)}">
+                on:click={() => (folderIconOpen = !folderIconOpen)}
+                on:blur={() => setTimeout(() => (folderIconOpen = false), 100)}
+            >
                 <Icon color="on-primary">{editedFolder.icon || 'folder'}</Icon>
             </IconButton>
             {#if folderIconOpen}
                 <div static class="menu_folder_icon">
                     <List>
                         {#each folderIcons as folderIcon}
-                            <Item on:click="{() => (editedFolder.icon = folderIcon)}">
+                            <Item
+                                on:click={() =>
+                                    (editedFolder.icon = folderIcon)}
+                            >
                                 <Icon color="on-surface">{folderIcon}</Icon>
                             </Item>
                         {/each}
@@ -96,11 +99,12 @@
                 </div>
             {/if}
 
-            <Textfield bind:value="{editedFolder.name}" />
+            <Textfield bind:value={editedFolder.name} />
             <Button
-                on:click="{onSaveFolder}"
+                on:click={onSaveFolder}
                 style="float: right; margin-top: 10px;"
-                color="secondary">
+                color="secondary"
+            >
                 Save
             </Button>
         {/if}
@@ -132,5 +136,4 @@
         display: block;
         width: 60px;
     }
-
 </style>

@@ -1,32 +1,32 @@
-import scrypt from 'scrypt-async';
+import scrypt from 'scrypt-async'
 
 export async function getTotpCode(token) {
-    const epoch = Math.floor(Date.now() / 1000 / 30);
+    const epoch = Math.floor(Date.now() / 1000 / 30)
 
     // Number to bytes array on 8 bytes
     const encodedTime = new Uint8Array(
         [0, 0, 0, 0, 0, 0, 0, 0].map(
-            (_, i) => Math.floor(epoch / Math.pow(256, 7 - i)) % 256,
-        ),
-    );
+            (_, i) => Math.floor(epoch / Math.pow(256, 7 - i)) % 256
+        )
+    )
 
-    let hash;
+    let hash
     try {
-        hash = await hmac(b32Decode(token), encodedTime);
+        hash = await hmac(b32Decode(token), encodedTime)
     } catch {
-        return null;
+        return null
     }
 
-    const offset = hash[hash.length - 1] % 16;
+    const offset = hash[hash.length - 1] % 16
 
     const binary =
         ((hash[offset] & 0x7f) << 24) +
         (hash[offset + 1] << 16) +
         (hash[offset + 2] << 8) +
-        hash[offset + 3];
+        hash[offset + 3]
 
-    const totp = '' + (binary % 1000000);
-    return totp.padStart(6, 0);
+    const totp = '' + (binary % 1000000)
+    return totp.padStart(6, 0)
 }
 
 /**
@@ -36,12 +36,14 @@ export async function getTotpCode(token) {
  * @param {string} The algorithm to use ('SHA-1', 'SHA-256', 'SHA-384', or 'SHA-512')
  */
 export async function digest(message, algorithm = 'SHA-1') {
-    const encoder = new TextEncoder();
-    const data = encoder.encode(message);
-    const hash = await crypto.subtle.digest(algorithm, data);
-    const hashArray = Array.from(new Uint8Array(hash));
-    const hashHex = hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
-    return hashHex.toUpperCase();
+    const encoder = new TextEncoder()
+    const data = encoder.encode(message)
+    const hash = await crypto.subtle.digest(algorithm, data)
+    const hashArray = Array.from(new Uint8Array(hash))
+    const hashHex = hashArray
+        .map((b) => b.toString(16).padStart(2, '0'))
+        .join('')
+    return hashHex.toUpperCase()
 }
 
 /**
@@ -60,40 +62,40 @@ export async function hmac(key, data, hash = 'SHA-1') {
             hash: { name: hash },
         },
         false,
-        ['sign'],
-    );
+        ['sign']
+    )
 
-    const signature = await window.crypto.subtle.sign('HMAC', hmac, data);
-    return new Uint8Array(signature);
+    const signature = await window.crypto.subtle.sign('HMAC', hmac, data)
+    return new Uint8Array(signature)
 }
 
 export function b32Decode(s) {
-    const alpha = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
-    s = s.toUpperCase().replace(/[^A-Z2-7]/, '');
+    const alpha = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567'
+    s = s.toUpperCase().replace(/[^A-Z2-7]/, '')
 
-    let number = BigInt(0);
-    let bitLength = 0;
+    let number = BigInt(0)
+    let bitLength = 0
     for (let l of s) {
-        const value = alpha.indexOf(l);
+        const value = alpha.indexOf(l)
         if (value < 0) {
-            continue;
+            continue
         }
-        number *= BigInt(Math.pow(2, 5));
-        number += BigInt(value);
+        number *= BigInt(Math.pow(2, 5))
+        number += BigInt(value)
         // Each character encode 5 bits
-        bitLength += 5;
+        bitLength += 5
     }
 
     // Remove trailing bits
-    number >>= BigInt(bitLength % 8);
+    number >>= BigInt(bitLength % 8)
 
-    const bytesArray = [];
+    const bytesArray = []
     while (number) {
-        bytesArray.splice(0, 0, number % BigInt(256));
-        number /= BigInt(256);
+        bytesArray.splice(0, 0, number % BigInt(256))
+        number /= BigInt(256)
     }
 
-    return new Uint8Array(bytesArray.map((i) => parseInt(i)));
+    return new Uint8Array(bytesArray.map((i) => parseInt(i)))
 }
 
 /**
@@ -103,48 +105,48 @@ export function b32Decode(s) {
  * @return {Uint8Array} A single bytes array containing all other
  */
 export function concatenate(...arrays) {
-    const size = arrays.reduce((a, b) => a + b.byteLength, 0);
-    const result = new Uint8Array(size);
+    const size = arrays.reduce((a, b) => a + b.byteLength, 0)
+    const result = new Uint8Array(size)
 
-    let offset = 0;
+    let offset = 0
     for (let arr of arrays) {
-        result.set(arr, offset);
-        offset += arr.byteLength;
+        result.set(arr, offset)
+        offset += arr.byteLength
     }
 
-    return result;
+    return result
 }
 
 // 32 bits representation of the given string
 function passwordKey(s) {
     let h = 0,
         l = s.length,
-        i = 0;
-    if (l > 0) while (i < l) h = ((h << 5) - h + s.charCodeAt(i++)) | 0;
-    return h;
+        i = 0
+    if (l > 0) while (i < l) h = ((h << 5) - h + s.charCodeAt(i++)) | 0
+    return h
 }
 
 // zxcvbn is relatively slow (3 ms / passwords)
 // so we cache the result
-const strength_cache = {};
-let total_time = 0;
+const strength_cache = {}
+let total_time = 0
 export function passwordStrength(password, detail) {
-    const key = passwordKey(password);
-    let result = strength_cache[key];
+    const key = passwordKey(password)
+    let result = strength_cache[key]
 
     if (result === undefined) {
-        result = zxcvbn(password);
-        delete result.password;
+        result = zxcvbn(password)
+        delete result.password
 
-        const strength = Math.min(Math.floor(result.guesses_log10 * 5), 100);
+        const strength = Math.min(Math.floor(result.guesses_log10 * 5), 100)
         if (strength >= 80) {
-            result = {};
+            result = {}
         }
-        result.strength = strength;
-        strength_cache[key] = result;
+        result.strength = strength
+        strength_cache[key] = result
     }
 
-    return detail ? [result.strength, result] : result.strength;
+    return detail ? [result.strength, result] : result.strength
 }
 
 /**
@@ -155,18 +157,18 @@ export function passwordStrength(password, detail) {
  * 3. Encrypt the result with AES-256 (PKCS7 padding)
  */
 export async function encrypt(plaintext, password) {
-    const [key, salt] = await derivePassword(password);
+    const [key, salt] = await derivePassword(password)
 
-    const keyChaCha = key.slice(0, 32);
-    const keyAes = key.slice(32, 64);
+    const keyChaCha = key.slice(0, 32)
+    const keyAes = key.slice(32, 64)
 
-    password = null;
+    password = null
 
-    const ciphertext = await encryptXChaCha20Poly1305(plaintext, keyChaCha);
+    const ciphertext = await encryptXChaCha20Poly1305(plaintext, keyChaCha)
 
-    const ciphertext2 = await encryptAES(ciphertext, keyAes);
+    const ciphertext2 = await encryptAES(ciphertext, keyAes)
 
-    return concatenate(salt, ciphertext2);
+    return concatenate(salt, ciphertext2)
 }
 
 /**
@@ -181,17 +183,17 @@ export async function encrypt(plaintext, password) {
  * @return {Uint8Array} The decrypted message or null if something bad happened
  */
 export async function decrypt(ciphertext, password) {
-    const salt = ciphertext.slice(0, 16);
-    const encrypted = ciphertext.slice(16);
+    const salt = ciphertext.slice(0, 16)
+    const encrypted = ciphertext.slice(16)
 
-    const [key, _] = await derivePassword(password, salt);
+    const [key, _] = await derivePassword(password, salt)
 
-    const keyChaCha = key.slice(0, 32);
-    const keyAes = key.slice(32, 64);
+    const keyChaCha = key.slice(0, 32)
+    const keyAes = key.slice(32, 64)
 
-    const encrypted2 = await decryptAES(encrypted, keyAes);
+    const encrypted2 = await decryptAES(encrypted, keyAes)
 
-    return await decryptXChaCha20Poly1305(encrypted2, keyChaCha);
+    return await decryptXChaCha20Poly1305(encrypted2, keyChaCha)
 }
 
 /**
@@ -202,25 +204,25 @@ export async function decrypt(ciphertext, password) {
  * @return {Uint8Array} The encrypted message or null if something bad happened
  */
 export async function encryptAES(plaintext, key) {
-    const iv = window.crypto.getRandomValues(new Uint8Array(16));
+    const iv = window.crypto.getRandomValues(new Uint8Array(16))
 
-    const cryptoKey = await rawKeyToCryptoKey(key);
+    const cryptoKey = await rawKeyToCryptoKey(key)
 
-    let t = performance.now();
+    let t = performance.now()
 
     try {
         const ciphertext = await window.crypto.subtle.encrypt(
             { name: 'AES-CBC', iv },
             cryptoKey,
-            plaintext,
-        );
+            plaintext
+        )
 
-        console.debug('AES encryption took', performance.now() - t, 'ms');
+        console.debug('AES encryption took', performance.now() - t, 'ms')
 
-        return concatenate(iv, new Uint8Array(ciphertext));
+        return concatenate(iv, new Uint8Array(ciphertext))
     } catch {}
 
-    return null;
+    return null
 }
 
 /**
@@ -233,30 +235,30 @@ export async function encryptAES(plaintext, key) {
 export async function decryptAES(ciphertext, key) {
     if (!ciphertext || ciphertext.length < 32) {
         // 16 for the IV and 16 for at least 1 AES block
-        console.error('Empty ciphertext');
-        return null;
+        console.error('Empty ciphertext')
+        return null
     }
 
-    const cryptoKey = await rawKeyToCryptoKey(key);
+    const cryptoKey = await rawKeyToCryptoKey(key)
 
-    const iv = ciphertext.slice(0, 16);
-    const encrypted = ciphertext.slice(16);
+    const iv = ciphertext.slice(0, 16)
+    const encrypted = ciphertext.slice(16)
 
-    let t = performance.now();
+    let t = performance.now()
 
     try {
         const decrypted = await window.crypto.subtle.decrypt(
             { name: 'AES-CBC', iv },
             cryptoKey,
-            encrypted,
-        );
+            encrypted
+        )
 
-        console.debug('AES decryption took', performance.now() - t, 'ms');
+        console.debug('AES decryption took', performance.now() - t, 'ms')
 
-        return new Uint8Array(decrypted);
+        return new Uint8Array(decrypted)
     } catch {}
 
-    return null;
+    return null
 }
 
 /**
@@ -268,9 +270,9 @@ export async function decryptAES(ciphertext, key) {
  */
 export async function encryptXChaCha20Poly1305(plaintext, key) {
     // xChaCha20: nonce need 24 bytes
-    const nonce = sodium.randombytes_buf(24);
+    const nonce = sodium.randombytes_buf(24)
 
-    let t = performance.now();
+    let t = performance.now()
 
     try {
         const encrypted = sodium.crypto_aead_xchacha20poly1305_ietf_encrypt(
@@ -278,15 +280,15 @@ export async function encryptXChaCha20Poly1305(plaintext, key) {
             null,
             null,
             nonce,
-            key,
-        );
+            key
+        )
 
-        console.debug('xChacha encryption took', performance.now() - t, 'ms');
+        console.debug('xChacha encryption took', performance.now() - t, 'ms')
 
-        return concatenate(nonce, encrypted);
+        return concatenate(nonce, encrypted)
     } catch {}
 
-    return null;
+    return null
 }
 
 /**
@@ -298,29 +300,29 @@ export async function encryptXChaCha20Poly1305(plaintext, key) {
  */
 export async function decryptXChaCha20Poly1305(ciphertext, key) {
     if (!ciphertext || ciphertext.length < 40) {
-        return null;
+        return null
     }
 
-    const nonce = ciphertext.slice(0, 24);
-    const encrypted = ciphertext.slice(24);
+    const nonce = ciphertext.slice(0, 24)
+    const encrypted = ciphertext.slice(24)
 
     try {
-        let t = performance.now();
+        let t = performance.now()
 
         const plaintext = sodium.crypto_aead_xchacha20poly1305_ietf_decrypt(
             null,
             encrypted,
             null,
             nonce,
-            key,
-        );
+            key
+        )
 
-        console.debug('xChacha decryption took', performance.now() - t, 'ms');
+        console.debug('xChacha decryption took', performance.now() - t, 'ms')
 
-        return plaintext;
+        return plaintext
     } catch {}
 
-    return null;
+    return null
 }
 
 /**
@@ -332,12 +334,12 @@ export async function decryptXChaCha20Poly1305(ciphertext, key) {
  */
 async function derivePassword(password, salt = null) {
     if (!salt) {
-        salt = window.crypto.getRandomValues(new Uint8Array(16));
+        salt = window.crypto.getRandomValues(new Uint8Array(16))
     } else if (salt.length !== 16) {
-        console.error('Salt length must be 16');
+        console.error('Salt length must be 16')
     }
 
-    let t = performance.now();
+    let t = performance.now()
 
     const options = {
         dkLen: 64,
@@ -346,14 +348,18 @@ async function derivePassword(password, salt = null) {
         p: 1,
         encoding: 'binary',
         interruptStep: 5000,
-    };
+    }
 
     return new Promise((resolve) => {
         scrypt(password, salt, options, (hash) => {
-            console.debug('Password derivation took', performance.now() - t, 'ms');
-            resolve([hash, salt]);
-        });
-    });
+            console.debug(
+                'Password derivation took',
+                performance.now() - t,
+                'ms'
+            )
+            resolve([hash, salt])
+        })
+    })
 }
 
 /**
@@ -368,6 +374,6 @@ async function rawKeyToCryptoKey(rawKey) {
         rawKey,
         { name: 'AES-CBC' },
         true,
-        ['decrypt', 'encrypt'],
-    );
+        ['decrypt', 'encrypt']
+    )
 }

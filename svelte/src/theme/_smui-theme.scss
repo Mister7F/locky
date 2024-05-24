@@ -1,0 +1,59 @@
+@use '@material/theme/color-palette';
+
+$background: #fff;
+
+$primary: #282c34;
+$on-primary: #dfe1e2;
+
+$secondary: #fc6d26;
+$on-secondary: #282c34;
+
+$surface: #fff;
+$on-surface: #4a6572;
+$background: $background;
+$error: #b00020;
+$on-error: #fcfcfc;
+
+@use '@material/theme/index' as theme with (
+    $primary: $primary,
+    $on-primary: $on-primary,
+
+    $secondary: $secondary,
+    $on-secondary: $on-secondary,
+
+    $surface: $surface,
+    $on-surface: $on-surface,
+    $background: $background,
+    $error: $error,
+    $on-error: $on-error
+);
+
+/* Textfield */
+$mdc-text-field-fullwidth-bottom-line-color: rgba($on-primary, 0.12);
+$mdc-text-field-disabled-border: rgba($on-primary, 0.06);
+$mdc-text-field-disabled-icon: rgba($on-primary, 0.3);
+$mdc-text-field-bottom-line-hover: rgba($on-primary, 0.87);
+$mdc-text-field-bottom-line-idle: rgba($on-primary, 0.42);
+$mdc-text-field-label: rgba($on-primary, 0.6);
+
+$mdc-text-field-ink-color: rgba($on-primary, 0.87);
+$mdc-text-field-helper-text-color: rgba($on-primary, 0.6);
+$mdc-text-field-icon-color: rgba($on-primary, 0.54);
+$mdc-text-field-focused-label-color: rgba($secondary, 0.87);
+$mdc-text-field-placeholder-ink-color: rgba($on-primary, 0.54);
+
+$mdc-text-field-disabled-label-color: rgba($on-primary, 0.37);
+$mdc-text-field-disabled-ink-color: rgba($on-primary, 0.37);
+$mdc-text-field-disabled-helper-text-color: rgba($on-primary, 0.37);
+
+$mdc-text-field-background: mix($on-primary, $surface, 4%);
+$mdc-text-field-disabled-background: mix($on-primary, $surface, 2%);
+$mdc-text-field-secondary-text: rgba($on-primary, 0.6);
+
+$mdc-text-field-outlined-idle-border: rgba($on-primary, 0.38);
+$mdc-text-field-outlined-disabled-border: rgba($on-primary, 0.06);
+$mdc-text-field-outlined-hover-border: rgba($on-primary, 0.87);
+
+$mdc-textarea-border: rgba($on-primary, 0.73);
+$mdc-textarea-background: rgba($surface, 1);
+$mdc-textarea-disabled-border-color: rgba($on-primary, 0.26);

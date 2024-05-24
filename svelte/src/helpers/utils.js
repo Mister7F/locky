@@ -4,26 +4,26 @@
  */
 export function isUrlValid(url) {
     if (!url) {
-        return false;
+        return false
     }
     if (url.startsWith('http://') || url.startsWith('https://')) {
-        return true;
+        return true
     }
-    return false;
+    return false
 }
 
 export function getCookie(name) {
-    const value = `; ${document.cookie}`;
-    const parts = value.split(`; ${name}=`);
-    if (parts.length === 2) return parts.pop().split(';').shift();
+    const value = `; ${document.cookie}`
+    const parts = value.split(`; ${name}=`)
+    if (parts.length === 2) return parts.pop().split(';').shift()
 }
 
 export function copyValue(str) {
-    const el = document.createElement('textarea');
+    const el = document.createElement('textarea')
     // clear the clipboard with space if nothing
-    el.value = str || ' ';
-    document.body.appendChild(el);
-    el.select();
-    document.execCommand('copy');
-    document.body.removeChild(el);
+    el.value = str || ' '
+    document.body.appendChild(el)
+    el.select()
+    document.execCommand('copy')
+    document.body.removeChild(el)
 }
