@@ -1,13 +1,13 @@
 <script>
-    import Button from '@smui/button'
-    import Dialog, { Title, Content, Actions } from '@smui/dialog'
+    import Button from '../../helpers/Button.svelte'
+    import Dialog from '../../helpers/Dialog.svelte'
     import QRious from 'qrious'
 
     export let account
-    let qrCodeDialog
+    let qrCodeDialogOpen = false
 
     export function open() {
-        qrCodeDialog.open()
+        qrCodeDialogOpen = true
         setTimeout(() => {
             new QRious({
                 element: document.getElementById('qr_code_canvas'),
@@ -27,24 +27,29 @@
     }
 </script>
 
-<Dialog bind:this={qrCodeDialog} class="account_editor_dialog">
-    <Title>2FA QR Code</Title>
-    <Content>
-        <p>Scan this QR Code with Google Authenticator, FreeOTP...</p>
-        <p style="text-align: center"><canvas id="qr_code_canvas"></canvas></p>
-        <Button
-            style="float: right; margin-top: 10px;"
-            color="secondary"
-            on:click={() => qrCodeDialog.close()}
-        >
-            Close
-        </Button>
-    </Content>
+<Dialog
+    bind:open={qrCodeDialogOpen}
+    class="account_editor_dialog"
+    title="2FA QR Code"
+>
+    <p>Scan this QR Code with Google Authenticator, FreeOTP...</p>
+    <p style="text-align: center"><canvas id="qr_code_canvas"></canvas></p>
+    <Button
+        style="float: right; margin-top: 10px;"
+        color="secondary"
+        variant="text"
+        on:click={() => (qrCodeDialogOpen = false)}
+    >
+        Close
+    </Button>
 </Dialog>
 
 <style>
     #qr_code_canvas {
         width: 250px;
         height: 250px;
+    }
+    p {
+        color: var(--on-primary);
     }
 </style>

@@ -1,8 +1,8 @@
 <script>
-    import Button from '@smui/button'
-    import Fab, { Label } from '@smui/fab'
-    import IconButton from '@smui/icon-button'
-    import Textfield from '@smui/textfield'
+    import Button from '../../helpers/Button.svelte'
+    import IconButton from '../../helpers/IconButton.svelte'
+    import Fab from '../../helpers/Fab.svelte'
+
     import { createEventDispatcher } from 'svelte'
     import Field from '../../helpers/field/Field.svelte'
     import { copyValue } from '../../helpers/utils.js'
@@ -114,10 +114,9 @@
     <IconButton
         class="account_editor_close_button"
         color="on-primary"
+        icon="close"
         on:click={() => dispatch('close')}
-    >
-        <Icon>close</Icon>
-    </IconButton>
+    />
     <div class="fields">
         <ImagePicker
             bind:src={account.icon}
@@ -180,23 +179,19 @@
         {/each}
 
         {#if !readonly}
-            <Button on:click={onNewField} color="secondary">New field</Button>
+            <Button on:click={onNewField} color="secondary" variant="text"
+                >New field</Button
+            >
         {/if}
     </div>
 
     {#if readonly}
-        <DialogRemoveAccount
-            bind:this={removeAccountDialog}
-            {account}
-            on:remove
-        />
         <Fab
             class="remove_account"
-            color="primary"
+            color="on-primary"
             on:click={() => removeAccountDialog.open()}
-        >
-            <Icon color="secondary">delete</Icon>
-        </Fab>
+            icon="delete"
+        />
     {:else}
         <GeneratePassword
             bind:this={generatePasswordDialog}
@@ -204,22 +199,25 @@
         />
         <Fab
             class="generate_password"
-            color="primary"
+            color="secondary"
+            bgColor="primary"
+            icon="password"
             on:click={() => generatePasswordDialog.open()}
-        >
-            <Icon color="secondary">password</Icon>
-        </Fab>
+        />
     {/if}
     <Fab
         class="save_account"
-        color="secondary"
+        color="on-secondary"
+        icon={readonly ? 'create' : 'done'}
         on:click={() => (readonly ? onEdit() : onSave())}
-    >
-        <Icon color="on-secondary">{readonly ? 'create' : 'done'}</Icon>
-    </Fab>
+    />
 </div>
 
 <DialogTotpQrCode bind:account bind:this={qrCodeDialog} />
+
+{#if readonly}
+    <DialogRemoveAccount bind:this={removeAccountDialog} {account} on:remove />
+{/if}
 
 <style>
     .account {
@@ -256,7 +254,7 @@
         bottom: 20px;
         left: 20px;
     }
-    .account :global(.remove_account i) {
+    .account :global(.remove_account span) {
         color: var(--error) !important;
     }
 

@@ -1,15 +1,10 @@
 <script>
-    import Button, { Group, GroupItem, Label } from '@smui/button'
-    import Menu from '@smui/menu'
-    import List, { Item, Separator, Text } from '@smui/list'
-    import FormField from '@smui/form-field'
-    import Select, { Option } from '@smui/select'
     import Icon from '../../helpers/Icon.svelte'
-    import Switch from '@smui/switch'
     import { createEventDispatcher } from 'svelte'
     import * as dropbox from '../dropbox/dropbox.js'
     import * as api from '../api.js'
     import Field from '../../helpers/field/Field.svelte'
+    import Button from '../../helpers/Button.svelte'
     import { onMount } from 'svelte'
     import { getCookie } from '../../helpers/utils.js'
     import FileInput from '../../helpers/FileInput.svelte'
@@ -196,20 +191,24 @@
             />
 
             <Button
-                class="login-button {loading ? 'loading' : ''}"
-                color="secondary"
-                variant="raised"
-                on:click={onLogin}
+                ripple={false}
                 disabled={loginDisabled || loading}
+                color="secondary"
+                class="login-button {loading ? 'loading' : ''}"
+                on:click={onLogin}
             >
                 {#if loading}
                     <Icon class="login-loading" color="on-primary">sync</Icon>
                 {/if}
-                <Label>{method === 'create' ? 'Create' : 'Login'}</Label>
+                {method === 'create' ? 'Create' : 'Login'}
             </Button>
         </div>
-        <Button color="secondary" on:click={() => (showOptions = true)}>
-            <Label>Choose an other method</Label>
+        <Button
+            color="secondary"
+            on:click={() => (showOptions = true)}
+            variant="text"
+        >
+            Choose an other method
         </Button>
     {/if}
 </div>
@@ -296,17 +295,7 @@
         width: 100%;
     }
     .fields > :global(*) {
-        height: 40px;
-        width: 100%;
         margin-bottom: 30px !important;
-    }
-    .fields > :global(*) > :global(button) {
-        width: 100%;
-        max-height: 35px;
-    }
-    .fields > :global(button) {
-        /* Login button */
-        max-height: 35px;
     }
 
     @-webkit-keyframes rotating {
@@ -317,16 +306,14 @@
             -webkit-transform: rotate(-360deg);
         }
     }
+
     .lock :global(.login-loading) {
+        font-size: 18px;
+        margin-right: 8px;
         -webkit-animation: rotating 2s linear infinite;
     }
 
-    .lock :global(.login-button.loading) {
-        color: var(--on-primary);
-    }
-
     .dropbox_button {
-        text-align: center;
-        pointer-events: none;
+        width: fit-content;
     }
 </style>

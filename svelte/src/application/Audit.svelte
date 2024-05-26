@@ -5,7 +5,7 @@
     See https://haveibeenpwned.com/API/v3#SearchingPwnedPasswordsByRange
  -->
 <script>
-    import Button, { Label } from '@smui/button'
+    import Button from '../helpers/Button.svelte'
     import AccountCard from './AccountCard.svelte'
     import { createEventDispatcher } from 'svelte'
     import Icon from '../helpers/Icon.svelte'
@@ -73,21 +73,20 @@
 
         leakedAccountsIndex = leakedAccountsIndex
         weakAccountsIndex = weakAccountsIndex
+
         loading = false
     }
 </script>
 
 <div class="audit wallet">
     <Button
+        class="audit-loading"
         color="secondary"
-        variant="raised"
         on:click={onStartAudit}
         disabled={loading}
+        icon={loading && 'sync'}
     >
-        {#if loading}
-            <Icon class="audit-loading" color="on-secondary">sync</Icon>
-        {/if}
-        <Label>Start auditing</Label>
+        Start auditing
     </Button>
 
     {#if leakedAccountsIndex.length}
@@ -170,7 +169,7 @@
             -webkit-transform: rotate(-360deg);
         }
     }
-    .audit :global(.audit-loading) {
+    .audit :global(.audit-loading .icon_base) {
         -webkit-animation: rotating 2s linear infinite;
     }
 </style>

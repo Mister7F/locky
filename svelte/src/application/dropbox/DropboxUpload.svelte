@@ -1,8 +1,9 @@
 <script>
-    import IconButton, { Icon } from '@smui/icon-button'
-    import Button, { Label } from '@smui/button'
-    import Dialog, { Title, Content, Actions } from '@smui/dialog'
-    import { createEventDispatcher } from 'svelte'
+    import Icon from '../../helpers/Icon.svelte'
+    import IconButton from '../../helpers/IconButton.svelte'
+    import Dialog from '../../helpers/Dialog.svelte'
+    import Button from '../../helpers/Button.svelte'
+
     import * as dropbox from './dropbox.js'
     import * as api from '../api.js'
     import { onMount } from 'svelte'
@@ -10,8 +11,8 @@
     export let isAuthenticated = false
     let authenticationUrl = null
     let uploadingState = 'wait'
-    let confirmationDialog
-    let downloadWalletDialog
+    let confirmationDialogOpen = false
+    let downloadWalletDialogOpen = false
 
     $: title = isAuthenticated ? 'Upload your wallet on Dropbox' : 'Login'
 
@@ -22,7 +23,7 @@
     async function onUpload() {
         uploadingState = 'uploading'
         if (await shouldAskConfirmation()) {
-            confirmationDialog.open()
+            confirmationDialogOpen = true
             uploadingState = 'wait'
             return
         }
@@ -31,7 +32,7 @@
 
     async function uploadWallet() {
         uploadingState = 'uploading'
-        confirmationDialog.close()
+        confirmationDialogOpen = false
 
         const encryptedWallet = await api.getEncryptedWallet()
         const ok = await dropbox.upload('wallet.lck', encryptedWallet)
@@ -82,7 +83,7 @@
                 currentRemoteHash.length &&
                 currentRemoteHash !== localHash
             ) {
-                downloadWalletDialog.open()
+                downloadWalletDialogOpen = true
             }
         }
     })
@@ -93,7 +94,6 @@
         on:click={() => (isAuthenticated ? onUpload() : onLogin())}
         {title}
     >
-        <div class="connected {isAuthenticated ? '' : 'red'}"></div>
         {#if uploadingState === 'wait'}
             <svg viewBox="0 7 57 57" width="57px">
                 <polygon
@@ -114,77 +114,76 @@
                 ></polygon>
             </svg>
         {:else if uploadingState === 'uploading'}
-            <Icon class="material-icons dropbox-uploading">sync</Icon>
+            <Icon class="dropbox-uploading">sync</Icon>
         {:else}
-            <Icon class="material-icons">sync_problem</Icon>
+            <Icon>sync_problem</Icon>
         {/if}
+        <div class="connected {isAuthenticated ? '' : 'red'}"></div>
     </IconButton>
-    <Dialog bind:this={confirmationDialog}>
-        <Title>Are you sure ?</Title>
-        <Content>
-            The file on Dropbox has changes you do not have locally, are you
-            sure you want to upload your local changes and overwrite the current
-            wallet on Dropbox ?
-        </Content>
-        <Actions>
+    <Dialog bind:open={confirmationDialogOpen} title="Are you sure ?">
+        The file on Dropbox has changes you do not have locally, are you sure
+        you want to upload your local changes and overwrite the current wallet
+        on Dropbox ?
+
+        <div slot="actions">
             <Button
-                on:click={() => confirmationDialog.close()}
+                on:click={() => (confirmationDialogOpen = false)}
                 color="secondary"
-                variant="raised"
+                variant="outlined"
             >
                 No
             </Button>
             <Button
                 on:click={() => {
-                    confirmationDialog.close()
+                    confirmationDialogOpen = true
                     uploadWallet()
                 }}
                 color="primary"
             >
                 Yes
             </Button>
-        </Actions>
+        </div>
     </Dialog>
-    <Dialog bind:this={downloadWalletDialog}>
-        <Title>New wallet available</Title>
-        <Content>
-            The file on Dropbox has changes you do not have locally, do you want
-            to download the wallet on Dropbox and overwrite this one ?
-        </Content>
-        <Actions>
+    <Dialog bind:open={downloadWalletDialogOpen} title="New wallet available">
+        The file on Dropbox has changes you do not have locally, do you want to
+        download the wallet on Dropbox and overwrite this one ?
+
+        <div slot="actions">
             <Button
-                on:click={() => downloadWalletDialog.close()}
+                on:click={() => (downloadWalletDialogOpen = false)}
                 color="secondary"
-                variant="raised"
+                variant="outlined"
             >
                 No
             </Button>
             <Button
                 on:click={async () => {
-                    downloadWalletDialog.close()
+                    downloadWalletDialogOpen = false
                     await downloadWallet()
                 }}
                 color="primary"
             >
                 Yes
             </Button>
-        </Actions>
+        </div>
     </Dialog>
 </div>
 
 <style>
     .container {
+        display: flex;
+        justify-items: center;
+        align-content: center;
     }
     svg {
         height: 25px;
         width: 25px;
-        margin-right: 5px;
         fill: var(--on-primary);
     }
     .connected {
         position: absolute;
-        right: 10px;
-        bottom: 10px;
+        margin-left: 25px;
+        margin-top: 25px;
         background: lightgreen;
         width: 5px;
         height: 5px;

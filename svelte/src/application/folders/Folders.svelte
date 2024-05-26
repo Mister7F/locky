@@ -1,21 +1,8 @@
 <script>
-    import Button from '@smui/button'
-    import Dialog, { Title, Content } from '@smui/dialog'
-    import Fab, { Label } from '@smui/fab'
-    import IconButton from '@smui/icon-button'
-    import List, {
-        Group,
-        Item,
-        Graphic,
-        Meta,
-        Separator,
-        Subheader,
-        Text,
-        PrimaryText,
-        SecondaryText,
-    } from '@smui/list'
-    import Menu, { SelectionGroup, SelectionGroupIcon } from '@smui/menu'
     import Textfield from '@smui/textfield'
+
+    import ListItem from '../../helpers/ListItem.svelte'
+    import IconButton from '../../helpers/IconButton.svelte'
     import { createEventDispatcher } from 'svelte'
     import * as api from '../api.js'
     import Icon from '../../helpers/Icon.svelte'
@@ -32,13 +19,12 @@
     let editedFolderId = -1
     let folderDialog
     let folderIconOpen = false
-    let draggingFolder = false
 
     async function onEditFolder(folder) {
         folderDialog.editFolder(folder)
     }
-    async function onDropDelete(event) {
-        wallet = await api.deleteFolder(event.detail.item)
+    async function onDeleteFolder(event) {
+        wallet = await api.deleteFolder(event.detail)
     }
     async function onSaveFolder(event) {
         wallet = await api.updateFolder(event.detail)
@@ -52,27 +38,27 @@
 </script>
 
 {#if visible && floating}
-    <div class="folders-overlay" on:click={() => (visible = false)}></div>
+    <div class="folders-overlay" on:click|self={() => (visible = false)}></div>
 {/if}
 
 <div
     class="foldersList {visible ? 'visible' : ''} {floating ? 'floating' : ''}"
 >
-    <Group>
-        <Subheader>
-            Folders
-            <IconButton on:click={onNewFolder}>
-                <Icon color="on-surface">create_new_folder</Icon>
-            </IconButton>
-        </Subheader>
-        <Item
-            class="account_audit"
+    <div class="item_container">
+        <div class="header">
+            <span class="header_title">Folders</span>
+            <IconButton
+                on:click={onNewFolder}
+                icon="create_new_folder"
+                color="on-surface"
+            />
+        </div>
+        <ListItem
             on:click={() => (currentFolderId = -1)}
             selected={currentFolderId < 0}
-        >
-            <Icon color="on-surface">policy</Icon>
-            <Text>Security panel</Text>
-        </Item>
+            icon="policy"
+            name="Security panel"
+        />
         {#if folders}
             <Folder
                 folder={folders[0]}
@@ -83,13 +69,9 @@
             <Sortablegrid
                 class="folders"
                 bind:items={categoryFolders}
-                let:item
-                bind:dragging={draggingFolder}
-                on:action={onDropDelete}
-                customActions={['delete_folder']}
                 on:move={onMoveFolder}
             >
-                <div slot="item">
+                <div slot="item" let:item>
                     <Folder
                         folder={item}
                         on:edit={onEditFolder(item)}
@@ -98,21 +80,33 @@
                     />
                 </div>
             </Sortablegrid>
-            <div
-                id="delete_folder"
-                class="deleteFolder {draggingFolder ? 'visible' : ''}"
-            >
-                <Fab color="primary">
-                    <Icon>delete</Icon>
-                </Fab>
-            </div>
         {/if}
-    </Group>
+    </div>
 
-    <EditFolder bind:this={folderDialog} on:save={onSaveFolder} />
+    <EditFolder
+        bind:this={folderDialog}
+        on:save={onSaveFolder}
+        on:delete={onDeleteFolder}
+    />
 </div>
 
 <style>
+    .item_container {
+    }
+    .header {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .header_title {
+        font-size: 20px;
+        font-weight: 700;
+        font-size: 1rem;
+        line-height: 1.75rem;
+        padding: 0 20px;
+    }
+
     .foldersList {
         --folder-width: 350px;
         width: var(--folder-width);
@@ -146,54 +140,9 @@
         width: 100%;
     }
 
-    .foldersList :global(.folder_item) {
-        display: flex;
-        flex-direction: row;
-        justify-content: flex-start;
-        align-items: center;
-        box-sizing: border-box;
-    }
-
-    .foldersList :global(.folder_item button) {
-        transition: 0.2s;
-        opacity: 0.2;
-    }
-
-    .foldersList :global(.folder_item button:hover) {
-        opacity: 1;
-    }
-
-    .foldersList :global(.folder_item.move_into:before),
-    .foldersList :global(.folder_item.selected:before) {
-        /* show the ripple background */
-        opacity: 0.2;
-    }
-
-    .foldersList :global(.account_audit .mdc-list-item__text),
-    .foldersList :global(.folder_item .mdc-list-item__text) {
-        margin-left: 10px;
-    }
-
-    :global(.wallet_folder_dialog .mdc-dialog__surface),
-    :global(.wallet_folder_dialog p),
-    :global(.wallet_folder_dialog .mdc-dialog__title) {
-        color: var(--on-primary);
-        background-color: var(--primary);
-    }
-
-    .deleteFolder {
-        position: absolute;
-        bottom: 60px;
-        left: -60px;
-        transition: all 0.5s cubic-bezier(0.47, 1.64, 0.41, 0.8);
-    }
-
-    .deleteFolder.visible {
-        left: 150px;
-    }
-
     .folders-overlay {
         position: absolute;
+        z-index: 1;
         height: 100%;
         width: 100%;
         background-color: var(--primary);

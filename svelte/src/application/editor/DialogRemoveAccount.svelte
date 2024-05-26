@@ -1,29 +1,32 @@
 <script>
-    import Button from '@smui/button'
-    import Dialog, { Title, Content, Actions } from '@smui/dialog'
+    import Button from '../../helpers/Button.svelte'
+    import Dialog from '../../helpers/Dialog.svelte'
+
     import { createEventDispatcher } from 'svelte'
 
     const dispatch = createEventDispatcher()
 
     export let account
-    let removeAccountDialog
+    let removeAccountDialogOpen = false
 
     export function open() {
-        removeAccountDialog.open()
+        removeAccountDialogOpen = true
     }
 </script>
 
 <Dialog
-    bind:this={removeAccountDialog}
+    bind:open={removeAccountDialogOpen}
     class="account_editor_dialog remove_account_dialog"
+    title="Delete this account"
 >
-    <Content>
-        <p>Are you sure you want to remove the {account.name} account ?</p>
+    Are you sure you want to remove the {account.name} account ?
+
+    <div slot="actions">
         <Button
             style="margin-top: 10px; margin-right: 10px;"
             color="secondary"
             variant="outlined"
-            on:click={() => removeAccountDialog.close()}
+            on:click={() => (removeAccountDialogOpen = false)}
         >
             No
         </Button>
@@ -34,7 +37,7 @@
         >
             Yes
         </Button>
-    </Content>
+    </div>
 </Dialog>
 
 <style>

@@ -1,7 +1,6 @@
 <script>
-    import Button, { Label } from '@smui/button'
-    import IconButton from '@smui/icon-button'
-    import Icon from '../../helpers/Icon.svelte'
+    import Button from '../../helpers/Button.svelte'
+    import IconButton from '../../helpers/IconButton.svelte'
     import Sidepanel from '../../helpers/Sidepanel.svelte'
     import ChangePassword from './ChangePassword.svelte'
     import * as dropbox from './../dropbox/dropbox.js'
@@ -28,27 +27,26 @@
     <ChangePassword bind:this={changePasswordDialog} />
     <IconButton
         class="settings_page_close_button"
+        icon="close"
         on:click={() => (visible = false)}
-    >
-        <Icon color="on-primary">close</Icon>
-    </IconButton>
+    />
     <div class="container">
         <h1>Settings</h1>
         <Button
             color="secondary"
             variant="outlined"
+            icon="logout"
             on:click={() => dispatch('lock')}
         >
-            <Icon class="material-icons" color="secondary">logout</Icon>
-            <Label>Logout</Label>
+            Logout
         </Button>
         <Button
             color="secondary"
             variant="outlined"
+            icon="password"
             on:click={() => changePasswordDialog.open()}
         >
-            <Icon class="material-icons" color="secondary">password</Icon>
-            <Label>Change your password</Label>
+            Change your password
         </Button>
         <Button color="secondary" variant="outlined" on:click={onDropboxClick}>
             <svg viewBox="0 0 56.693 56.693" width="56.693px">
@@ -69,7 +67,7 @@
                     28.377,54.405 43.005,45.638 43.005,42.427 38.621,45.29 "
                 ></polygon>
             </svg>
-            <Label>{isDropboxAuthenticated ? 'Logout' : 'Login'}</Label>
+            {isDropboxAuthenticated ? 'Logout' : 'Login'}
         </Button>
     </div>
 </Sidepanel>

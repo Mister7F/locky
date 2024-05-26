@@ -1,22 +1,7 @@
 <script>
-    import Button from '@smui/button'
-    import Dialog, { Title, Content } from '@smui/dialog'
-    import Fab, { Label } from '@smui/fab'
-    import IconButton from '@smui/icon-button'
-    import List, {
-        Group,
-        Item,
-        Graphic,
-        Meta,
-        Separator,
-        Subheader,
-        Text,
-        PrimaryText,
-        SecondaryText,
-    } from '@smui/list'
-    import Menu, { SelectionGroup, SelectionGroupIcon } from '@smui/menu'
-    import Snackbar, { Actions } from '@smui/snackbar'
-    import Textfield from '@smui/textfield'
+    import Snackbar, { Actions, Label } from '@smui/snackbar'
+
+    import Fab from '../helpers/Fab.svelte'
     import { createEventDispatcher } from 'svelte'
     import Audit from './Audit.svelte'
     import AccountCard from './AccountCard.svelte'
@@ -180,18 +165,15 @@
         <Fab
             class="new_account {dragging ? '' : 'visible'}"
             on:click={onNewAccount}
-        >
-            <Icon class="material-icons" color="on-secondary">add</Icon>
-        </Fab>
+            icon="add"
+            color="on-secondary"
+        />
     {/if}
 </div>
 
 <!-- Notifications -->
 <Snackbar bind:this={snackbar} bind:labelText={snackbarText}>
     <Label />
-    <Actions>
-        <IconButton class="material-icons" title="Dismiss">close</IconButton>
-    </Actions>
 </Snackbar>
 
 <style>

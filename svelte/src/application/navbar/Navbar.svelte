@@ -1,8 +1,5 @@
 <script>
-    import IconButton from '@smui/icon-button'
-    import List, { Item } from '@smui/list'
-    import Menu from '@smui/menu'
-    import TopAppBar, { Row, Section } from '@smui/top-app-bar'
+    import IconButton from '../../helpers/IconButton.svelte'
     import { onMount } from 'svelte'
     import { createEventDispatcher } from 'svelte'
     import ChangePassword from './ChangePassword.svelte'
@@ -56,86 +53,81 @@
 </script>
 
 <Settings bind:visible={settingsVisible} bind:isDropboxAuthenticated on:lock />
-<TopAppBar class="wallet-navbar" color="primary">
-    <Row>
-        <Section>
-            {#if floatingFolder}
-                <IconButton
-                    class="material-icons"
-                    on:click={() => dispatch('show_folders')}
-                >
-                    menu
-                </IconButton>
-            {/if}
-        </Section>
-        <Section align="end">
+<div class="wallet-navbar" color="primary">
+    <div class="folder_menu">
+        {#if floatingFolder}
+            <IconButton on:click={() => dispatch('show_folders')} icon="menu" />
+        {/if}
+    </div>
+    <div class="actions">
+        <IconButton
+            title="Search an account"
+            icon="search"
+            on:click={() => {
+                searchField.focus()
+                openSearch = !openSearch
+            }}
+        />
+        <Field
+            class="search_field {openSearch ? 'visible' : ''}"
+            copy="0"
+            bind:this={searchField}
+            on:input={() => setTimeout(() => dispatch('search', searchText))}
+            on:blur={() => (openSearch = !!searchText)}
+            bind:value={searchText}
+        />
+        {#if !openSearch || !floatingFolder}
             <IconButton
-                class="material-icons"
-                title="Search an account"
-                on:click={() => {
-                    searchField.focus()
-                    openSearch = !openSearch
-                }}
-            >
-                search
-            </IconButton>
-            <Field
-                class="search_field {openSearch ? 'visible' : ''}"
-                copy="0"
-                bind:this={searchField}
-                on:input={() =>
-                    setTimeout(() => dispatch('search', searchText))}
-                on:blur={() => (openSearch = !!searchText)}
-                bind:value={searchText}
+                title="Download your wallet"
+                icon="download"
+                on:click={async () => await api.downloadWallet()}
             />
-            {#if !openSearch || !floatingFolder}
-                <IconButton
-                    class="material-icons"
-                    title="Download your wallet"
-                    on:click={async () => await api.downloadWallet()}
-                >
-                    download
-                </IconButton>
-                <DropboxUpload bind:isAuthenticated={isDropboxAuthenticated} />
-            {/if}
-            <IconButton
-                class="material-icons"
-                title="Change mode"
-                on:click={changeViewMode}
-            >
-                {viewModeIcon}
-            </IconButton>
-            <IconButton
-                class="material-icons"
-                title="More options"
-                on:click={() => (settingsVisible = true)}
-            >
-                settings
-            </IconButton>
-        </Section>
-    </Row>
-</TopAppBar>
+            <DropboxUpload bind:isAuthenticated={isDropboxAuthenticated} />
+        {/if}
+        <IconButton
+            title="Change mode"
+            icon={viewModeIcon}
+            on:click={changeViewMode}
+        />
+        <IconButton
+            title="More options"
+            icon="settings"
+            on:click={() => (settingsVisible = true)}
+        />
+    </div>
+</div>
 
 <style>
-    :global(.mdc-top-app-bar.wallet-navbar) {
-        position: sticky !important;
-    }
     h1 {
         color: var(--on-primary);
         font-size: 20px;
     }
-    :global(.wallet-navbar .field) {
+    .wallet-navbar {
+        background: var(--primary);
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .wallet-navbar :global(.field) {
         margin-top: -20px;
         width: 100%;
         z-index: 10;
     }
 
-    :global(.wallet-navbar .menu_navbar) {
+    .wallet-navbar :global(.menu_navbar) {
         margin-top: 220px;
         margin-left: -60px;
         min-width: 60px;
         width: 60px;
         z-index: 999999;
+    }
+
+    .actions {
+        display: flex;
+        flex-direction: row;
+        justify-content: end;
+        align-items: center;
     }
 
     :global(.search_field) {

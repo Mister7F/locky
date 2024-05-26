@@ -1,4 +1,4 @@
-import { encryptDatabase, decryptDatabase } from './encrypt.js'
+import { decryptDatabase, encryptDatabase } from './encrypt.js'
 import * as indexdb from './indexdb.js'
 
 let wallet = null

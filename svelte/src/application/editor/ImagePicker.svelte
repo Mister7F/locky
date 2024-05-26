@@ -1,10 +1,10 @@
 <script>
-    import Textfield from '@smui/textfield'
-    import IconButton from '@smui/icon-button'
+    import IconButton from '../../helpers/IconButton.svelte'
+
     import Icon from '../../helpers/Icon.svelte'
     import { onMount } from 'svelte'
     import Field from '../../helpers/field/Field.svelte'
-    import Img from '../Img.svelte'
+    import Img from '../../helpers/Img.svelte'
 
     export let src
     export let chooseIcon = false
@@ -55,9 +55,10 @@
         <div class="img-header">
             <div class="url">
                 <Field label="Image URL" copy="0" bind:value={customSrc} />
-                <IconButton on:click={() => choose(customSrc)}>
-                    <Icon color="on-primary">save_alt</Icon>
-                </IconButton>
+                <IconButton
+                    on:click={() => choose(customSrc)}
+                    icon="save_alt"
+                />
             </div>
             <Field label="Search" copy="0" bind:value={searchValue} />
         </div>

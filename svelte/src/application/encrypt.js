@@ -1,5 +1,5 @@
-import { compressSync, decompressSync, strToU8, strFromU8 } from 'fflate'
-import { encrypt, decrypt } from '../helpers/crypto.js'
+import { compressSync, decompressSync, strFromU8, strToU8 } from 'fflate'
+import { decrypt, encrypt } from '../helpers/crypto.js'
 
 export async function encryptDatabase(database, password) {
     const strDatabase = JSON.stringify(database)

@@ -1,5 +1,4 @@
 <script>
-    import { Icon } from '@smui/icon-button'
     export let title = ''
     let className = ''
     export { className as class }
@@ -16,23 +15,21 @@
         }[color] || 'var(--on-surface)'
 </script>
 
-<Icon
-    class="icon-import material-icons {className}"
+<span
+    class="icon_base material-icons {className}"
     on:click
     {on}
     {title}
     {color}
-    style="--color: {cssColor}"
+    style="--color: {cssColor}"><slot /></span
 >
-    <slot />
-</Icon>
 
 <style>
-    :global(.icon-import) {
+    .icon_base {
         color: var(--color) !important;
     }
 
-    :global(.icon-import svg) {
+    :global(.icon_base svg) {
         fill: var(--color);
         width: 100%;
         min-width: 24px;

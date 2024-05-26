@@ -1,6 +1,5 @@
 <script>
-    import IconButton, { Icon } from '@smui/icon-button'
-    import Button, { Label } from '@smui/button'
+    import Button from '../../helpers/Button.svelte'
     import { createEventDispatcher } from 'svelte'
     import * as dropbox from './dropbox.js'
     import { onMount } from 'svelte'
@@ -44,9 +43,13 @@
 
 <div class="file">
     {#if state === 'logged' || state === 'no_wallet'}
-        <Button color="secondary" variant="outlined" on:click={onLogout}>
-            <Icon class="material-icons">logout</Icon>
-            <Label>Logout</Label>
+        <Button
+            color="secondary"
+            variant="outlined"
+            on:click={onLogout}
+            icon="logout"
+        >
+            Logout
         </Button>
     {/if}
 
@@ -72,7 +75,7 @@
                     28.377,54.405 43.005,45.638 43.005,42.427 38.621,45.29 "
                 ></polygon>
             </svg>
-            <Label>Login</Label>
+            Login
         </Button>
     {/if}
 </div>

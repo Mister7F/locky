@@ -1,15 +1,8 @@
 <script>
-    import Button, { Label } from '@smui/button'
-    import Card, {
-        PrimaryAction,
-        Actions,
-        ActionButtons,
-        ActionIcons,
-    } from '@smui/card'
-    import { Item } from '@smui/list'
-    import IconButton, { Icon } from '@smui/icon-button'
+    import IconButton from '../helpers/IconButton.svelte'
+    import { createRipple } from '../helpers/ripple.js'
     import { createEventDispatcher } from 'svelte'
-    import Img from './Img.svelte'
+    import Img from '../helpers/Img.svelte'
     import { getTotpCode, passwordStrength } from '../helpers/crypto.js'
     import { isUrlValid, copyValue } from '../helpers/utils.js'
 
@@ -37,13 +30,16 @@
     </div>
 {:else if viewMode === 'detail'}
     <div class="detail-card">
-        <Card>
+        <div>
             {#if strength !== 0}
                 <div class="strength" style="--force: {strength}"></div>
             {/if}
-            <PrimaryAction
-                class="detail_primary_action"
-                on:click={() => dispatch('click')}
+            <div
+                class="detail_main_action ripple ripple_dark ripple_fast"
+                on:click={(event) => {
+                    createRipple(event)
+                    dispatch('click')
+                }}
             >
                 <div class="detail_img">
                     <Img
@@ -55,48 +51,46 @@
                     <div class="detail_name">{account.name}</div>
                     <div class="detail_login">{account.login}</div>
                 </div>
-            </PrimaryAction>
-            <Actions class="detail_account_actions">
-                <ActionButtons>
+            </div>
+            <div class="detail_account_actions">
+                <div>
                     {#if account.url && isUrlValid(account.url)}
                         <IconButton
-                            class="material-icons"
                             title="Open URL"
                             href={account.url}
-                            target="_blank"
-                        >
-                            launch
-                        </IconButton>
+                            icon="launch"
+                            color="on-surface"
+                            bgTransparent="1"
+                        />
                     {/if}
-                </ActionButtons>
-                <ActionIcons>
+                </div>
+                <div>
                     {#if account.login}
                         <IconButton
-                            class="material-icons"
                             on:click={() => {
                                 dispatch('notify', 'Login copied')
                                 copyValue(account.login)
                             }}
-                            title="More options"
-                        >
-                            alternate_email
-                        </IconButton>
+                            title="Login"
+                            icon="alternate_email"
+                            color="on-surface"
+                            bgTransparent="1"
+                        />
                     {/if}
                     {#if account.password}
                         <IconButton
-                            class="material-icons"
                             on:click={() => {
                                 dispatch('notify', 'Password copied')
                                 copyValue(account.password)
                             }}
-                            title="Share"
-                        >
-                            vpn_key
-                        </IconButton>
+                            icon="vpn_key"
+                            title="Password"
+                            color="on-surface"
+                            bgTransparent="1"
+                        />
                     {/if}
                     {#if account.totp}
                         <IconButton
-                            class="material-icons"
                             on:click={async () => {
                                 dispatch('notify', '2FA copied')
                                 copyValue(
@@ -106,17 +100,24 @@
                                     )
                                 )
                             }}
-                            title="Share"
-                        >
-                            schedule
-                        </IconButton>
+                            title="2FA"
+                            icon="schedule"
+                            color="on-surface"
+                            bgTransparent="1"
+                        />
                     {/if}
-                </ActionIcons>
-            </Actions>
-        </Card>
+                </div>
+            </div>
+        </div>
     </div>
 {:else}
-    <Item class="account_list_item" on:click={() => dispatch('click')}>
+    <div
+        class="account_list_item ripple ripple_dark"
+        on:click={(event) => {
+            createRipple(event)
+            dispatch('click')
+        }}
+    >
         <div class="account_list_item_title">
             <Img
                 src={account.icon || 'img/accounts/default.svg'}
@@ -130,43 +131,42 @@
         <div class="account_list_item_actions">
             {#if account.url && isUrlValid(account.url)}
                 <IconButton
-                    class="material-icons account_list_item_url"
+                    class="account_list_item_url"
                     title="Open URL"
                     href={account.url}
-                    target="_blank"
-                >
-                    launch
-                </IconButton>
+                    icon="launch"
+                    color="on-surface"
+                    bgTransparent="1"
+                />
             {/if}
             {#if account.login}
                 <IconButton
-                    class="material-icons"
                     on:click={(event) => {
                         event.stopPropagation()
                         dispatch('notify', 'Login copied')
                         copyValue(account.login)
                     }}
-                    title="More options"
-                >
-                    alternate_email
-                </IconButton>
+                    title="Login"
+                    icon="alternate_email"
+                    color="on-surface"
+                    bgTransparent="1"
+                />
             {/if}
             {#if account.password}
                 <IconButton
-                    class="material-icons"
                     on:click={(event) => {
                         event.stopPropagation()
                         dispatch('notify', 'Password copied')
                         copyValue(account.password)
                     }}
-                    title="Share"
-                >
-                    vpn_key
-                </IconButton>
+                    title="Password"
+                    icon="vpn_key"
+                    color="on-surface"
+                    bgTransparent="1"
+                />
             {/if}
             {#if account.totp}
                 <IconButton
-                    class="material-icons"
                     on:click={async (event) => {
                         event.stopPropagation()
                         dispatch('notify', '2FA copied')
@@ -174,16 +174,17 @@
                             (await getTotpCode(account.totp)).replace(' ', '')
                         )
                     }}
-                    title="Share"
-                >
-                    schedule
-                </IconButton>
+                    title="2FA"
+                    icon="schedule"
+                    color="on-surface"
+                    bgTransparent="1"
+                />
             {/if}
         </div>
         {#if strength !== 0}
             <div class="strength" style="--force: {strength}"></div>
         {/if}
-    </Item>
+    </div>
 {/if}
 
 <style>
@@ -282,8 +283,10 @@
         color: var(--on-surface);
         width: 280px;
         overflow: hidden;
+        border: 1px solid var(--on-surface);
+        border-radius: 4px;
     }
-    :global(.detail_primary_action) {
+    .detail_main_action {
         padding: 5px;
         border-bottom: 1px solid var(--on-surface);
         display: flex;
@@ -291,6 +294,21 @@
         justify-content: flex-start;
         align-items: center;
         cursor: pointer;
+    }
+    .detail_main_action:hover {
+        background-color: color-mix(in srgb, var(--primary) 4%, transparent);
+    }
+    .detail_account_actions {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        height: 48px;
+    }
+    .detail_account_actions > * {
+        width: fit-content;
+        display: flex;
+        flex-direction: row;
     }
     .detail_img {
         min-height: 70px;
@@ -329,14 +347,14 @@
         white-space: nowrap;
     }
 
-    :global(.detail-card) .strength {
+    .detail-card .strength {
         margin-top: 0px;
         margin-bottom: -30px;
         transform: rotate(270deg);
         margin-left: calc(100% - 30px);
     }
 
-    :global(.account_list_item) .strength {
+    .account_list_item .strength {
         margin-bottom: -50px;
         margin-right: -10px;
         position: absolute;
@@ -344,7 +362,8 @@
         bottom: 50px;
     }
 
-    :global(.account_list_item) {
+    .account_list_item {
+        position: relative;
         display: flex;
         flex-direction: row;
         justify-content: space-between;
@@ -361,9 +380,13 @@
             0 1px 3px rgb(0 0 0 / 12%),
             0 1px 2px rgb(0 0 0 / 24%);
         color: var(--on-surface);
+        cursor: pointer;
+    }
+    .account_list_item:hover {
+        background-color: color-mix(in srgb, var(--primary) 4%, transparent);
     }
 
-    :global(.account_list_item Img) {
+    .account_list_item :global(Img) {
         pointer-events: none;
         max-height: 36px;
         max-width: 100%;
@@ -395,18 +418,12 @@
         margin-top: 2px;
     }
 
-    :global(.account_list_item_actions) {
-        overflow: hidden;
+    .account_list_item_actions {
         height: 100%;
         display: flex;
         flex-direction: row;
         align-items: center;
         justify-content: flex-end;
         min-width: fit-content;
-    }
-
-    :global(a.account_list_item_url) {
-        color: var(--on-surface);
-        text-decoration: none;
     }
 </style>

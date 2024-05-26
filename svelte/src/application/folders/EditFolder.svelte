@@ -1,24 +1,15 @@
 <script>
-    import Button from '@smui/button'
-    import Dialog, { Title, Content } from '@smui/dialog'
-    import IconButton from '@smui/icon-button'
-    import List, {
-        Group,
-        Item,
-        Graphic,
-        Meta,
-        Separator,
-        Subheader,
-        Text,
-        PrimaryText,
-        SecondaryText,
-    } from '@smui/list'
     import Textfield from '@smui/textfield'
+
+    import Button from '../../helpers/Button.svelte'
+    import IconButton from '../../helpers/IconButton.svelte'
+    import Dialog from '../../helpers/Dialog.svelte'
     import { createEventDispatcher } from 'svelte'
     import Icon from '../../helpers/Icon.svelte'
     const dispatch = createEventDispatcher()
     let editedFolder = null
     let folderDialog = null
+    let folderDialogOpen = false
     let folderIconOpen = false
     let folderIcons = [
         // https://material.io/resources/icons/?style=baseline
@@ -66,53 +57,93 @@
     export function editFolder(folder) {
         // Deep copy to not change the folder before saving
         editedFolder = JSON.parse(JSON.stringify(folder))
-        folderDialog.open()
+        folderDialogOpen = true
     }
     function onSaveFolder() {
         dispatch('save', editedFolder)
-        folderDialog.close()
+        folderDialogOpen = false
+        editedFolder = null
+    }
+    function onDeleteFolder() {
+        dispatch('delete', editedFolder)
+        folderDialogOpen = false
+        editedFolder = null
     }
 </script>
 
-<Dialog class="wallet_folder_dialog" bind:this={folderDialog}>
-    <Title>Folder</Title>
-    <Content>
-        {#if editedFolder}
-            <IconButton
-                on:click={() => (folderIconOpen = !folderIconOpen)}
-                on:blur={() => setTimeout(() => (folderIconOpen = false), 100)}
-            >
-                <Icon color="on-primary">{editedFolder.icon || 'folder'}</Icon>
-            </IconButton>
-            {#if folderIconOpen}
-                <div static class="menu_folder_icon">
-                    <List>
-                        {#each folderIcons as folderIcon}
-                            <Item
-                                on:click={() =>
-                                    (editedFolder.icon = folderIcon)}
-                            >
-                                <Icon color="on-surface">{folderIcon}</Icon>
-                            </Item>
-                        {/each}
-                    </List>
-                </div>
-            {/if}
-
-            <Textfield bind:value={editedFolder.name} />
-            <Button
-                on:click={onSaveFolder}
-                style="float: right; margin-top: 10px;"
-                color="secondary"
-            >
-                Save
-            </Button>
+<Dialog title="Folder" bind:open={folderDialogOpen}>
+    <div class="container">
+        <IconButton
+            on:click={() => (folderIconOpen = !folderIconOpen)}
+            on:blur={() => setTimeout(() => (folderIconOpen = false), 100)}
+            icon={editedFolder.icon || 'folder'}
+            color="on-primary"
+        />
+        {#if folderIconOpen}
+            <div static class="menu_folder_icon">
+                {#each folderIcons as folderIcon}
+                    <div
+                        class="folder_icon"
+                        on:click={() => (editedFolder.icon = folderIcon)}
+                    >
+                        <Icon color="on-surface">{folderIcon}</Icon>
+                    </div>
+                {/each}
+            </div>
         {/if}
-    </Content>
+
+        <Textfield bind:value={editedFolder.name} />
+    </div>
+
+    <div slot="actions">
+        <Button
+            on:click={onDeleteFolder}
+            style="float: right; margin-top: 10px;"
+            color="secondary"
+            variant="outlined"
+        >
+            Delete
+        </Button>
+
+        <Button
+            on:click={onSaveFolder}
+            style="float: right; margin-top: 10px;"
+            color="secondary"
+            variant="outlined"
+        >
+            Save
+        </Button>
+    </div>
 </Dialog>
 
 <style>
-    :global(.menu_folder_icon) {
+    .container {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        width: 250px;
+    }
+
+    .folder_icon {
+        cursor: pointer;
+        margin: 10px;
+    }
+    .folder_icon:hover {
+        background-color: color-mix(
+            in srgb,
+            var(--on-primary) 12%,
+            transparent
+        );
+    }
+
+    .menu_folder_icon {
+        border-radius: 5px;
+        box-shadow:
+            0 19px 38px rgba(0, 0, 0, 0.3),
+            0 15px 12px rgba(0, 0, 0, 0.22);
+
+        padding: 5px 10px;
         position: absolute;
         min-width: 60px;
         width: 60px;
@@ -121,19 +152,15 @@
 
         background-color: var(--surface);
         max-height: 400px;
-        width: 300px;
-    }
-
-    :global(.menu_folder_icon > ul) {
+        max-width: 250px;
         display: flex;
         flex-direction: row;
-        justify-content: space-between;
+        justify-content: space-around;
+        align-items: center;
         flex-wrap: wrap;
         width: 100%;
     }
 
-    :global(.menu_folder_icon > *) {
-        display: block;
-        width: 60px;
+    .menu_folder_icon > ul {
     }
 </style>

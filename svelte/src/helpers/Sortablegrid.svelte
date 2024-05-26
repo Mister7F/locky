@@ -357,6 +357,6 @@
     }
 
     :global(.move_into) {
-        -webkit-filter: brightness(50%);
+        background-color: color-mix(in srgb, #4a6572 20%, transparent);
     }
 </style>

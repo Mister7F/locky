@@ -1,6 +1,5 @@
 <script>
-    import IconButton, { Icon } from '@smui/icon-button'
-    import Button, { Label } from '@smui/button'
+    import Button from './Button.svelte'
     import { createEventDispatcher } from 'svelte'
 
     const dispatch = createEventDispatcher()
@@ -36,10 +35,10 @@
     <Button
         color="secondary"
         variant="outlined"
+        icon="file_upload"
         on:click={() => fileInput.click()}
     >
-        <Icon class="material-icons">file_upload</Icon>
-        <Label>{truncatedFilename || 'Upload'}</Label>
+        {truncatedFilename || 'Upload'}
     </Button>
     <input on:change={onFileUploaded} type="file" bind:this={fileInput} />
 </div>

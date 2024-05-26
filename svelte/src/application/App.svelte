@@ -13,13 +13,13 @@
         locked = true
     }
 
-    if ('serviceWorker' in navigator) {
-        window.addEventListener('load', async () => {
-            await navigator.serviceWorker.register('sw.js')
-        })
-    } else {
-        console.error('Service Worker will not work')
-    }
+    // if ('serviceWorker' in navigator) {
+    //     window.addEventListener('load', async () => {
+    //         await navigator.serviceWorker.register('sw.js')
+    //     })
+    // } else {
+    //     console.error('Service Worker will not work')
+    // }
 
     setTimeout(async () => {
         // Parse the URL to fetch the access token and store it in the local storage
@@ -42,6 +42,12 @@
         font-weight: 400;
         src: url('font/OpenSans-Regular.ttf');
     }
+    @font-face {
+        font-family: 'SF';
+        font-style: normal;
+        font-weight: 400;
+        src: url('font/SF-Pro.ttf');
+    }
     :global(*) {
         --primary: #282c34;
         --on-primary: #dfe1e2;
@@ -49,7 +55,7 @@
         --secondary: #fc6d26;
         --on-secondary: #282c34;
 
-        --surface: #fff;
+        --surface: #edf0f2;
         --on-surface: #4a6572;
 
         /* Svelte MUI */
@@ -57,7 +63,7 @@
 
         /* Other colors */
         --link-color: #1877f2;
-        --error-color: #e53935;
+        --error: #e53935;
         --wallet-background: #edf0f2;
         --account-background: #fff;
 
@@ -78,7 +84,7 @@
         display: flex;
         flex-direction: column;
         justify-content: flex-start;
-        font-family: 'Open Sans';
+        font-family: 'SF';
         font-size: 15px;
         height: 100%;
         width: 100vw;

@@ -1,7 +1,8 @@
 <script>
     import Slider from '@smui/slider'
-    import Button from '@smui/button'
-    import Dialog, { Title, Content, Actions } from '@smui/dialog'
+
+    import Dialog from '../../helpers/Dialog.svelte'
+    import Button from '../../helpers/Button.svelte'
     import { createEventDispatcher } from 'svelte'
     import Icon from '../../helpers/Icon.svelte'
 
@@ -9,7 +10,7 @@
 
     let password = ''
     let passwordLength = 16
-    let generatePasswordDialog
+    let generatePasswordDialogOpen = false
 
     let useLower = true
     let useUpper = true
@@ -43,82 +44,80 @@
     }
 
     export function open() {
-        generatePasswordDialog.open()
+        generatePasswordDialogOpen = true
     }
 
     function onUse() {
         const newPassword = password
         password = ''
-        generatePasswordDialog.close()
+        generatePasswordDialogOpen = false
         dispatch('use', newPassword)
     }
 </script>
 
 <Dialog
-    bind:this={generatePasswordDialog}
+    bind:open={generatePasswordDialogOpen}
     class="account_editor_dialog generate_password_dialog"
+    title="Generate a password"
 >
-    <Title>Generate a password</Title>
-    <Content>
-        <div class="options">
-            <Button
-                color="secondary"
-                on:click={() => (useLower = !useLower)}
-                variant={useLower ? 'outlined' : ''}
-            >
-                a
-            </Button>
-            <Button
-                color="secondary"
-                on:click={() => (useUpper = !useUpper)}
-                variant={useUpper ? 'outlined' : ''}
-            >
-                A
-            </Button>
-            <Button
-                color="secondary"
-                on:click={() => (useNumber = !useNumber)}
-                variant={useNumber ? 'outlined' : ''}
-            >
-                9
-            </Button>
-            <Button
-                color="secondary"
-                on:click={() => (useSymbol = !useSymbol)}
-                variant={useSymbol ? 'outlined' : ''}
-            >
-                $
-            </Button>
-        </div>
-        <div class="password-length">
-            <Slider
-                min={4}
-                max={50}
-                step={1}
-                discrete
-                bind:value={passwordLength}
-            />
-            <span>{passwordLength}</span>
-        </div>
-        <p>{password}</p>
+    <div class="options">
+        <Button
+            color="secondary"
+            on:click={() => (useLower = !useLower)}
+            variant={useLower ? '' : 'outlined'}
+        >
+            a
+        </Button>
+        <Button
+            color="secondary"
+            on:click={() => (useUpper = !useUpper)}
+            variant={useUpper ? '' : 'outlined'}
+        >
+            A
+        </Button>
+        <Button
+            color="secondary"
+            on:click={() => (useNumber = !useNumber)}
+            variant={useNumber ? '' : 'outlined'}
+        >
+            9
+        </Button>
+        <Button
+            color="secondary"
+            on:click={() => (useSymbol = !useSymbol)}
+            variant={useSymbol ? '' : 'outlined'}
+        >
+            $
+        </Button>
+    </div>
+    <div class="password-length">
+        <Slider
+            min={4}
+            max={50}
+            step={1}
+            discrete
+            bind:value={passwordLength}
+        />
+        <span>{passwordLength}</span>
+    </div>
+    <p>{password}</p>
 
-        <Button
-            style="margin-top: 10px;"
-            color="secondary"
-            variant="outlined"
-            on:click={onUse}
-        >
-            Use
-        </Button>
-        <Button
-            style="margin-top: 10px; margin-left: 20px"
-            color="secondary"
-            variant="outlined"
-            on:click={() => (password = '')}
-        >
-            Generate
-        </Button>
-    </Content>
+    <Button
+        style="margin-top: 10px;"
+        color="secondary"
+        variant="outlined"
+        on:click={onUse}
+    >
+        Use
+    </Button>
+    <Button
+        style="margin-top: 10px; margin-left: 20px"
+        color="secondary"
+        variant="outlined"
+        on:click={() => (password = '')}
+    >
+        Generate
+    </Button>
 </Dialog>
 
 <style>
@@ -158,5 +157,6 @@
         min-width: 0;
         width: 50px;
         text-transform: none;
+        margin: 5px 10px;
     }
 </style>

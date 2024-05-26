@@ -1,5 +1,6 @@
 <script>
-    import Button, { Group, GroupItem, Label, Icon } from '@smui/button'
+    import Button from '../../helpers/Button.svelte'
+
     import { createEventDispatcher } from 'svelte'
 
     const dispatch = createEventDispatcher()
@@ -13,27 +14,27 @@
         <Button
             color="secondary"
             variant="outlined"
+            icon="login"
             on:click={() => dispatch('click', 'login')}
         >
-            <Icon class="material-icons">login</Icon>
-            <Label>Unlock the session</Label>
+            Unlock the session
         </Button>
     {/if}
     <Button
         color="secondary"
         variant="outlined"
+        icon="add"
         on:click={() => dispatch('click', 'create')}
     >
-        <Icon class="material-icons">add</Icon>
-        <Label>Create a new wallet</Label>
+        Create a new wallet
     </Button>
     <Button
         color="secondary"
         variant="outlined"
+        icon="file_upload"
         on:click={() => dispatch('click', 'upload')}
     >
-        <Icon class="material-icons">file_upload</Icon>
-        <Label>Upload a file</Label>
+        Upload a file
     </Button>
     <Button
         color="secondary"
@@ -58,7 +59,7 @@
                 28.377,54.405 43.005,45.638 43.005,42.427 38.621,45.29 "
             ></polygon>
         </svg>
-        <Label>Dropbox</Label>
+        Dropbox
     </Button>
 </div>
 
