@@ -23,10 +23,6 @@
         if (disabled) {
             return
         }
-        if (ripple) {
-            createRipple(event)
-        }
-
         dispatch('click')
     }
 </script>
@@ -34,6 +30,7 @@
 <button
     class="ripple {color} {className} {disabled && 'disabled'} {_variant}"
     on:click={onClick}
+    on:mousedown={(event) => ripple && createRipple(event)}
     {style}
 >
     {#if icon}

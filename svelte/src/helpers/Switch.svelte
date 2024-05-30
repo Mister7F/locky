@@ -1,12 +1,12 @@
 <script>
-        const elId = Math.floor(Math.random() * 10000000)
-        export let label = ''
-        export let checked = false
+    const elId = Math.floor(Math.random() * 10000000)
+    export let label = ''
+    export let checked = false
 </script>
 
 <div>
-    <input type="checkbox" id="{elId}" bind:checked={checked} />
-    <label for="{elId}">{label}</label>
+    <input type="checkbox" id={elId} bind:checked />
+    <label for={elId}>{label}</label>
 </div>
 
 <style>

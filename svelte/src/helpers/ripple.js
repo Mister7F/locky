@@ -1,6 +1,21 @@
 // https://css-tricks.com/how-to-recreate-the-ripple-effect-of-material-design-buttons
+// https://m2.material.io/develop/ios/supporting/ripple
 export function createRipple(event, forceCenter) {
     const button = event.currentTarget
+
+    const start = performance.now()
+
+    button.classList.add('ripple_pressed')
+
+    function onMouseUp() {
+        button.removeEventListener('mouseup', onMouseUp)
+
+        const ellapsed = performance.now() - start
+        setTimeout(() => {
+            button.classList.remove('ripple_pressed')
+        }, 250 - ellapsed) // animation time if we just click
+    }
+    button.addEventListener('mouseup', onMouseUp)
 
     const circle = document.createElement('span')
 

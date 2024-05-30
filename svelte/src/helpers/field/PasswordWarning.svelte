@@ -44,7 +44,7 @@
         {/each}
     </ul>
 
-    <Switch label="Show sequence" bind:checked={visible}/>
+    <Switch label="Show sequence" bind:checked={visible} />
 
     {#if strengthResult.feedback.warning}
         <p>{strengthResult.feedback.warning}</p>

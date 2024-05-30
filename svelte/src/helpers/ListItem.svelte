@@ -19,8 +19,7 @@
         dispatch('edit')
     }
 
-    function onCardClick(event) {
-        createRipple(event)
+    function onCardClick() {
         dispatch('click')
     }
 </script>
@@ -29,6 +28,7 @@
     class="ripple ripple_dark list_item {selected && 'selected'}"
     {id}
     on:click={onCardClick}
+    on:mousedown={(event) => createRipple(event)}
 >
     <div class="left">
         <Icon color="on-surface">{icon}</Icon>

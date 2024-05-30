@@ -36,10 +36,8 @@
             {/if}
             <div
                 class="detail_main_action ripple ripple_dark ripple_fast"
-                on:click={(event) => {
-                    createRipple(event)
-                    dispatch('click')
-                }}
+                on:click={() => dispatch('click')}
+                on:mousedown={(event) => createRipple(event)}
             >
                 <div class="detail_img">
                     <Img
@@ -113,10 +111,8 @@
 {:else}
     <div
         class="account_list_item ripple ripple_dark"
-        on:click={(event) => {
-            createRipple(event)
-            dispatch('click')
-        }}
+        on:click={(event) => dispatch('click')}
+        on:mousedown={(event) => createRipple(event)}
     >
         <div class="account_list_item_title">
             <Img

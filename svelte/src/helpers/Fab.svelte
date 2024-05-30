@@ -1,6 +1,4 @@
 <script>
-    import { createRipple } from './ripple.js'
-
     import Icon from './Icon.svelte'
     import IconButton from './IconButton.svelte'
     import { createEventDispatcher } from 'svelte'

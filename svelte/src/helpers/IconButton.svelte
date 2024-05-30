@@ -23,7 +23,8 @@
     const dispatch = createEventDispatcher()
 
     function onClick(event) {
-        createRipple(event, true)
+        event.stopPropagation()
+        event.preventDefault()
         if (isUrlValid(href)) {
             window.open(href)
         }
@@ -35,7 +36,8 @@
     class="ripple icon-button {className} {color === 'on-surface'
         ? 'ripple_dark'
         : ''} {bgTransparent ? 'bg-transparent' : ''}"
-    on:click|stopPropagation={onClick}
+    on:click={onClick}
+    on:mousedown={(event) => createRipple(event, true)}
     on:blur={() => dispatch('blur')}
     on:mousedown|stopPropagation={() => {}}
     {title}
