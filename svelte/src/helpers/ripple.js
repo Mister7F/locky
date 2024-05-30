@@ -9,6 +9,7 @@ export function createRipple(event, forceCenter) {
 
     function onMouseUp() {
         button.removeEventListener('mouseup', onMouseUp)
+        button.removeEventListener('mousemove', onMouseUp)
 
         const ellapsed = performance.now() - start
         setTimeout(() => {
@@ -16,6 +17,7 @@ export function createRipple(event, forceCenter) {
         }, 250 - ellapsed) // animation time if we just click
     }
     button.addEventListener('mouseup', onMouseUp)
+    button.addEventListener('mousemove', onMouseUp)
 
     const circle = document.createElement('span')
 
