@@ -1,8 +1,8 @@
 # Technologies
 Locky has been developed as a PWA server-less, so it can be easily installed on mobile.
 
-The data persistence is done thanks to Google Drive and your password are encrypted using
-AES-256 in CBC mode.
+The data persistence is done thanks to Dropbox and your password are encrypted using
+AES-256 in CBC mode and xChaCha20.
 
 Your password will be compressed, encrypted and save in the indexDB of your browser, so
 when you refresh the page you keep your password.
@@ -32,6 +32,8 @@ To derive the password with scrypt
 https://github.com/dchest/scrypt-async-js
 
 ## Svelte material UI
+The components are inspired from
+
 https://github.com/hperrin/svelte-material-ui
 
 ## Icons
