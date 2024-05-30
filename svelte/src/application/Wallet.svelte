@@ -2,6 +2,7 @@
     import Snackbar, { Actions, Label } from '@smui/snackbar'
 
     import Fab from '../helpers/Fab.svelte'
+    import IconButton from '../helpers/IconButton.svelte'
     import { createEventDispatcher } from 'svelte'
     import Audit from './Audit.svelte'
     import AccountCard from './AccountCard.svelte'
@@ -199,7 +200,7 @@
         background-color: var(--wallet-background);
         box-sizing: border-box;
         overflow-y: scroll;
-        height: calc(100vh - 65px);
+        height: calc(100vh - 57px);
         display: flex;
         flex-direction: row;
         overflow: hidden;
