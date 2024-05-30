@@ -1,6 +1,5 @@
 <script>
-    import Textfield from '@smui/textfield'
-
+    import TextInput from '../../helpers/TextInput.svelte'
     import Button from '../../helpers/Button.svelte'
     import IconButton from '../../helpers/IconButton.svelte'
     import Dialog from '../../helpers/Dialog.svelte'
@@ -92,7 +91,7 @@
             </div>
         {/if}
 
-        <Textfield bind:value={editedFolder.name} />
+        <TextInput bind:value={editedFolder.name} />
     </div>
 
     <div slot="actions">

@@ -1,6 +1,5 @@
 <script>
-    import Textfield from '@smui/textfield'
-
+    import TextInput from '../../helpers/TextInput.svelte'
     import Icon from '../Icon.svelte'
     import IconButton from '../IconButton.svelte'
     import Button from '../Button.svelte'
@@ -64,7 +63,7 @@
     <br />
     Rename
     <br />
-    <Textfield
+    <TextInput
         class="field_name"
         on:keypress={onKeyPressFieldLabel}
         bind:value={label}

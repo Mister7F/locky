@@ -1,6 +1,4 @@
 <script>
-    import Textfield from '@smui/textfield'
-
     import ListItem from '../../helpers/ListItem.svelte'
     import IconButton from '../../helpers/IconButton.svelte'
     import { createEventDispatcher } from 'svelte'
