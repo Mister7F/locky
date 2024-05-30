@@ -19,11 +19,5 @@ export function getCookie(name) {
 }
 
 export function copyValue(str) {
-    const el = document.createElement('textarea')
-    // clear the clipboard with space if nothing
-    el.value = str || ' '
-    document.body.appendChild(el)
-    el.select()
-    document.execCommand('copy')
-    document.body.removeChild(el)
+    navigator.clipboard.writeText(str)
 }
