@@ -7,8 +7,7 @@
         "dev": "vite",
         "build": "vite build",
         "preview": "vite preview",
-        "check": "svelte-check --tsconfig ./tsconfig.json",
-        "prepare": "smui-theme compile public/smui.css -i src/theme"
+        "check": "svelte-check --tsconfig ./tsconfig.json"
     },
     "dependencies": {
         "fflate": "^0.7.1",
@@ -16,26 +15,10 @@
         "scrypt-async": "^2.0.1"
     },
     "devDependencies": {
-        "@smui/button": "^7.0.0",
-        "@smui/card": "^7.0.0",
-        "@smui/dialog": "^7.0.0",
-        "@smui/fab": "^7.0.0",
-        "@smui/form-field": "^7.0.0",
-        "@smui/icon-button": "^7.0.0",
-        "@smui/list": "^7.0.0",
-        "@smui/menu": "^7.0.0",
-        "@smui/select": "^7.0.0",
-        "@smui/slider": "^7.0.0",
-        "@smui/snackbar": "^7.0.0",
-        "@smui/switch": "^7.0.0",
-        "@smui/textfield": "^7.0.0",
-        "@smui/top-app-bar": "^7.0.0",
         "@sveltejs/vite-plugin-svelte": "^3.0.2",
         "@tsconfig/svelte": "^5.0.2",
         "prettier": "^3.2.5",
         "prettier-plugin-svelte": "^3.2.3",
-        "smui": "^0.0.4",
-        "smui-theme": "^7.0.0",
         "svelte": "^4.2.12",
         "svelte-check": "^3.6.7",
         "tslib": "^2.6.2",
