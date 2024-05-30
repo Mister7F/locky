@@ -11,10 +11,14 @@
     export let viewMode = 'list'
 
     const strength = passwordStrength(account.password)
+
+    function onClick(event) {
+        dispatch('click')
+    }
 </script>
 
 {#if viewMode === 'minimalist'}
-    <div class="account" on:click={() => dispatch('click')}>
+    <div class="account" on:click={onClick}>
         <div class="card">
             <div class="row">
                 <div class="image">
@@ -36,7 +40,7 @@
             {/if}
             <div
                 class="detail_main_action ripple ripple_dark ripple_fast"
-                on:click={() => dispatch('click')}
+                on:click={onClick}
                 on:mousedown={(event) => createRipple(event)}
             >
                 <div class="detail_img">
@@ -111,7 +115,7 @@
 {:else}
     <div
         class="account_list_item ripple ripple_dark"
-        on:click={(event) => dispatch('click')}
+        on:click={onClick}
         on:mousedown={(event) => createRipple(event)}
     >
         <div class="account_list_item_title">
@@ -240,6 +244,7 @@
         margin-right: 10px;
         max-height: 40px;
         max-width: 100%;
+        user-select: none;
     }
 
     .strength {

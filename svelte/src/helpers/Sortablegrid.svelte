@@ -225,7 +225,7 @@
     }
 
     /**
-     * Init the dragging,
+     * Initiate the dragging
      *
      * - on Desktop, to trigger this, you need to press the element and then move
      *   the mouse
@@ -342,6 +342,7 @@
         opacity: 0.2;
         transform: rotate(-3deg);
         z-index: 99;
+        pointer-events: none;
     }
 
     :global(.dragged),
@@ -357,6 +358,7 @@
     }
 
     :global(.move_into) {
+        pointer-events: none;
         background-color: color-mix(in srgb, #4a6572 20%, transparent);
     }
 </style>

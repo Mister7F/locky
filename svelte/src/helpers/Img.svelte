@@ -18,6 +18,6 @@
 
 <style>
     img {
-        user-select: none;
+        pointer-events: none;
     }
 </style>
