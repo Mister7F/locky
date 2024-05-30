@@ -31,24 +31,20 @@
     }
 </script>
 
-<div class="file">
-    <Button
-        color="secondary"
-        variant="outlined"
-        icon="file_upload"
-        on:click={() => fileInput.click()}
-    >
-        {truncatedFilename || 'Upload'}
-    </Button>
-    <input on:change={onFileUploaded} type="file" bind:this={fileInput} />
-</div>
+<Button
+    class="file_input_button"
+    color="secondary"
+    variant="outlined"
+    icon="file_upload"
+    on:click={() => fileInput.click()}
+>
+    {truncatedFilename || 'Upload'}
+</Button>
+<input on:change={onFileUploaded} type="file" bind:this={fileInput} />
 
 <style>
-    .file {
-        display: flex;
-        flex-direction: row;
-        justify-content: center;
-        align-items: center;
+    :global(.file_input_button) {
+        width: 100%;
     }
     input {
         display: none;

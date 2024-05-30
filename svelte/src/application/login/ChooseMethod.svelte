@@ -81,4 +81,7 @@
         margin-right: 5px;
         fill: var(--secondary);
     }
+    .container > :global(button) {
+        width: 100%;
+    }
 </style>

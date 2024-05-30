@@ -13,13 +13,13 @@
         locked = true
     }
 
-    // if ('serviceWorker' in navigator) {
-    //     window.addEventListener('load', async () => {
-    //         await navigator.serviceWorker.register('sw.js')
-    //     })
-    // } else {
-    //     console.error('Service Worker will not work')
-    // }
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', async () => {
+            await navigator.serviceWorker.register('sw.js')
+        })
+    } else {
+        console.error('Service Worker will not work')
+    }
 
     setTimeout(async () => {
         // Parse the URL to fetch the access token and store it in the local storage
@@ -36,12 +36,6 @@
 </div>
 
 <style>
-    @font-face {
-        font-family: 'Open Sans';
-        font-style: normal;
-        font-weight: 400;
-        src: url('font/OpenSans-Regular.ttf');
-    }
     @font-face {
         font-family: 'SF';
         font-style: normal;
@@ -71,6 +65,7 @@
 
         transition-timing-function: ease;
         user-select: none;
+        font-family: 'SF';
     }
 
     :global(html),
@@ -84,7 +79,6 @@
         display: flex;
         flex-direction: column;
         justify-content: flex-start;
-        font-family: 'SF';
         font-size: 15px;
         height: 100%;
         width: 100vw;

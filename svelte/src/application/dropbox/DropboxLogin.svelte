@@ -41,7 +41,7 @@
     })
 </script>
 
-<div class="file">
+<div class="dropbox_login">
     {#if state === 'logged' || state === 'no_wallet'}
         <Button
             color="secondary"
@@ -81,11 +81,15 @@
 </div>
 
 <style>
-    .file {
+    .dropbox_login {
         display: flex;
         flex-direction: row;
         justify-content: center;
         align-items: center;
+        width: 100%;
+    }
+    .dropbox_login > :global(button) {
+        width: 100%;
     }
     svg {
         height: 25px;

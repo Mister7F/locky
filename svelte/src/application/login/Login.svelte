@@ -291,7 +291,8 @@
         align-items: center;
     }
 
-    .fields > :global(*:not(.mdc-form-field)) {
+    .fields > :global(.file),
+    .fields > :global(button) {
         width: 100%;
     }
     .fields > :global(*) {

@@ -87,6 +87,7 @@
     }
     h1 {
         margin-top: 0;
+        color: var(--on-primary);
     }
     svg {
         height: 25px;
