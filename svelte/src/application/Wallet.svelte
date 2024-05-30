@@ -1,6 +1,4 @@
 <script>
-    import Snackbar, { Actions, Label } from '@smui/snackbar'
-
     import Fab from '../helpers/Fab.svelte'
     import IconButton from '../helpers/IconButton.svelte'
     import { createEventDispatcher } from 'svelte'
@@ -52,8 +50,8 @@
     let walletWidth
     let foldersVisible = false
     $: floatingFolder = walletWidth < 870
-    let snackbar
-    let snackbarText
+    let snackbarText = ''
+    let snackbarTimeout
     let folderDomIds = []
     $: {
         folderDomIds = []
@@ -110,9 +108,11 @@
         }
     }
     function onNotify(event) {
-        snackbar.close()
         snackbarText = event.detail ? event.detail : event
-        snackbar.open(snackbarText)
+        clearTimeout(snackbarTimeout)
+        snackbarTimeout = setTimeout(() => {
+            snackbarText = ''
+        }, 1000)
     }
 </script>
 
@@ -173,9 +173,12 @@
 </div>
 
 <!-- Notifications -->
-<Snackbar bind:this={snackbar} bind:labelText={snackbarText}>
-    <Label />
-</Snackbar>
+{#if snackbarText}
+    <div class="notification">
+        <span>{snackbarText}</span>
+        <IconButton icon="close" on:click={() => (snackbarText = '')} />
+    </div>
+{/if}
 
 <style>
     :global(.new_account) {
@@ -208,5 +211,39 @@
 
     .wallet :global(.accountsGrid) {
         width: 100%;
+    }
+
+    .notification {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+
+        box-sizing: border-box;
+        text-align: center;
+        position: absolute;
+
+        background-color: var(--primary);
+        border-radius: 4px;
+        left: 50%;
+        transform: translateX(-50%);
+        box-shadow:
+            0 14px 28px rgba(0, 0, 0, 0.25),
+            0 10px 10px rgba(0, 0, 0, 0.22);
+        animation: notification 0.1s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    }
+    .notification > span {
+        margin-right: 15px;
+        margin-left: 20px;
+
+        color: var(--on-primary);
+    }
+    @keyframes notification {
+        from {
+            bottom: -20px;
+        }
+        to {
+            bottom: 20px;
+        }
     }
 </style>
