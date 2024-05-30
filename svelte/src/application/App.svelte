@@ -35,13 +35,18 @@
     {/if}
 </div>
 
+<svelte:head>
+    <style>
+        @font-face {
+            font-family: 'SF';
+            font-style: normal;
+            font-weight: 400;
+            src: url('font/SF-Pro.ttf');
+        }
+    </style>
+</svelte:head>
+
 <style>
-    @font-face {
-        font-family: 'SF';
-        font-style: normal;
-        font-weight: 400;
-        src: url('font/SF-Pro.ttf');
-    }
     :global(*) {
         --primary: #282c34;
         --on-primary: #dfe1e2;
