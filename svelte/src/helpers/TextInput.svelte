@@ -171,7 +171,7 @@
         font-size: 0.75rem;
         font-weight: 400;
     }
-    input:not(.focused) ~ .help:not(.help-persistent) {
+    input:not(.focused):not(.help-persistent) ~ .help {
         display: none;
     }
 </style>
