@@ -8,7 +8,7 @@
 
     export let icon
     export let name
-    export let id
+    export let id = null
 
     export let edit = false
     export let selected

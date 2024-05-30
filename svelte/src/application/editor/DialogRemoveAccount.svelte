@@ -14,11 +14,7 @@
     }
 </script>
 
-<Dialog
-    bind:open={removeAccountDialogOpen}
-    class="account_editor_dialog remove_account_dialog"
-    title="Delete this account"
->
+<Dialog bind:open={removeAccountDialogOpen} title="Delete this account">
     Are you sure you want to remove the {account.name} account ?
 
     <div slot="actions">
@@ -39,9 +35,3 @@
         </Button>
     </div>
 </Dialog>
-
-<style>
-    :global(.remove_account_dialog .mdc-dialog__surface) {
-        border: 1px solid var(--error);
-    }
-</style>

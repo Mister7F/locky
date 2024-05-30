@@ -270,11 +270,4 @@
         position: absolute;
         right: 25px;
     }
-
-    :global(.account_editor_dialog .mdc-dialog__surface),
-    :global(.account_editor_dialog p),
-    :global(.account_editor_dialog .mdc-dialog__title) {
-        color: var(--on-primary);
-        background-color: var(--primary);
-    }
 </style>

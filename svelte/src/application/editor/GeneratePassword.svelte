@@ -55,11 +55,7 @@
     }
 </script>
 
-<Dialog
-    bind:open={generatePasswordDialogOpen}
-    class="account_editor_dialog generate_password_dialog"
-    title="Generate a password"
->
+<Dialog bind:open={generatePasswordDialogOpen} title="Generate a password">
     <div class="options">
         <Button
             color="secondary"

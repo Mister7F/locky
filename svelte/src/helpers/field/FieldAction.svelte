@@ -180,7 +180,7 @@
     </Menu>
 {/if}
 
-<Dialog bind:this={fieldNameDialog} class="account_editor_dialog">
+<Dialog bind:this={fieldNameDialog}>
     <Title>Field name</Title>
     <Content>
         <Textfield on:keypress={onKeyPressFieldLabel} bind:value={label} />

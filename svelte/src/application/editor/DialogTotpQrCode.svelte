@@ -27,11 +27,7 @@
     }
 </script>
 
-<Dialog
-    bind:open={qrCodeDialogOpen}
-    class="account_editor_dialog"
-    title="2FA QR Code"
->
+<Dialog bind:open={qrCodeDialogOpen} title="2FA QR Code">
     <p>Scan this QR Code with Google Authenticator, FreeOTP...</p>
     <p style="text-align: center"><canvas id="qr_code_canvas"></canvas></p>
     <Button
