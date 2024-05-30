@@ -1,10 +1,9 @@
 <script>
-    import IconButton from '@smui/icon-button'
-    import List, { Item } from '@smui/list'
-    import Menu, { SelectionGroup, SelectionGroupIcon } from '@smui/menu'
     import Textfield from '@smui/textfield'
+
     import { createEventDispatcher } from 'svelte'
     import FieldAction from './FieldAction.svelte'
+    import IconButton from '../IconButton.svelte'
     import PasswordWarning from './PasswordWarning.svelte'
     import { passwordStrength } from '../crypto.js'
     import { isUrlValid } from '../utils.js'
@@ -113,41 +112,17 @@
 
             {#if type === 'password'}
                 <IconButton
-                    toggle
-                    bind:pressed={passwordVisible}
-                    ripple={false}
-                >
-                    {#if passwordVisible}
-                        <Icon on>visibility</Icon>
-                    {:else}
-                        <Icon>visibility_off</Icon>
-                    {/if}
-                </IconButton>
+                    on:click={() => (passwordVisible = !passwordVisible)}
+                    icon={passwordVisible ? 'visibility' : 'visibility_off'}
+                />
                 {#if strengthResult && strengthResult.feedback}
                     <PasswordWarning bind:strengthResult />
                 {/if}
             {:else if type === 'totp' && value}
-                <IconButton on:click={() => dispatch('show_qrcode')}>
-                    <Icon>
-                        <svg
-                            height="1792"
-                            viewBox="0 0 1792 1792"
-                            width="1792"
-                            xmlns="http://www.w3.org/2000/svg"
-                        >
-                            <path
-                                d="M576
-                                1152v128h-128v-128h128zm0-768v128h-128v-128h128zm768
-                                0v128h-128v-128h128zm-1024
-                                1023h384v-383h-384v383zm0-767h384v-384h-384v384zm768
-                                0h384v-384h-384v384zm-256 256v640h-640v-640h640zm512
-                                512v128h-128v-128h128zm256
-                                0v128h-128v-128h128zm0-512v384h-384v-128h-128v384h-128v-640h384v128h128v-128h128zm-768-768v640h-640v-640h640zm768
-                                0v640h-640v-640h640z"
-                            ></path>
-                        </svg>
-                    </Icon>
-                </IconButton>
+                <IconButton
+                    on:click={() => dispatch('show_qrcode')}
+                    icon="qr_code"
+                />
             {/if}
             {#if canEditType && !readonly}
                 <FieldAction
@@ -157,13 +132,10 @@
                 />
             {/if}
             {#if parseInt(copy) && value}
-                <IconButton on:click={onCopyClick}>
-                    {#if !copied}
-                        <Icon>content_copy</Icon>
-                    {:else}
-                        <Icon>check</Icon>
-                    {/if}
-                </IconButton>
+                <IconButton
+                    on:click={onCopyClick}
+                    icon={copied ? 'check' : 'content_copy'}
+                />
             {/if}
         </div>
     </div>
