@@ -13,6 +13,7 @@
 
     $: _variant = variant || 'standard'
     $: iconColor = _variant === 'standard' ? `on-${color}` : color
+    const SLOTS = $$props.$$slots
 
     export let ripple = true
 
@@ -34,7 +35,9 @@
     {style}
 >
     {#if icon}
-        <Icon color={iconColor} class="button_icon">{icon}</Icon>
+        <Icon color={iconColor} class="button_icon {SLOTS ? 'margin' : ''}"
+            >{icon}</Icon
+        >
     {/if}
     <slot />
 </button>
@@ -113,8 +116,11 @@
     }
 
     :global(.button_icon) {
-        margin-right: 10px;
         font-size: 18px;
+    }
+    :global(.button_icon.margin) {
+        /* There's text on the right */
+        margin-right: 10px;
     }
 
     .disabled {

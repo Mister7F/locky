@@ -61,6 +61,8 @@
         height: 48px;
         max-width: 48px;
         max-height: 48px;
+        min-width: 48px;
+        min-height: 48px;
         border-radius: 100%;
         align-items: center;
     }
