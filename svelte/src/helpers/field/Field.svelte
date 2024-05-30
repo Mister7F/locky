@@ -1,9 +1,8 @@
 <script>
-    import Textfield from '@smui/textfield'
-
     import { createEventDispatcher } from 'svelte'
     import FieldAction from './FieldAction.svelte'
     import IconButton from '../IconButton.svelte'
+    import TextInput from '../TextInput.svelte'
     import PasswordWarning from './PasswordWarning.svelte'
     import { passwordStrength } from '../crypto.js'
     import { isUrlValid } from '../utils.js'
@@ -24,10 +23,10 @@
     export let index = 0
     export let passwordVisible = false
 
-    let textField
     let copied = false
 
-    $: computedType = passwordVisible ? 'text' : type
+    $: computedType =
+        passwordVisible || type !== 'password' ? 'text' : 'password'
 
     $: [strength, strengthResult] =
         type === 'password' && showPasswordStrength && value && value.length
@@ -56,13 +55,6 @@
         }
     }
 
-    /**
-     * Allow to give the focus on this element.
-     */
-    export function focus() {
-        if (textField) textField.focus()
-    }
-
     function onCopyClick() {
         dispatch('copy')
         copied = true
@@ -75,6 +67,7 @@
         {#if readonly}
             <div class="label">{label}</div>
         {/if}
+
         <div class="content">
             {#if readonly}
                 {#if type === 'url' && isUrlValid(value)}
@@ -87,29 +80,20 @@
                     <div class="value">{value}</div>
                 {/if}
             {:else}
-                <form class="text-field-container">
-                    <Textfield
-                        class="text-field"
-                        bind:label
-                        bind:value
-                        bind:this={textField}
-                        bind:type={computedType}
-                        on:keypress={onKeyPress}
-                        on:change
-                        on:input
-                        on:keydown
-                        on:blur
-                        input$aria-controls="helper-text-standard-field"
-                        input$autocomplete="off"
-                    />
-                    {#if computedMessage}
-                        <span persistent={messagePersistent}>
-                            {computedMessage}
-                        </span>
-                    {/if}
-                </form>
+                <TextInput
+                    class="text-field"
+                    bind:label
+                    bind:value
+                    type={computedType}
+                    on:keypress={onKeyPress}
+                    on:change
+                    on:input
+                    on:keydown
+                    on:blur
+                    bind:help={computedMessage}
+                    bind:helpPersistent={messagePersistent}
+                />
             {/if}
-
             {#if type === 'password'}
                 <IconButton
                     on:click={() => (passwordVisible = !passwordVisible)}
@@ -160,14 +144,6 @@
         box-sizing: border-box;
     }
 
-    .text-field-container {
-        width: 100%;
-    }
-
-    .text-field-container :global(.text-field) {
-        width: 100%;
-    }
-
     .label {
         min-width: calc(100% - 50px);
         max-width: calc(100% - 50px);
@@ -177,6 +153,7 @@
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
+        color: var(--on-primary);
     }
 
     .value {
@@ -184,28 +161,14 @@
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
-    }
-
-    .message {
-        font-size: 12px;
-        letter-spacing: 0.4px;
+        color: var(--on-primary);
     }
 
     a {
         color: var(--link-color);
         text-decoration: none;
     }
-
     a:hover {
         text-decoration: underline;
-    }
-
-    /* Set colors */
-    .field {
-        color: var(--on-primary);
-    }
-    .field .label {
-        color: var(--on-primary);
-        filter: brightness(85%);
     }
 </style>

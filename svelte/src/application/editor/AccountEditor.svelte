@@ -258,14 +258,6 @@
         color: var(--error) !important;
     }
 
-    .field {
-        display: flex;
-        flex-direction: row;
-        justify-content: space-between;
-        align-items: center;
-        height: 72px;
-    }
-
     :global(.account_editor_close_button) {
         position: absolute;
         right: 25px;

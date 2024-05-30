@@ -43,10 +43,13 @@
             let topElement = document.elementFromPoint(0, 0)
             if (
                 topElement &&
-                topElement.classList.contains('mdc-top-app-bar__section')
+                topElement.classList.contains('wallet-navbar') &&
+                event.target.tagName !== 'INPUT'
             ) {
                 openSearch = true
-                searchField.focus()
+                const input = document.querySelector('.search_field input')
+                input.focus()
+                input.value += event.key
             }
         })
     })
@@ -64,7 +67,7 @@
             title="Search an account"
             icon="search"
             on:click={() => {
-                searchField.focus()
+                document.querySelector('.search_field input').focus()
                 openSearch = !openSearch
             }}
         />
@@ -98,10 +101,6 @@
 </div>
 
 <style>
-    h1 {
-        color: var(--on-primary);
-        font-size: 20px;
-    }
     .wallet-navbar {
         background: var(--primary);
         display: flex;
@@ -110,7 +109,7 @@
         align-items: center;
     }
     .wallet-navbar :global(.field) {
-        margin-top: -20px;
+        margin-bottom: -15px;
         width: 100%;
         z-index: 10;
     }

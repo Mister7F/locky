@@ -160,7 +160,4 @@
         flex-wrap: wrap;
         width: 100%;
     }
-
-    .menu_folder_icon > ul {
-    }
 </style>
