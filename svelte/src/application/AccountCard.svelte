@@ -114,7 +114,7 @@
     </div>
 {:else}
     <div
-        class="account_list_item ripple ripple_dark"
+        class="account_list_item ripple ripple_dark ripple_fast"
         on:click={onClick}
         on:mousedown={(event) => createRipple(event)}
     >
