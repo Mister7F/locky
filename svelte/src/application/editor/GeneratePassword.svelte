@@ -1,6 +1,5 @@
 <script>
-    import Slider from '@smui/slider'
-
+    import Slider from '../../helpers/Slider.svelte'
     import Dialog from '../../helpers/Dialog.svelte'
     import Button from '../../helpers/Button.svelte'
     import { createEventDispatcher } from 'svelte'
@@ -87,13 +86,7 @@
         </Button>
     </div>
     <div class="password-length">
-        <Slider
-            min={4}
-            max={50}
-            step={1}
-            discrete
-            bind:value={passwordLength}
-        />
+        <Slider min={4} max={50} bind:value={passwordLength} />
         <span>{passwordLength}</span>
     </div>
     <p>{password}</p>
