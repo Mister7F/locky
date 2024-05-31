@@ -135,6 +135,6 @@
         transition: width 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     }
     :global(.search_field.visible) {
-        width: 300px !important;
+        width: 100% !important;
     }
 </style>
