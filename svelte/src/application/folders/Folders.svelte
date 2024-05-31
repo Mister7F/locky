@@ -37,6 +37,9 @@
     function setFolder(folderId) {
         currentFolderId = folderId
         dispatch('change')
+        if (floating) {
+            visible = false
+        }
     }
 </script>
 

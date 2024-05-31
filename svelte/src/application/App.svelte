@@ -13,13 +13,13 @@
         locked = true
     }
 
-    if ('serviceWorker' in navigator) {
-        window.addEventListener('load', async () => {
-            await navigator.serviceWorker.register('sw.js')
-        })
-    } else {
-        console.error('Service Worker will not work')
-    }
+    // if ('serviceWorker' in navigator) {
+    //     window.addEventListener('load', async () => {
+    //         await navigator.serviceWorker.register('sw.js')
+    //     })
+    // } else {
+    //     console.error('Service Worker will not work')
+    // }
 
     setTimeout(async () => {
         // Parse the URL to fetch the access token and store it in the local storage

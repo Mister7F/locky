@@ -10,7 +10,6 @@
 - view to see duplicated password
 - new folder: edit the folder in the list instead opening a dialog
   allow to edit the icon without the dialog (just a select component)
-- folders list in mobile view: close when clicking outside
 - better password generation (list of words...)
 - clipboard: find a better solution (browser extension with an iframe to the Locky instance ?)
 - automatically remove the clipboard after 1 minute
