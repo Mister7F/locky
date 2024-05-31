@@ -165,7 +165,7 @@
     }
 
     a {
-        color: var(--link-color);
+        color: var(--link-color) !important;
         text-decoration: none;
     }
     a:hover {
