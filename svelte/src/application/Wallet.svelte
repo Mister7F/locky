@@ -129,10 +129,10 @@
 </Sidepanel>
 <Navbar
     on:lock
-    on:search={(event) => (searchText = event.detail || '')}
     bind:viewMode
     on:show_folders={() => (foldersVisible = !foldersVisible)}
     bind:floatingFolder
+    bind:searchText
 />
 <div class="wallet" bind:clientWidth={walletWidth}>
     <Folders

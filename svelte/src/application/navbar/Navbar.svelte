@@ -13,8 +13,7 @@
     const dispatch = createEventDispatcher()
     export let viewMode = 'list'
     export let floatingFolder
-    let searchField
-    let searchText = ''
+    export let searchText = ''
     let changePassword
     let openSearch = false
     let isDropboxAuthenticated = false
@@ -51,9 +50,8 @@
                 if (input !== document.activeElement) {
                     setTimeout(() => {
                         input.focus()
-                        input.dispatchEvent(new Event('input'))
                     })
-                    input.value += event.key
+                    searchText += event.key
                 }
             }
         })
@@ -79,8 +77,6 @@
         <Field
             class="search_field {openSearch ? 'visible' : ''}"
             copy="0"
-            bind:this={searchField}
-            on:input={() => setTimeout(() => dispatch('search', searchText))}
             on:blur={() => (openSearch = !!searchText)}
             bind:value={searchText}
         />
