@@ -78,7 +78,7 @@
     }
 </script>
 
-<div class="audit wallet">
+<div class="audit">
     <Button
         class="audit-loading"
         color="secondary"
@@ -88,6 +88,7 @@
     >
         Start auditing
     </Button>
+    <br />
 
     {#if leakedAccountsIndex.length}
         <span class="title">
@@ -96,19 +97,19 @@
                 >leaked</a
             >, you must change them!
         </span>
+        <div class="container">
+            {#each leakedAccountsIndex as accountIndex, index}
+                <div {index}>
+                    <AccountCard
+                        account={wallet['accounts'][accountIndex]}
+                        on:click={() =>
+                            dispatch('edit', wallet['accounts'][accountIndex])}
+                        viewMode="minimalist"
+                    />
+                </div>
+            {/each}
+        </div>
     {/if}
-    <div class="container">
-        {#each leakedAccountsIndex as accountIndex, index}
-            <div {index}>
-                <AccountCard
-                    account={wallet['accounts'][accountIndex]}
-                    on:click={() =>
-                        dispatch('edit', wallet['accounts'][accountIndex])}
-                    viewMode="minimalist"
-                />
-            </div>
-        {/each}
-    </div>
 
     {#if weakAccountsIndex.length}
         <span class="title">
@@ -134,11 +135,10 @@
 <style>
     .audit {
         width: 100%;
-        display: flex;
-        flex-direction: column;
-        justify-content: flex-start;
-        align-items: center;
+        display: block;
         padding-top: 15px;
+        overflow-y: auto;
+        text-align: center;
     }
 
     .audit > :global(*) {
@@ -149,16 +149,21 @@
         margin: 10px 30px;
     }
 
+    span {
+        display: block;
+        text-align: center;
+    }
+
     .container {
         background-color: var(--wallet-background);
         box-sizing: border-box;
         overflow-y: scroll;
-        height: inherit;
         display: flex;
         flex-wrap: wrap;
         flex-direction: row;
         justify-content: space-around;
         overflow: hidden;
+        height: auto;
     }
 
     @-webkit-keyframes rotating {
