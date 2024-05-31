@@ -45,6 +45,7 @@
     let dragging
     let viewMode = window.localStorage.getItem('viewMode') || 'detail'
     let searchText = ''
+    let openSearch = false
 
     // folders variable
     let walletWidth
@@ -133,6 +134,7 @@
     on:show_folders={() => (foldersVisible = !foldersVisible)}
     bind:floatingFolder
     bind:searchText
+    bind:openSearch
 />
 <div class="wallet" bind:clientWidth={walletWidth}>
     <Folders
@@ -140,6 +142,10 @@
         bind:floating={floatingFolder}
         bind:visible={foldersVisible}
         bind:currentFolderId
+        on:change={() => {
+            searchText = ''
+            openSearch = false
+        }}
     />
     {#if auditVisible}
         <Audit {wallet} on:edit={(event) => editAccount(event.detail)} />

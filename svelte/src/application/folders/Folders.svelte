@@ -33,6 +33,11 @@
     async function onMoveFolder(event) {
         wallet = await api.moveFolder(event.detail.fromItem, event.detail.to)
     }
+
+    function setFolder(folderId) {
+        currentFolderId = folderId
+        dispatch('change')
+    }
 </script>
 
 {#if visible && floating}
@@ -52,7 +57,7 @@
             />
         </div>
         <ListItem
-            on:click={() => (currentFolderId = -1)}
+            on:click={() => setFolder(-1)}
             selected={currentFolderId < 0}
             icon="policy"
             name="Security panel"
@@ -62,7 +67,7 @@
                 folder={folders[0]}
                 on:edit={onEditFolder(folders[0])}
                 selected={currentFolderId === folders[0].id}
-                on:click={() => (currentFolderId = folders[0].id)}
+                on:click={() => setFolder(folders[0].id)}
             />
             <Sortablegrid
                 class="folders"
@@ -74,7 +79,7 @@
                         folder={item}
                         on:edit={onEditFolder(item)}
                         selected={currentFolderId === item.id}
-                        on:click={() => (currentFolderId = item.id)}
+                        on:click={() => setFolder(item.id)}
                     />
                 </div>
             </Sortablegrid>

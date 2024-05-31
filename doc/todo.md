@@ -1,9 +1,4 @@
 # Todo
-Bugs
-- search then keep the search and try to open a folder
-  expected result: clear the search and open the folder
-
-Less important
 - download image when adding the URL on an account
 - grep Todo
 - improve readme

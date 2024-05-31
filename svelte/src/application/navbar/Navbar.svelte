@@ -15,7 +15,7 @@
     export let floatingFolder
     export let searchText = ''
     let changePassword
-    let openSearch = false
+    export let openSearch = false
     let isDropboxAuthenticated = false
     let settingsVisible = false
 
