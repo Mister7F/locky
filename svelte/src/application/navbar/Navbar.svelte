@@ -11,7 +11,7 @@
     import * as dropbox from './../dropbox/dropbox.js'
 
     const dispatch = createEventDispatcher()
-    export let viewMode = 'detail'
+    export let viewMode = 'list'
     export let floatingFolder
     let searchField
     let searchText = ''
