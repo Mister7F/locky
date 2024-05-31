@@ -50,8 +50,8 @@
                 if (input !== document.activeElement) {
                     setTimeout(() => {
                         input.focus()
+                        searchText += event.key
                     })
-                    searchText += event.key
                 }
             }
         })
