@@ -358,7 +358,6 @@
     }
 
     :global(.move_into) {
-        pointer-events: none;
         background-color: color-mix(in srgb, #4a6572 20%, transparent);
     }
 </style>

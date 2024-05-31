@@ -50,7 +50,7 @@
 <div
     class="foldersList {visible ? 'visible' : ''} {floating ? 'floating' : ''}"
 >
-    <div class="item_container">
+    <div>
         <div class="header">
             <span class="header_title">Folders</span>
             <IconButton
@@ -77,14 +77,14 @@
                 bind:items={categoryFolders}
                 on:move={onMoveFolder}
             >
-                <div slot="item" let:item>
-                    <Folder
-                        folder={item}
-                        on:edit={onEditFolder(item)}
-                        selected={currentFolderId === item.id}
-                        on:click={() => setFolder(item.id)}
-                    />
-                </div>
+                <Folder
+                    slot="item"
+                    let:item
+                    folder={item}
+                    on:edit={onEditFolder(item)}
+                    selected={currentFolderId === item.id}
+                    on:click={() => setFolder(item.id)}
+                />
             </Sortablegrid>
         {/if}
         <ListItem
@@ -103,8 +103,6 @@
 </div>
 
 <style>
-    .item_container {
-    }
     .header {
         display: flex;
         flex-direction: row;
