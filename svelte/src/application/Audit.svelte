@@ -21,6 +21,7 @@
     let loading = false
     let leakedAccountsIndex = []
     let weakAccountsIndex = []
+    let duplicatedIndex = []
 
     async function isPasswordLeaked(password) {
         const hash = await digest(password)
@@ -71,8 +72,24 @@
             }
         }
 
+        // find duplicated passwords
+        const seen = {}
+        const _duplicatedIndex = new Set()
+        for (let i = 0; i < wallet['accounts'].length; i++) {
+            const password = wallet['accounts'][i].password
+            if (!password?.length) {
+                continue
+            }
+            if (seen[password]) {
+                _duplicatedIndex.add(i)
+                _duplicatedIndex.add(seen[password])
+            }
+            seen[password] = i
+        }
+
         leakedAccountsIndex = leakedAccountsIndex
         weakAccountsIndex = weakAccountsIndex
+        duplicatedIndex = [..._duplicatedIndex]
 
         loading = false
     }
@@ -117,19 +134,37 @@
             <a href="https://github.com/dropbox/zxcvbn" target="_blank">weak</a>
             and must be changed!
         </span>
+        <div class="container">
+            {#each weakAccountsIndex as accountIndex, index}
+                <div {index}>
+                    <AccountCard
+                        account={wallet['accounts'][accountIndex]}
+                        on:click={() =>
+                            dispatch('edit', wallet['accounts'][accountIndex])}
+                        viewMode="minimalist"
+                    />
+                </div>
+            {/each}
+        </div>
     {/if}
-    <div class="container">
-        {#each weakAccountsIndex as accountIndex, index}
-            <div {index}>
-                <AccountCard
-                    account={wallet['accounts'][accountIndex]}
-                    on:click={() =>
-                        dispatch('edit', wallet['accounts'][accountIndex])}
-                    viewMode="minimalist"
-                />
-            </div>
-        {/each}
-    </div>
+
+    {#if duplicatedIndex.length}
+        <span class="title">
+            The passwords of those accounts are re-used and must be changed!
+        </span>
+        <div class="container">
+            {#each duplicatedIndex as accountIndex, index}
+                <div {index}>
+                    <AccountCard
+                        account={wallet['accounts'][accountIndex]}
+                        on:click={() =>
+                            dispatch('edit', wallet['accounts'][accountIndex])}
+                        viewMode="minimalist"
+                    />
+                </div>
+            {/each}
+        </div>
+    {/if}
 </div>
 
 <style>

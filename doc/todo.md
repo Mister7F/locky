@@ -7,9 +7,6 @@
 - move additional fields
 - account editor: press tab go to next field instead of "Copy" button
 - when entering an email, suggest existing email
-- view to see duplicated password
-- new folder: edit the folder in the list instead opening a dialog
-  allow to edit the icon without the dialog (just a select component)
 - better password generation (list of words...)
 - clipboard: find a better solution (browser extension with an iframe to the Locky instance ?)
 - automatically remove the clipboard after 1 minute
