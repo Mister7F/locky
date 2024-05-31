@@ -60,8 +60,8 @@
             />
         </div>
         <ListItem
-            on:click={() => setFolder(-1)}
-            selected={currentFolderId < 0}
+            on:click={() => setFolder('security')}
+            selected={currentFolderId === 'security'}
             icon="policy"
             name="Security panel"
         />
@@ -87,6 +87,12 @@
                 </div>
             </Sortablegrid>
         {/if}
+        <ListItem
+            on:click={() => setFolder('no_folder')}
+            selected={currentFolderId === 'no_folder'}
+            icon="folder_off"
+            name="No Folder"
+        />
     </div>
 
     <EditFolder

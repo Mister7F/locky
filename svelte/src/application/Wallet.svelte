@@ -20,6 +20,10 @@
     $: {
         accounts = []
         if (wallet && wallet['accounts']) {
+            const folderIds = wallet['folders']
+                .map((folder) => folder.id)
+                .filter((folderId) => folderId !== 0)
+
             accounts = wallet['accounts'].filter((account) => {
                 if (searchText.length) {
                     return (
@@ -27,6 +31,9 @@
                             .toLowerCase()
                             .indexOf(searchText.toLowerCase()) >= 0
                     )
+                }
+                if (currentFolderId === 'no_folder') {
+                    return !folderIds.includes(account.folder_id)
                 }
                 return currentFolderId
                     ? account.folder_id === currentFolderId
@@ -62,7 +69,7 @@
     }
 
     // Accounts audit
-    $: auditVisible = currentFolderId < 0
+    $: auditVisible = currentFolderId === 'security'
 
     async function onMoveAccount(event) {
         const fromAccount = event.detail.fromItem
