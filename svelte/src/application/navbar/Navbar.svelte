@@ -48,8 +48,13 @@
             ) {
                 openSearch = true
                 const input = document.querySelector('.search_field input')
-                input.focus()
-                input.value += event.key
+                if (input !== document.activeElement) {
+                    setTimeout(() => {
+                        input.focus()
+                        input.dispatchEvent(new Event('input'))
+                    })
+                    input.value += event.key
+                }
             }
         })
     })
