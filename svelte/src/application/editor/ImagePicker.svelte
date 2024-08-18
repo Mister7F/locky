@@ -6,15 +6,15 @@
     import Field from '../../helpers/field/Field.svelte'
     import Img from '../../helpers/Img.svelte'
 
-    export let src
-    export let chooseIcon = false
-    export let readonly = false
-    export let size = '100px'
-    export let srcs = []
+    let {
+        src = $bindable(''),
+        chooseIcon = false,
+        readonly = false,
+        size = '100px',
+        srcs = $bindable([]),
+    } = $props()
 
-    let customSrc = src
-
-    $: currentSrcs =
+    let currentSrcs = $derived(
         !searchValue || !searchValue.length
             ? srcs
             : srcs.filter((url) => {
@@ -22,8 +22,9 @@
                       url.toLowerCase().indexOf(searchValue.toLowerCase()) > 0
                   )
               })
+    )
 
-    let searchValue = ''
+    let searchValue = $state('')
 
     // Fetch the list of account logos
     onMount(async () => {
@@ -46,7 +47,7 @@
 </script>
 
 <div class="image_picker" style="--size: {size}">
-    <div class="img {readonly ? 'readonly' : ''}" on:click={open}>
+    <div class="img {readonly ? 'readonly' : ''}" onclick={open}>
         {#if src}
             <Img {src} alt={src} />
         {:else}<img src="img/accounts/default.svg" alt="default" />{/if}
@@ -54,17 +55,14 @@
     <div class="icons {chooseIcon && !readonly ? 'visible' : ''}">
         <div class="img-header">
             <div class="url">
-                <Field label="Image URL" copy="0" bind:value={customSrc} />
-                <IconButton
-                    on:click={() => choose(customSrc)}
-                    icon="save_alt"
-                />
+                <Field label="Image URL" copy="0" bind:value={src} />
+                <IconButton onclick={() => choose(src)} icon="save_alt" />
             </div>
             <Field label="Search" copy="0" bind:value={searchValue} />
         </div>
         <div class="container">
             {#each currentSrcs as src}
-                <img {src} on:click={() => choose(src)} alt={src} />
+                <img {src} onclick={() => choose(src)} alt={src} />
             {/each}
         </div>
     </div>

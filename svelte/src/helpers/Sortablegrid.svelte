@@ -1,18 +1,16 @@
 <script>
-    import { createEventDispatcher, onMount } from 'svelte'
-
-    export let items
-    export let dragging = false
-
-    // if false, can not move the items in the list
-    export let movable = true
-    let className = ''
-    export { className as class }
-    // List of [dom_id], when an item is dropped on the specified DOM id
-    // the event "action" is called
-    export let customActions = []
-
-    const dispatch = createEventDispatcher()
+    let {
+        items,
+        dragging = $bindable(false),
+        movable = true,
+        class: className = '',
+        // List of [dom_id], when an item is dropped on the specified DOM id
+        // the event "action" is called
+        customActions = [],
+        onmove = null,
+        onmove_blocked = null,
+        onaction = null,
+    } = $props()
 
     function getElementIndex(element) {
         // Return the index of the element in its parent
@@ -29,7 +27,7 @@
     let draggedIndex = -1
     let destIndex = -1
     let action = null
-    let gridElement
+    let gridElement = $state()
     let ghostElement = null
 
     // Position of the mouse on the dragged element
@@ -96,7 +94,7 @@
         }
         let draggedItem = items[draggedIndex]
         if (action) {
-            dispatch('action', {
+            onaction({
                 action: action,
                 item: draggedItem,
             })
@@ -112,7 +110,7 @@
             // update the UI
             ghostElement.parentNode.insertBefore(draggedElement, ghostElement)
             ghostElement.remove()
-            dispatch('move', {
+            onmove({
                 from: draggedIndex,
                 to: destIndex,
                 fromItem: draggedItem,
@@ -236,7 +234,7 @@
         const target = event.currentTarget
         if (!movable) {
             // try to move, but can't
-            dispatch('move_blocked')
+            onmove_blocked()
             return
         }
 
@@ -277,7 +275,7 @@
         return clone
     }
 
-    onMount(() => {
+    $effect(() => {
         const body = document.body
         body.addEventListener('mouseup', mouseUp, { passive: true })
         body.addEventListener('touchend', mouseUp, { passive: true })
@@ -289,16 +287,16 @@
 <div
     class="grid {className}
     {dragging ? 'dragging' : ''}"
-    oncontextmenu="return false;"
+    oncontextmenu={() => false}
     bind:this={gridElement}
 >
     <div class="items">
-        {#each items as item, index (item)}
+        {#each items as item, index (JSON.stringify(item))}
             <div
                 class="container"
-                on:mousedown={mouseDown}
-                on:touchstart={touchStart}
-                on:contextmenu|preventDefault
+                onmousedowncapture={mouseDown}
+                ontouchstartcapture={touchStart}
+                oncontextmenu={(event) => event.preventDefault()}
             >
                 <slot name="item" class="item" {item} {index} />
             </div>

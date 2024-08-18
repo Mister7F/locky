@@ -4,9 +4,9 @@
     import Login from './login/Login.svelte'
     import Wallet from './Wallet.svelte'
 
-    let locked = true
-    let walletElement
-    let wallet = null
+    let locked = $state(true)
+    let walletElement = $state(null)
+    let wallet = $state(null)
 
     async function lock() {
         await api.logout(true)
@@ -29,9 +29,9 @@
 
 <div class="root">
     {#if locked}
-        <Login on:wallet_openned={() => (locked = false)} bind:wallet />
+        <Login onwallet_openned={() => (locked = false)} bind:wallet />
     {:else}
-        <Wallet bind:wallet on:lock={lock} bind:this={walletElement} />
+        <Wallet bind:wallet onlock={lock} bind:this={walletElement} />
     {/if}
 </div>
 

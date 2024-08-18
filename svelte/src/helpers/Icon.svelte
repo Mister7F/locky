@@ -1,10 +1,13 @@
 <script>
-    export let title = ''
-    let className = ''
-    export { className as class }
-    export let color = 'on-primary'
-    export let on = null
-    $: cssColor =
+    let {
+        onclick,
+        title = '',
+        color = 'on-primary',
+        on = null,
+        class: className,
+    } = $props()
+
+    let cssColor = $derived(
         {
             primary: 'var(--primary)',
             secondary: 'var(--secondary)',
@@ -13,11 +16,12 @@
             'on-secondary': 'var(--on-secondary)',
             'on-surface': 'var(--on-surface)',
         }[color] || 'var(--on-surface)'
+    )
 </script>
 
 <span
     class="icon_base material-icons {className}"
-    on:click
+    {onclick}
     {on}
     {title}
     {color}

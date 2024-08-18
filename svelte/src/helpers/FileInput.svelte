@@ -1,18 +1,17 @@
 <script>
     import Button from './Button.svelte'
-    import { createEventDispatcher } from 'svelte'
-
-    const dispatch = createEventDispatcher()
 
     let filedata = null
-    let filename = null
-
+    let filename = $state(null)
     let fileInput = null
 
-    $: truncatedFilename =
+    let { onremoved, onuploaded } = $props()
+
+    let truncatedFilename = $derived(
         !filename || filename.length <= 18
             ? filename
             : filename.substr(0, 15) + '...'
+    )
 
     async function onFileUploaded(event) {
         const target = event.target
@@ -21,13 +20,12 @@
         if (!file) {
             filename = null
             filedata = null
-            dispatch('removed')
+            onremoved()
             return
         }
 
         filename = file.name
-        filedata = await file.arrayBuffer()
-        dispatch('uploaded', { file: filedata })
+        onuploaded(await file.arrayBuffer())
     }
 </script>
 
@@ -36,11 +34,11 @@
     color="secondary"
     variant="outlined"
     icon="file_upload"
-    on:click={() => fileInput.click()}
+    onclick={() => fileInput.click()}
 >
     {truncatedFilename || 'Upload'}
 </Button>
-<input on:change={onFileUploaded} type="file" bind:this={fileInput} />
+<input onchange={onFileUploaded} type="file" bind:this={fileInput} />
 
 <style>
     :global(.file_input_button) {

@@ -1,30 +1,22 @@
 <script>
     import Icon from './Icon.svelte'
     import IconButton from './IconButton.svelte'
-    import { createEventDispatcher } from 'svelte'
 
-    export let title = ''
-    let className = ''
-    export { className as class }
-
-    export let color = 'on-primary'
-
-    export let icon = false
-
-    export let bgColor = false
-
-    const dispatch = createEventDispatcher()
-
-    function onClick(event) {
-        dispatch('click')
-    }
+    let {
+        onclick,
+        title = '',
+        color = 'on-primary',
+        icon = false,
+        bgColor = false,
+        class: className = '',
+    } = $props()
 </script>
 
 <IconButton
     class="{className} fab_button"
     {title}
     {color}
-    on:click={onClick}
+    {onclick}
     {icon}
     {bgColor}
 >

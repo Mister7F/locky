@@ -2,12 +2,9 @@
     import Button from '../../helpers/Button.svelte'
     import Dialog from '../../helpers/Dialog.svelte'
 
-    import { createEventDispatcher } from 'svelte'
+    let { onremove, account } = $props()
 
-    const dispatch = createEventDispatcher()
-
-    export let account
-    let removeAccountDialogOpen = false
+    let removeAccountDialogOpen = $state(false)
 
     export function open() {
         removeAccountDialogOpen = true
@@ -22,15 +19,11 @@
             style="margin-top: 10px; margin-right: 10px;"
             color="secondary"
             variant="outlined"
-            on:click={() => (removeAccountDialogOpen = false)}
+            onclick={() => (removeAccountDialogOpen = false)}
         >
             No
         </Button>
-        <Button
-            style="margin-top: 10px;"
-            color="secondary"
-            on:click={() => dispatch('remove')}
-        >
+        <Button style="margin-top: 10px;" color="secondary" onclick={onremove}>
             Yes
         </Button>
     </div>

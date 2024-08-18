@@ -2,22 +2,12 @@
     import Slider from '../../helpers/Slider.svelte'
     import Dialog from '../../helpers/Dialog.svelte'
     import Button from '../../helpers/Button.svelte'
-    import { createEventDispatcher } from 'svelte'
     import Icon from '../../helpers/Icon.svelte'
 
-    const dispatch = createEventDispatcher()
+    let { onuse } = $props()
 
-    let password = ''
-    let passwordLength = 16
-    let generatePasswordDialogOpen = false
-
-    let useLower = true
-    let useUpper = true
-    let useNumber = true
-    let useSymbol = true
-
-    $: {
-        password = ''
+    function generate() {
+        let password = ''
         let alphabet = ''
         if (useLower) {
             alphabet = alphabet + 'abcdefghijklmnopqrstuvwxyz'
@@ -40,7 +30,17 @@
                 password = password + alphabet[pos % alphabet.length]
             }
         }
+        return password
     }
+
+    let useLower = $state(true)
+    let useUpper = $state(true)
+    let useNumber = $state(true)
+    let useSymbol = $state(true)
+
+    let passwordLength = $state(20)
+    let password = $state(generate())
+    let generatePasswordDialogOpen = $state(false)
 
     export function open() {
         generatePasswordDialogOpen = true
@@ -50,7 +50,7 @@
         const newPassword = password
         password = ''
         generatePasswordDialogOpen = false
-        dispatch('use', newPassword)
+        onuse(newPassword)
     }
 </script>
 
@@ -58,28 +58,28 @@
     <div class="options">
         <Button
             color="secondary"
-            on:click={() => (useLower = !useLower)}
+            onclick={() => (useLower = !useLower)}
             variant={useLower ? '' : 'outlined'}
         >
             a
         </Button>
         <Button
             color="secondary"
-            on:click={() => (useUpper = !useUpper)}
+            onclick={() => (useUpper = !useUpper)}
             variant={useUpper ? '' : 'outlined'}
         >
             A
         </Button>
         <Button
             color="secondary"
-            on:click={() => (useNumber = !useNumber)}
+            onclick={() => (useNumber = !useNumber)}
             variant={useNumber ? '' : 'outlined'}
         >
             9
         </Button>
         <Button
             color="secondary"
-            on:click={() => (useSymbol = !useSymbol)}
+            onclick={() => (useSymbol = !useSymbol)}
             variant={useSymbol ? '' : 'outlined'}
         >
             $
@@ -95,7 +95,7 @@
         style="margin-top: 10px;"
         color="secondary"
         variant="outlined"
-        on:click={onUse}
+        onclick={onUse}
     >
         Use
     </Button>
@@ -103,7 +103,7 @@
         style="margin-top: 10px; margin-left: 20px"
         color="secondary"
         variant="outlined"
-        on:click={() => (password = '')}
+        onclick={() => (password = generate())}
     >
         Generate
     </Button>

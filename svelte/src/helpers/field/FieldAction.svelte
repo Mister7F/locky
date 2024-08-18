@@ -4,19 +4,14 @@
     import IconButton from '../IconButton.svelte'
     import Button from '../Button.svelte'
     import Dialog from '../../helpers/Dialog.svelte'
-    import { createEventDispatcher } from 'svelte'
 
-    const dispatch = createEventDispatcher()
+    let { type = $bindable('text'), label = $bindable(''), onremove } = $props()
 
-    export let type = 'text'
-    export let label = ''
-
-    let fieldNameDialogOpen = false
-
-    let deleteConfirmation = false
+    let fieldNameDialogOpen = $state(false)
+    let deleteConfirmation = $state(false)
 
     function onDelete() {
-        dispatch('remove')
+        onremove()
         deleteConfirmation = false
     }
 
@@ -31,7 +26,7 @@
 </script>
 
 <IconButton
-    on:click={() => (fieldNameDialogOpen = true)}
+    onclick={() => (fieldNameDialogOpen = true)}
     color="on-primary"
     icon="create"
 />
@@ -44,28 +39,28 @@
         icon="title"
         color="secondary"
         variant={type === 'text' ? '' : 'outlined'}
-        on:click={() => (type = 'text')}
+        onclick={() => (type = 'text')}
     />
     <Button
         class="field_type_button"
         icon="vpn_key"
         color="secondary"
         variant={type === 'password' ? '' : 'outlined'}
-        on:click={() => (type = 'password')}
+        onclick={() => (type = 'password')}
     />
     <Button
         class="field_type_button"
         icon="link"
         color="secondary"
         variant={type === 'url' ? '' : 'outlined'}
-        on:click={() => (type = 'url')}
+        onclick={() => (type = 'url')}
     />
     <br />
     Rename
     <br />
     <TextInput
         class="field_name"
-        on:keypress={onKeyPressFieldLabel}
+        onkeypress={onKeyPressFieldLabel}
         bind:value={label}
     />
 
@@ -75,7 +70,7 @@
                 style="float: right; margin-top: 10px;"
                 color="secondary"
                 variant="outlined"
-                on:click={() => (deleteConfirmation = false)}
+                onclick={() => (deleteConfirmation = false)}
             >
                 Cancel
             </Button>
@@ -83,7 +78,7 @@
                 style="float: right; margin-top: 10px;"
                 color="secondary"
                 variant="text"
-                on:click={onDelete}
+                onclick={onDelete}
             >
                 Delete
             </Button>
@@ -92,7 +87,7 @@
                 style="float: right; margin-top: 10px;"
                 color="secondary"
                 variant="text"
-                on:click={() => (deleteConfirmation = true)}
+                onclick={() => (deleteConfirmation = true)}
             >
                 Delete
             </Button>
@@ -100,7 +95,7 @@
                 style="float: right; margin-top: 10px;"
                 color="secondary"
                 variant="outlined"
-                on:click={() => (fieldNameDialogOpen = false)}
+                onclick={() => (fieldNameDialogOpen = false)}
             >
                 Close
             </Button>

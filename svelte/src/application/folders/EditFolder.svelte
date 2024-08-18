@@ -3,13 +3,14 @@
     import Button from '../../helpers/Button.svelte'
     import IconButton from '../../helpers/IconButton.svelte'
     import Dialog from '../../helpers/Dialog.svelte'
-    import { createEventDispatcher } from 'svelte'
     import Icon from '../../helpers/Icon.svelte'
-    const dispatch = createEventDispatcher()
-    let editedFolder = null
+
+    let { onsave, ondelete } = $props()
+
+    let editedFolder = $state(null)
     let folderDialog = null
-    let folderDialogOpen = false
-    let folderIconOpen = false
+    let folderDialogOpen = $state(false)
+    let folderIconOpen = $state(false)
     let folderIcons = [
         // https://material.io/resources/icons/?style=baseline
         'home',
@@ -59,12 +60,12 @@
         folderDialogOpen = true
     }
     function onSaveFolder() {
-        dispatch('save', editedFolder)
+        onsave(editedFolder)
         folderDialogOpen = false
         editedFolder = null
     }
     function onDeleteFolder() {
-        dispatch('delete', editedFolder)
+        ondelete(editedFolder)
         folderDialogOpen = false
         editedFolder = null
     }
@@ -73,8 +74,8 @@
 <Dialog title="Folder" bind:open={folderDialogOpen}>
     <div class="container">
         <IconButton
-            on:click={() => (folderIconOpen = !folderIconOpen)}
-            on:blur={() => setTimeout(() => (folderIconOpen = false), 100)}
+            onclick={() => (folderIconOpen = !folderIconOpen)}
+            onblur={() => setTimeout(() => (folderIconOpen = false), 100)}
             icon={editedFolder.icon || 'folder'}
             color="on-primary"
         />
@@ -83,7 +84,7 @@
                 {#each folderIcons as folderIcon}
                     <div
                         class="folder_icon"
-                        on:click={() => (editedFolder.icon = folderIcon)}
+                        onclick={() => (editedFolder.icon = folderIcon)}
                     >
                         <Icon color="on-surface">{folderIcon}</Icon>
                     </div>
@@ -96,7 +97,7 @@
 
     <div slot="actions">
         <Button
-            on:click={onDeleteFolder}
+            onclick={onDeleteFolder}
             style="float: right; margin-top: 10px;"
             color="secondary"
             variant="outlined"
@@ -105,7 +106,7 @@
         </Button>
 
         <Button
-            on:click={onSaveFolder}
+            onclick={onSaveFolder}
             style="float: right; margin-top: 10px;"
             color="secondary"
             variant="outlined"

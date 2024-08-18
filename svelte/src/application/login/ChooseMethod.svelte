@@ -1,11 +1,7 @@
 <script>
     import Button from '../../helpers/Button.svelte'
 
-    import { createEventDispatcher } from 'svelte'
-
-    const dispatch = createEventDispatcher()
-
-    export let sessionOpened = false
+    let { sessionOpened = false, onclick } = $props()
 </script>
 
 <h1>Open your wallet</h1>
@@ -15,7 +11,7 @@
             color="secondary"
             variant="outlined"
             icon="login"
-            on:click={() => dispatch('click', 'login')}
+            onclick={() => onclick('login')}
         >
             Unlock the session
         </Button>
@@ -24,7 +20,7 @@
         color="secondary"
         variant="outlined"
         icon="add"
-        on:click={() => dispatch('click', 'create')}
+        onclick={() => onclick('create')}
     >
         Create a new wallet
     </Button>
@@ -32,14 +28,14 @@
         color="secondary"
         variant="outlined"
         icon="file_upload"
-        on:click={() => dispatch('click', 'upload')}
+        onclick={() => onclick('upload')}
     >
         Upload a file
     </Button>
     <Button
         color="secondary"
         variant="outlined"
-        on:click={() => dispatch('click', 'dropbox')}
+        onclick={() => onclick('dropbox')}
     >
         <svg viewBox="0 0 56.693 56.693" width="56.693px">
             <polygon

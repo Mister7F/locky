@@ -1,10 +1,10 @@
 <script>
-    export let src = null
-    export let alt = null
-    let className = ''
-    export { className as class }
-
-    let noimageSet = false
+    let {
+        src = null,
+        alt = null,
+        class: className = '',
+        noimageSet = false,
+    } = $props()
 
     function onError(event) {
         if (event.target.src !== 'img/noimage.svg' && !noimageSet) {
@@ -14,7 +14,7 @@
     }
 </script>
 
-<img class={className} {src} {alt} on:error={onError} />
+<img class={className} {src} {alt} onerror={onError} />
 
 <style>
     img {

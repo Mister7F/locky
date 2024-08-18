@@ -1,24 +1,17 @@
 <script>
     import IconButton from '../helpers/IconButton.svelte'
     import { createRipple } from '../helpers/ripple.js'
-    import { createEventDispatcher } from 'svelte'
     import Img from '../helpers/Img.svelte'
     import { getTotpCode, passwordStrength } from '../helpers/crypto.js'
     import { isUrlValid, copyValue } from '../helpers/utils.js'
 
-    const dispatch = createEventDispatcher()
-    export let account
-    export let viewMode = 'list'
+    let { account, viewMode = 'list', onclick, onnotify } = $props()
 
     const strength = passwordStrength(account.password)
-
-    function onClick(event) {
-        dispatch('click')
-    }
 </script>
 
 {#if viewMode === 'minimalist'}
-    <div class="account" on:click={onClick}>
+    <div class="account" {onclick}>
         <div class="card">
             <div class="row">
                 <div class="image">
@@ -40,8 +33,8 @@
             {/if}
             <div
                 class="detail_main_action ripple ripple_dark ripple_fast"
-                on:click={onClick}
-                on:mousedown={(event) => createRipple(event)}
+                {onclick}
+                onmousedown={(event) => createRipple(event)}
             >
                 <div class="detail_img">
                     <Img
@@ -69,8 +62,8 @@
                 <div>
                     {#if account.login}
                         <IconButton
-                            on:click={() => {
-                                dispatch('notify', 'Login copied')
+                            onclick={() => {
+                                onnotify('Login copied')
                                 copyValue(account.login)
                             }}
                             title="Login"
@@ -81,8 +74,8 @@
                     {/if}
                     {#if account.password}
                         <IconButton
-                            on:click={() => {
-                                dispatch('notify', 'Password copied')
+                            onclick={() => {
+                                onnotify('Password copied')
                                 copyValue(account.password)
                             }}
                             icon="vpn_key"
@@ -93,8 +86,8 @@
                     {/if}
                     {#if account.totp}
                         <IconButton
-                            on:click={async () => {
-                                dispatch('notify', '2FA copied')
+                            onclick={async () => {
+                                onnotify('2FA copied')
                                 copyValue(
                                     (await getTotpCode(account.totp)).replace(
                                         ' ',
@@ -115,8 +108,8 @@
 {:else}
     <div
         class="account_list_item ripple ripple_dark ripple_fast"
-        on:click={onClick}
-        on:mousedown={(event) => createRipple(event)}
+        {onclick}
+        onmousedown={(event) => createRipple(event)}
     >
         <div class="account_list_item_title">
             <Img
@@ -125,7 +118,7 @@
             />
             <div>
                 <h5>{account.name}</h5>
-                <p>{account.login.split('@')[0]}</p>
+                <p>{account.login?.split('@')[0]}</p>
             </div>
         </div>
         <div class="account_list_item_actions">
@@ -141,9 +134,8 @@
             {/if}
             {#if account.login}
                 <IconButton
-                    on:click={(event) => {
-                        event.stopPropagation()
-                        dispatch('notify', 'Login copied')
+                    onclick={() => {
+                        onnotify('Login copied')
                         copyValue(account.login)
                     }}
                     title="Login"
@@ -154,9 +146,8 @@
             {/if}
             {#if account.password}
                 <IconButton
-                    on:click={(event) => {
-                        event.stopPropagation()
-                        dispatch('notify', 'Password copied')
+                    onclick={() => {
+                        onnotify('Password copied')
                         copyValue(account.password)
                     }}
                     title="Password"
@@ -167,9 +158,8 @@
             {/if}
             {#if account.totp}
                 <IconButton
-                    on:click={async (event) => {
-                        event.stopPropagation()
-                        dispatch('notify', '2FA copied')
+                    onclick={async () => {
+                        onnotify('2FA copied')
                         copyValue(
                             (await getTotpCode(account.totp)).replace(' ', '')
                         )

@@ -3,8 +3,9 @@
     import Dialog from '../../helpers/Dialog.svelte'
     import QRious from 'qrious'
 
-    export let account
-    let qrCodeDialogOpen = false
+    let { account } = $props()
+
+    let qrCodeDialogOpen = $state(false)
 
     export function open() {
         qrCodeDialogOpen = true
@@ -34,7 +35,7 @@
         style="float: right; margin-top: 10px;"
         color="secondary"
         variant="text"
-        on:click={() => (qrCodeDialogOpen = false)}
+        onclick={() => (qrCodeDialogOpen = false)}
     >
         Close
     </Button>

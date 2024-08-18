@@ -2,13 +2,11 @@
     import Switch from '../../helpers/Switch.svelte'
     import Dialog from '../../helpers/Dialog.svelte'
     import IconButton from '../IconButton.svelte'
-    import { createEventDispatcher } from 'svelte'
 
-    const dispatch = createEventDispatcher()
-    export let strengthResult
-    let detailDialogOpen = false
+    let { strengthResult } = $props()
 
-    let visible = false
+    let detailDialogOpen = $state(false)
+    let visible = $state(false)
 
     function open() {
         detailDialogOpen = true
@@ -16,7 +14,7 @@
 </script>
 
 <div>
-    <IconButton on:click={open} icon="warning" />
+    <IconButton onclick={open} icon="warning" />
 </div>
 
 <Dialog bind:open={detailDialogOpen} title="Weak password">
@@ -58,9 +56,6 @@
     ul {
         padding-left: 15px;
         margin-top: 0;
-    }
-    span {
-        color: rgba(74, 101, 114, 0.6);
     }
     p,
     li {

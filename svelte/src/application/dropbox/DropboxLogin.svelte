@@ -1,12 +1,8 @@
 <script>
     import Button from '../../helpers/Button.svelte'
-    import { createEventDispatcher } from 'svelte'
     import * as dropbox from './dropbox.js'
-    import { onMount } from 'svelte'
 
-    export let state = ''
-
-    const dispatch = createEventDispatcher()
+    let { state = $bindable(), logout } = $props()
 
     let filedata = null
     let authenticationUrl = null
@@ -19,10 +15,10 @@
     async function onLogout() {
         dropbox.logout()
         state = 'not_logged'
-        dispatch('logout')
+        onlogout()
     }
 
-    onMount(async () => {
+    $effect(async () => {
         let isAuthenticated = await dropbox.isAuthenticated()
         state = isAuthenticated ? 'logged' : 'not_logged'
         authenticationUrl = await dropbox.getAuthenticationUrl()
@@ -46,7 +42,7 @@
         <Button
             color="secondary"
             variant="outlined"
-            on:click={onLogout}
+            onclick={onLogout}
             icon="logout"
         >
             Logout
@@ -56,7 +52,7 @@
     {#if state === 'no_wallet'}<span class="error">No wallet found</span>{/if}
 
     {#if state === 'not_logged'}
-        <Button color="secondary" variant="outlined" on:click={onLogin}>
+        <Button color="secondary" variant="outlined" onclick={onLogin}>
             <svg viewBox="0 0 56.693 56.693" width="56.693px">
                 <polygon
                     points="3.535,33.956 18.132,43.481 28.347,34.962 13.628,25.878 "

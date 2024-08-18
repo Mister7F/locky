@@ -3,7 +3,6 @@
     import IconButton from '../../helpers/IconButton.svelte'
     import Fab from '../../helpers/Fab.svelte'
 
-    import { createEventDispatcher } from 'svelte'
     import Field from '../../helpers/field/Field.svelte'
     import { copyValue } from '../../helpers/utils.js'
     import { getTotpCode } from '../../helpers/crypto.js'
@@ -13,27 +12,24 @@
     import DialogRemoveAccount from './DialogRemoveAccount.svelte'
     import GeneratePassword from './GeneratePassword.svelte'
 
-    export let account = null
-    export let readonly = 0
+    let { onsave, onclose, onremove, account, readonly = 0 } = $props()
 
-    const dispatch = createEventDispatcher()
-    let qrCodeDialog
-    let removeAccountDialog
-    let generatePasswordDialog
+    let qrCodeDialog = $state()
+    let removeAccountDialog = $state()
+    let generatePasswordDialog = $state()
 
     // TOTP
-    let totpCode = null
-    let time = 30
+    let totpCode = $state(null)
+    let time = $state(30)
     let totpTimeoutHandle = null
-    $: totpMessage = makeTotpMessage(totpCode, time)
-    $: {
-        // Trick to start the TOTP loop when the account
-        // is set or when the readonly state changed
-        account, readonly
-        if (account) updateTotp()
-    }
 
-    let iconSrcs
+    let totpMessage = $derived(makeTotpMessage(totpCode, time))
+
+    $inspect(account, readonly).with(() => {
+        if (account) updateTotp()
+    })
+
+    let iconSrcs = $state([])
 
     function makeTotpMessage(totp, time) {
         if (!totp) {
@@ -68,7 +64,7 @@
     }
 
     function onSave() {
-        dispatch('save', { account: account })
+        onsave(account)
         readonly = true
         totpCode = null
     }
@@ -115,12 +111,12 @@
         class="account_editor_close_button"
         color="on-primary"
         icon="close"
-        on:click={() => dispatch('close')}
+        onclick={onclose()}
     />
     <div class="fields">
         <ImagePicker
             bind:src={account.icon}
-            bind:readonly
+            {readonly}
             size="100px"
             bind:srcs={iconSrcs}
         />
@@ -128,58 +124,58 @@
         <Field
             label="Name"
             bind:value={account.name}
-            bind:readonly
+            {readonly}
             copy="0"
-            on:blur={onFindImage}
+            onblur={onFindImage}
         />
         <Field
             label="Login"
             bind:value={account.login}
-            bind:readonly
-            on:copy={() => copyValue(account.login)}
+            {readonly}
+            oncopy={() => copyValue(account.login)}
         />
         <Field
             label="Password"
             bind:value={account.password}
-            bind:readonly
+            {readonly}
             type="password"
             showPasswordStrength="1"
-            on:copy={() => copyValue(account.password)}
+            oncopy={() => copyValue(account.password)}
         />
         <Field
             label="URL"
             bind:value={account.url}
-            bind:readonly
+            {readonly}
             type="url"
-            on:copy={() => copyValue(account.url)}
+            oncopy={() => copyValue(account.url)}
         />
         <Field
             label="2FA"
             bind:value={account.totp}
-            bind:readonly
+            {readonly}
             type="totp"
-            bind:message={totpMessage}
+            message={totpMessage}
             messagePersistent="1"
-            on:show_qrcode={() => qrCodeDialog.open()}
-            on:change={updateTotp}
-            on:copy={async () => copyValue(await getTotpCode(account.totp))}
+            onshow_qrcode={() => qrCodeDialog.open()}
+            onchange={updateTotp}
+            oncopy={async () => copyValue(await getTotpCode(account.totp))}
         />
 
         {#each account.fields || [] as field, i}
             <Field
                 bind:label={field.name}
                 bind:value={field.value}
-                bind:readonly
+                {readonly}
                 bind:type={field.type}
                 index={i}
                 canEditType="1"
-                on:remove={() => removeField(i)}
-                on:copy={() => copyValue(field.value)}
+                onremove={() => removeField(i)}
+                oncopy={() => copyValue(field.value)}
             />
         {/each}
 
         {#if !readonly}
-            <Button on:click={onNewField} color="secondary" variant="text"
+            <Button onclick={onNewField} color="secondary" variant="text"
                 >New field</Button
             >
         {/if}
@@ -189,34 +185,34 @@
         <Fab
             class="remove_account"
             color="on-primary"
-            on:click={() => removeAccountDialog.open()}
+            onclick={() => removeAccountDialog.open()}
             icon="delete"
         />
     {:else}
         <GeneratePassword
             bind:this={generatePasswordDialog}
-            on:use={(event) => (account.password = event.detail)}
+            onuse={(password) => (account.password = password)}
         />
         <Fab
             class="generate_password"
             color="secondary"
             bgColor="primary"
             icon="password"
-            on:click={() => generatePasswordDialog.open()}
+            onclick={() => generatePasswordDialog.open()}
         />
     {/if}
     <Fab
         class="save_account"
         color="on-secondary"
         icon={readonly ? 'create' : 'done'}
-        on:click={() => (readonly ? onEdit() : onSave())}
+        onclick={() => (readonly ? onEdit() : onSave())}
     />
 </div>
 
-<DialogTotpQrCode bind:account bind:this={qrCodeDialog} />
+<DialogTotpQrCode {account} bind:this={qrCodeDialog} />
 
 {#if readonly}
-    <DialogRemoveAccount bind:this={removeAccountDialog} {account} on:remove />
+    <DialogRemoveAccount bind:this={removeAccountDialog} {account} {onremove} />
 {/if}
 
 <style>

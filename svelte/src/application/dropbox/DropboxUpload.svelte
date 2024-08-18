@@ -8,13 +8,16 @@
     import * as api from '../api.js'
     import { onMount } from 'svelte'
 
-    export let isAuthenticated = false
-    let authenticationUrl = null
-    let uploadingState = 'wait'
-    let confirmationDialogOpen = false
-    let downloadWalletDialogOpen = false
+    let { isAuthenticated = false } = $props()
 
-    $: title = isAuthenticated ? 'Upload your wallet on Dropbox' : 'Login'
+    let authenticationUrl = null
+    let uploadingState = $state('wait')
+    let confirmationDialogOpen = $state(false)
+    let downloadWalletDialogOpen = $state(false)
+
+    let title = $derived(
+        isAuthenticated ? 'Upload your wallet on Dropbox' : 'Login'
+    )
 
     function onLogin() {
         document.location = authenticationUrl
@@ -91,7 +94,7 @@
 
 <div class="container">
     <IconButton
-        on:click={() => (isAuthenticated ? onUpload() : onLogin())}
+        onclick={() => (isAuthenticated ? onUpload() : onLogin())}
         {title}
     >
         {#if uploadingState === 'wait'}
@@ -127,14 +130,14 @@
 
         <div slot="actions">
             <Button
-                on:click={() => (confirmationDialogOpen = false)}
+                onclick={() => (confirmationDialogOpen = false)}
                 color="secondary"
                 variant="outlined"
             >
                 No
             </Button>
             <Button
-                on:click={() => {
+                onclick={() => {
                     confirmationDialogOpen = true
                     uploadWallet()
                 }}
@@ -150,14 +153,14 @@
 
         <div slot="actions">
             <Button
-                on:click={() => (downloadWalletDialogOpen = false)}
+                onclick={() => (downloadWalletDialogOpen = false)}
                 color="secondary"
                 variant="outlined"
             >
                 No
             </Button>
             <Button
-                on:click={async () => {
+                onclick={async () => {
                     downloadWalletDialogOpen = false
                     await downloadWallet()
                 }}

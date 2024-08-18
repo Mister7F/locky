@@ -4,14 +4,10 @@
     import Sidepanel from '../../helpers/Sidepanel.svelte'
     import ChangePassword from './ChangePassword.svelte'
     import * as dropbox from './../dropbox/dropbox.js'
-    import { createEventDispatcher } from 'svelte'
 
-    const dispatch = createEventDispatcher()
+    let { onlock, isDropboxAuthenticated, visible = $bindable(true) } = $props()
 
-    export let isDropboxAuthenticated
-    export let visible = true
-
-    let changePasswordDialog
+    let changePasswordDialog = $state()
 
     async function onDropboxClick() {
         if (isDropboxAuthenticated) {
@@ -28,7 +24,7 @@
     <IconButton
         class="settings_page_close_button"
         icon="close"
-        on:click={() => (visible = false)}
+        onclick={() => (visible = false)}
     />
     <div class="container">
         <h1>Settings</h1>
@@ -36,7 +32,7 @@
             color="secondary"
             variant="outlined"
             icon="logout"
-            on:click={() => dispatch('lock')}
+            onclick={onlock}
         >
             Logout
         </Button>
@@ -44,11 +40,11 @@
             color="secondary"
             variant="outlined"
             icon="password"
-            on:click={() => changePasswordDialog.open()}
+            onclick={() => changePasswordDialog.open()}
         >
             Change your password
         </Button>
-        <Button color="secondary" variant="outlined" on:click={onDropboxClick}>
+        <Button color="secondary" variant="outlined" onclick={onDropboxClick}>
             <svg viewBox="0 0 56.693 56.693" width="56.693px">
                 <polygon
                     points="3.535,33.956 18.132,43.481 28.347,34.962 13.628,25.878 "

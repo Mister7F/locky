@@ -131,6 +131,7 @@ function passwordKey(s) {
 const strength_cache = {}
 let total_time = 0
 export function passwordStrength(password, detail) {
+    password = password || ''
     const key = passwordKey(password)
     let result = strength_cache[key]
 

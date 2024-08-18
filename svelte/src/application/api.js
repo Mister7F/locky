@@ -7,7 +7,7 @@ let masterPassword = null
 export async function newWallet(password) {
     wallet = {
         accounts: [],
-        folders: [{ id: 0, name: 'All', icon: 'home' }],
+        folders: [],
     }
     masterPassword = password
     return await saveWallet()
@@ -39,7 +39,6 @@ export async function login(filedata, password) {
     if (!database) {
         return
     }
-    // return null;
 
     masterPassword = password
     wallet = database
@@ -66,7 +65,8 @@ async function saveWallet() {
         const encryptedWallet = await encryptDatabase(wallet, masterPassword)
         await indexdb.set('wallet', encryptedWallet)
     })
-    return wallet
+    return { accounts: [...wallet.accounts], folders: [...wallet.folders] }
+    // return JSON.parse(JSON.stringify(wallet))
 }
 
 export async function downloadWallet() {
@@ -85,38 +85,29 @@ export async function downloadWallet() {
     document.body.removeChild(elem)
 }
 
-export async function moveAccount(fromAccount, toAccount) {
-    const insertIndex = wallet['accounts'].findIndex(
-        (account) => account === toAccount
-    )
-    const movedAccount = wallet['accounts'].find(
-        (account) => account === fromAccount
-    )
-    const newAccounts = wallet['accounts'].filter(
-        (account) => account !== fromAccount
-    )
-    newAccounts.splice(insertIndex, 0, movedAccount)
-    wallet['accounts'] = newAccounts
+export async function moveAccount(fromIndex, toIndex) {
+    console.log(fromIndex, toIndex)
+    wallet.accounts = array_move(wallet.accounts, fromIndex, toIndex)
     return await saveWallet()
 }
 
 export async function newAccount(account) {
-    wallet['accounts'].push(account)
+    wallet.accounts.push(account)
     return await saveWallet()
 }
 
 export async function updateAccount(accountIndex, account) {
-    wallet['accounts'][accountIndex] = account
+    wallet.accounts[accountIndex] = account
     return await saveWallet()
 }
 
 export async function removeAccount(accountIndex) {
-    wallet['accounts'].splice(accountIndex, 1)
+    wallet.accounts.splice(accountIndex, 1)
     return await saveWallet()
 }
 
 export async function changeFolder(account, newFolderId) {
-    if (wallet['folders'].find((folder) => folder.id === newFolderId) < 0) {
+    if (wallet.folders.find((folder) => folder.id === newFolderId) < 0) {
         console.error("The folder doesn't exist")
         return
     }
@@ -125,14 +116,9 @@ export async function changeFolder(account, newFolderId) {
 }
 
 export async function moveFolder(folder, newIndex) {
-    if (!folder.id || newIndex < 0) {
-        // Can not move the "All" directory
-        return
-    }
-    newIndex += 1 // Index 0 is the "All" directory
-    const newFolders = wallet['folders'].filter((f) => f !== folder)
+    const newFolders = wallet.folders.filter((f) => f.id !== folder.id)
     newFolders.splice(newIndex, 0, folder)
-    wallet['folders'] = newFolders
+    wallet.folders = newFolders
     return await saveWallet()
 }
 
@@ -142,29 +128,25 @@ export async function updateFolder(folder) {
         do {
             // Todo: better ID generation
             folderId = Math.floor(Math.random() * 10000000000000)
-        } while (wallet['folders'].findIndex((f) => f.id === folderId) >= 0)
+        } while (wallet.folders.findIndex((f) => f.id === folderId) >= 0)
 
         // New folder
         folder.id = folderId
-        wallet['folders'].push(folder)
+        wallet.folders.push(folder)
         return await saveWallet()
     }
 
-    const index = wallet['folders'].findIndex((f) => f.id === folder.id)
+    const index = wallet.folders.findIndex((f) => f.id === folder.id)
     if (index < 0) {
         console.error("The folder doesn't exist")
         return
     }
-    wallet['folders'][index] = folder
+    wallet.folders[index] = folder
     return await saveWallet()
 }
 
 export async function deleteFolder(folder) {
-    if (!folder.id) {
-        console.error('Can not remove "All" folder')
-        return
-    }
-    wallet['folders'] = wallet['folders'].filter((f) => f.id !== folder.id)
+    wallet.folders = wallet.folders.filter((f) => f.id !== folder.id)
     return await saveWallet()
 }
 
@@ -175,4 +157,16 @@ export async function updatePassword(oldPassword, newPassword) {
     masterPassword = newPassword
     const encryptedWallet = await saveWallet()
     return !!encryptedWallet
+}
+
+// HELPERS //
+function array_move(arr, old_index, new_index) {
+    if (new_index >= arr.length) {
+        var k = new_index - arr.length + 1
+        while (k--) {
+            arr.push(undefined)
+        }
+    }
+    arr.splice(new_index, 0, arr.splice(old_index, 1)[0])
+    return arr
 }

@@ -1,7 +1,6 @@
 <script>
     import Fab from '../helpers/Fab.svelte'
     import IconButton from '../helpers/IconButton.svelte'
-    import { createEventDispatcher } from 'svelte'
     import Audit from './Audit.svelte'
     import AccountCard from './AccountCard.svelte'
     import AccountEditor from './editor/AccountEditor.svelte'
@@ -12,72 +11,72 @@
     import Sidepanel from '../helpers/Sidepanel.svelte'
     import Sortablegrid from '../helpers/Sortablegrid.svelte'
 
-    const dispatch = createEventDispatcher()
-    export let wallet
+    let { wallet = $bindable(null) } = $props()
+
     // accounts displayed in the UI
     // care about the search, the current directory, etc
-    let accounts = []
-    $: {
-        accounts = []
-        if (wallet && wallet['accounts']) {
-            const folderIds = wallet['folders']
-                .map((folder) => folder.id)
-                .filter((folderId) => folderId !== 0)
+    let accounts = $derived(
+        (() => {
+            // TODO: $derived.with
+            let ret = []
+            if (wallet && wallet.accounts) {
+                const folderIds = wallet.folders.map((folder) => folder.id)
 
-            accounts = wallet['accounts'].filter((account) => {
-                if (searchText.length) {
-                    return (
-                        account.name
-                            .toLowerCase()
-                            .indexOf(searchText.toLowerCase()) >= 0
-                    )
-                }
-                if (currentFolderId === 'no_folder') {
-                    return !folderIds.includes(account.folder_id)
-                }
-                return currentFolderId
-                    ? account.folder_id === currentFolderId
-                    : true
-            })
-        }
-    }
-    let currentFolderId = 0
+                ret = wallet.accounts.filter((account) => {
+                    if (searchText.length) {
+                        return (
+                            account.name
+                                .toLowerCase()
+                                .indexOf(searchText.toLowerCase()) >= 0
+                        )
+                    }
+                    if (currentFolderId === 'no_folder') {
+                        return !folderIds.includes(account.folder_id)
+                    }
+                    return currentFolderId
+                        ? account.folder_id === currentFolderId
+                        : true
+                })
+            }
+            return ret
+        })()
+    )
+    let currentFolderId = $state(0)
 
     // Account edition
-    let accountEdited = null
-    let accountEditorReadonly = false
-    let editedAccountIndex = null
-    $: menuVisible = !!accountEdited
+    let accountEdited = $state(null)
+    let accountEditorReadonly = $state(false)
+    let editedAccountIndex = $state(null)
 
-    let dragging
-    let viewMode = window.localStorage.getItem('viewMode') || 'detail'
-    let searchText = ''
-    let openSearch = false
+    let dragging = $state(false)
+    let viewMode = $state(window.localStorage.getItem('viewMode') || 'detail')
+    let searchText = $state('')
+    let openSearch = $state(false)
 
     // folders variable
-    let walletWidth
-    let foldersVisible = false
-    $: floatingFolder = walletWidth < 870
-    let snackbarText = ''
+    let walletWidth = $state(null)
+    let foldersVisible = $state(false)
+    let floatingFolder = $derived(walletWidth < 870)
+    let snackbarText = $state('')
     let snackbarTimeout
-    let folderDomIds = []
-    $: {
-        folderDomIds = []
-        for (let folder of wallet['folders'] || []) {
-            folderDomIds = folderDomIds.concat(['item_folder_' + folder.id])
-        }
-    }
-
+    let folderDomIds = $derived(
+        (() => {
+            // TODO: derived.with
+            let ret = []
+            for (let folder of wallet['folders'] || []) {
+                ret = ret.concat(['item_folder_' + folder.id])
+            }
+            return ret
+        })()
+    )
     // Accounts audit
-    $: auditVisible = currentFolderId === 'security'
+    let auditVisible = $derived(currentFolderId === 'security')
 
     async function onMoveAccount(event) {
-        const fromAccount = event.detail.fromItem
-        const toAccount = event.detail.destItem
-        wallet = await api.moveAccount(fromAccount, toAccount)
+        wallet = await api.moveAccount(event.from, event.to)
     }
     function editAccount(account) {
-        editedAccountIndex = wallet['accounts'].indexOf(account)
+        editedAccountIndex = wallet.accounts.indexOf(account)
         // Deep copy, to not change the account before saving
         accountEdited = JSON.parse(JSON.stringify(account))
         accountEditorReadonly = true
@@ -87,21 +86,17 @@
         accountEdited = { icon: 'img/accounts/default.svg' }
         accountEditorReadonly = false
     }
-    async function onSaveAccount(event) {
+    async function onSaveAccount(account) {
         if (editedAccountIndex !== null) {
-            wallet = await api.updateAccount(
-                editedAccountIndex,
-                event.detail.account
-            )
+            wallet = await api.updateAccount(editedAccountIndex, account)
         } else {
-            const account = event.detail.account
             account['folder_id'] = currentFolderId
             wallet = await api.newAccount(account)
             // Edit this account to not create one for future "save" event
             editAccount(account)
         }
     }
-    async function onRemoveAccount(event) {
+    async function onRemoveAccount() {
         accountEdited = null
         if (editedAccountIndex !== null) {
             wallet = await api.removeAccount(editedAccountIndex)
@@ -109,76 +104,76 @@
         }
     }
     async function onAccountAction(event) {
-        const actionElement = event.detail.action
+        const actionElement = event.action
         if (actionElement.id && actionElement.id.startsWith('item_folder_')) {
             const folderId = parseInt(actionElement.id.split('item_folder_')[1])
-            wallet = await api.changeFolder(event.detail.item, folderId)
+            wallet = await api.changeFolder(event.item, folderId)
         }
     }
-    function onNotify(event) {
-        snackbarText = event.detail ? event.detail : event
+    function onNotify(text) {
         clearTimeout(snackbarTimeout)
+        snackbarText = text
         snackbarTimeout = setTimeout(() => {
             snackbarText = ''
         }, 1000)
     }
 </script>
 
-<Sidepanel bind:visible={menuVisible} on:close={() => (accountEdited = null)}>
+<Sidepanel visible={!!accountEdited} onclose={() => (accountEdited = null)}>
     {#if accountEdited}
         <AccountEditor
             account={accountEdited}
             readonly={accountEditorReadonly}
-            on:save={onSaveAccount}
-            on:remove={onRemoveAccount}
-            on:close={() => (accountEdited = null)}
+            onsave={onSaveAccount}
+            onremove={onRemoveAccount}
+            onclose={() => (accountEdited = null)}
         />
     {/if}
 </Sidepanel>
 <Navbar
-    on:lock
+    onlock
+    onshow_folders={() => (foldersVisible = !foldersVisible)}
+    {floatingFolder}
     bind:viewMode
-    on:show_folders={() => (foldersVisible = !foldersVisible)}
-    bind:floatingFolder
     bind:searchText
-    bind:openSearch
+    {openSearch}
 />
 <div class="wallet" bind:clientWidth={walletWidth}>
     <Folders
         bind:wallet
-        bind:floating={floatingFolder}
+        floating={floatingFolder}
         bind:visible={foldersVisible}
         bind:currentFolderId
-        on:change={() => {
+        onchange={() => {
             searchText = ''
             openSearch = false
         }}
     />
     {#if auditVisible}
-        <Audit {wallet} on:edit={(event) => editAccount(event.detail)} />
+        <Audit {wallet} onedit={(account) => editAccount(account)} />
     {:else}
         <Sortablegrid
             class="accountsGrid"
-            on:move={onMoveAccount}
-            on:action={onAccountAction}
-            on:move_blocked={() =>
+            onmove={onMoveAccount}
+            onaction={onAccountAction}
+            onmove_blocked={() =>
                 onNotify('Can not move accounts in this folder')}
-            bind:items={accounts}
+            items={accounts}
             bind:dragging
-            bind:customActions={folderDomIds}
+            customActions={folderDomIds}
         >
             <div slot="item" let:item>
                 <AccountCard
                     account={item}
-                    on:click={() => editAccount(item)}
-                    bind:viewMode
-                    on:notify={onNotify}
+                    onclick={() => editAccount(item)}
+                    {viewMode}
+                    onnotify={onNotify}
                 />
             </div>
         </Sortablegrid>
         <Fab
             class="new_account {dragging ? '' : 'visible'}"
-            on:click={onNewAccount}
+            onclick={onNewAccount}
             icon="add"
             color="on-secondary"
         />
@@ -189,7 +184,7 @@
 {#if snackbarText}
     <div class="notification">
         <span>{snackbarText}</span>
-        <IconButton icon="close" on:click={() => (snackbarText = '')} />
+        <IconButton icon="close" onclick={() => (snackbarText = '')} />
     </div>
 {/if}
 

@@ -1,7 +1,7 @@
 <script>
     const elId = Math.floor(Math.random() * 10000000)
-    export let label = ''
-    export let checked = false
+
+    let { label = '', checked = $bindable(false) } = $props()
 </script>
 
 <div>

@@ -1,37 +1,36 @@
 <script>
     import Icon from './Icon.svelte'
     import { createRipple } from './ripple.js'
-    import { createEventDispatcher } from 'svelte'
 
-    const dispatch = createEventDispatcher()
+    let {
+        variant = false,
+        color = 'primary',
+        disabled = false,
+        icon = false,
+        style = '',
+        ripple = true,
 
-    export let variant = false // standard, outlined
-    export let color = 'primary'
-    export let disabled = false
-    export let icon = false
-    export let style = ''
+        class: className = '',
+        onclick,
+    } = $props()
 
-    $: _variant = variant || 'standard'
-    $: iconColor = _variant === 'standard' ? `on-${color}` : color
-    const SLOTS = $$props.$$slots
+    let _variant = $derived(variant || 'standard')
+    let iconColor = $derived(_variant === 'standard' ? `on-${color}` : color)
 
-    export let ripple = true
-
-    let className = ''
-    export { className as class }
+    const SLOTS = $$slots.description
 
     function onClick(event) {
         if (disabled) {
             return
         }
-        dispatch('click')
+        onclick()
     }
 </script>
 
 <button
     class="ripple {color} {className} {disabled && 'disabled'} {_variant}"
-    on:click={onClick}
-    on:mousedown={(event) => ripple && createRipple(event)}
+    onclick={onClick}
+    onmousedown={(event) => ripple && createRipple(event)}
     {style}
 >
     {#if icon}

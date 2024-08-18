@@ -1,28 +1,30 @@
 <script>
-    import { createEventDispatcher } from 'svelte'
+    let {
+        label = '',
+        class: className,
+        help = '',
+        helpPersistent = true,
+        value = $bindable(),
+        type = 'text',
+        onkeypress = null,
+        onchange = null,
+        oninput = null,
+        onkeydown = null,
+        onfocus = null,
+        onblur = null,
+    } = $props()
 
-    const dispatch = createEventDispatcher()
-
-    export let label = ''
-    let className = ''
-    export { className as class }
-
-    export let help = ''
-    export let helpPersistent = true
-    export let value = ''
-    export let type = 'text'
-
-    let focused = false
-    let selectionIndex = -1
+    let focused = $state(false)
+    let selectionIndex = $state(-1)
     let timeoutHandle = null
-    let loosingFocus = false
+    let loosingFocus = $state(false)
 
     function onFocus(event) {
         focused = true
         loosingFocus = false
         clearTimeout(timeoutHandle)
         selectionIndex = event.target.selectionStart
-        dispatch('focus')
+        onfocus && onfocus()
     }
 
     function onBlur() {
@@ -33,7 +35,7 @@
         timeoutHandle = setTimeout(() => {
             loosingFocus = false
         }, 180)
-        dispatch('blur')
+        onblur && onblur()
     }
 </script>
 
@@ -48,14 +50,14 @@
         "
         {...{ type }}
         bind:value
-        on:focus={onFocus}
-        on:blur={onBlur}
-        on:keypress
-        on:change
-        on:input
-        on:keydown
+        onfocus={onFocus}
+        onblur={onBlur}
+        {onkeypress}
+        {onchange}
+        {oninput}
+        {onkeydown}
     />
-    <span class="bar" />
+    <span class="bar"></span>
     {#if label}
         <span class="label">{label}</span>
     {/if}

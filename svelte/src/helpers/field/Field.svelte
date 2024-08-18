@@ -1,5 +1,4 @@
 <script>
-    import { createEventDispatcher } from 'svelte'
     import FieldAction from './FieldAction.svelte'
     import IconButton from '../IconButton.svelte'
     import TextInput from '../TextInput.svelte'
@@ -8,30 +7,40 @@
     import { isUrlValid } from '../utils.js'
     import Icon from '../Icon.svelte'
 
-    const dispatch = createEventDispatcher()
-    export let label = ''
-    export let readonly = 0
-    export let type = 'text'
-    export let showPasswordStrength = false
-    export let value = ''
-    export let message = null
-    export let messagePersistent = false
-    export let copy = 1
-    let className = ''
-    export { className as class }
-    export let canEditType = false
-    export let index = 0
-    export let passwordVisible = false
+    let {
+        label = $bindable(''),
+        readonly = 0,
+        type = $bindable('text'),
+        showPasswordStrength = false,
+        value = $bindable(),
+        message = null,
+        messagePersistent = false,
+        copy = 1,
+        class: className = '',
+        canEditType = false,
+        index = 0,
+        passwordVisible = false,
+        onchange = null,
+        oninput = null,
+        onkeydown = null,
+        onblur = null,
+        onenter = null,
+        oncopy = null,
+        onshow_qrcode = null,
+        onremove = null,
+    } = $props()
 
-    let copied = false
+    let copied = $state(false)
 
-    $: computedType =
+    let computedType = $derived(
         passwordVisible || type !== 'password' ? 'text' : 'password'
+    )
 
-    $: [strength, strengthResult] =
+    let [strength, strengthResult] = $derived(
         type === 'password' && showPasswordStrength && value && value.length
             ? passwordStrength(value, true)
             : [null, null]
+    )
 
     const getMessage = (message, strength) => {
         if (message && message.length) {
@@ -40,7 +49,7 @@
             return 'Strength: ' + (strength || 0) + ' / 100'
         }
     }
-    $: computedMessage = getMessage(message, strength)
+    let computedMessage = $derived(getMessage(message, strength))
 
     /**
      * Generate the event "enter" when pressing enter.
@@ -50,13 +59,13 @@
         if ((e.keyCode || e.which) == 13) {
             e.preventDefault()
             e.stopPropagation()
-            dispatch('enter')
+            onenter()
             return false
         }
     }
 
     function onCopyClick() {
-        dispatch('copy')
+        oncopy()
         copied = true
         setTimeout(() => (copied = false), 1000)
     }
@@ -82,42 +91,35 @@
             {:else}
                 <TextInput
                     class="text-field"
-                    bind:label
+                    {label}
                     bind:value
                     type={computedType}
-                    on:keypress={onKeyPress}
-                    on:change
-                    on:input
-                    on:keydown
-                    on:blur
-                    bind:help={computedMessage}
-                    bind:helpPersistent={messagePersistent}
+                    onkeypress={onKeyPress}
+                    {onchange}
+                    {oninput}
+                    {onkeydown}
+                    {onblur}
+                    help={computedMessage}
+                    helpPersistent={messagePersistent}
                 />
             {/if}
             {#if type === 'password'}
                 <IconButton
-                    on:click={() => (passwordVisible = !passwordVisible)}
+                    onclick={() => (passwordVisible = !passwordVisible)}
                     icon={passwordVisible ? 'visibility' : 'visibility_off'}
                 />
                 {#if strengthResult && strengthResult.feedback}
-                    <PasswordWarning bind:strengthResult />
+                    <PasswordWarning {strengthResult} />
                 {/if}
             {:else if type === 'totp' && value}
-                <IconButton
-                    on:click={() => dispatch('show_qrcode')}
-                    icon="qr_code"
-                />
+                <IconButton onclick={onshow_qrcode} icon="qr_code" />
             {/if}
             {#if canEditType && !readonly}
-                <FieldAction
-                    bind:type
-                    bind:label
-                    on:remove={() => dispatch('remove', index)}
-                />
+                <FieldAction bind:type bind:label {onremove} />
             {/if}
             {#if parseInt(copy) && value}
                 <IconButton
-                    on:click={onCopyClick}
+                    onclick={onCopyClick}
                     icon={copied ? 'check' : 'content_copy'}
                 />
             {/if}

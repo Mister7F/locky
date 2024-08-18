@@ -1,42 +1,41 @@
 <script>
     import ListItem from '../../helpers/ListItem.svelte'
     import IconButton from '../../helpers/IconButton.svelte'
-    import { createEventDispatcher } from 'svelte'
     import * as api from '../api.js'
     import Icon from '../../helpers/Icon.svelte'
     import Sortablegrid from '../../helpers/Sortablegrid.svelte'
     import EditFolder from './EditFolder.svelte'
     import Folder from './Folder.svelte'
-    const dispatch = createEventDispatcher()
-    export let wallet
-    export let currentFolderId
-    export let visible = true
-    export let floating = false
-    $: folders = wallet && wallet['folders']
-    $: categoryFolders = folders && folders.slice(1)
-    let editedFolderId = -1
+
+    let {
+        wallet = $bindable(),
+        currentFolderId = $bindable(),
+        visible = $bindable(true),
+        floating = false,
+        onchange,
+    } = $props()
+
     let folderDialog
-    let folderIconOpen = false
 
     async function onEditFolder(folder) {
         folderDialog.editFolder(folder)
     }
-    async function onDeleteFolder(event) {
-        wallet = await api.deleteFolder(event.detail)
+    async function onDeleteFolder(folder) {
+        wallet = await api.deleteFolder(folder)
     }
-    async function onSaveFolder(event) {
-        wallet = await api.updateFolder(event.detail)
+    async function onSaveFolder(folder) {
+        wallet = await api.updateFolder(folder)
     }
     async function onNewFolder() {
         folderDialog.editFolder({ icon: null, name: '' })
     }
     async function onMoveFolder(event) {
-        wallet = await api.moveFolder(event.detail.fromItem, event.detail.to)
+        wallet = await api.moveFolder(event.fromItem, event.to)
     }
 
     function setFolder(folderId) {
         currentFolderId = folderId
-        dispatch('change')
+        onchange()
         if (floating) {
             visible = false
         }
@@ -44,7 +43,7 @@
 </script>
 
 {#if visible && floating}
-    <div class="folders-overlay" on:click|self={() => (visible = false)}></div>
+    <div class="folders-overlay" onclick={() => (visible = false)}></div>
 {/if}
 
 <div
@@ -54,41 +53,41 @@
         <div class="header">
             <span class="header_title">Folders</span>
             <IconButton
-                on:click={onNewFolder}
+                onclick={onNewFolder}
                 icon="create_new_folder"
                 color="on-surface"
             />
         </div>
         <ListItem
-            on:click={() => setFolder('security')}
+            onclick={() => setFolder('security')}
             selected={currentFolderId === 'security'}
             icon="policy"
             name="Security panel"
         />
-        {#if folders}
+        {#if wallet['folders']}
             <Folder
-                folder={folders[0]}
-                on:edit={onEditFolder(folders[0])}
-                selected={currentFolderId === folders[0].id}
-                on:click={() => setFolder(folders[0].id)}
+                folder={{ id: 0, name: 'All', icon: 'home' }}
+                selected={currentFolderId === 0}
+                onclick={() => setFolder(0)}
+                edit={false}
             />
             <Sortablegrid
                 class="folders"
-                bind:items={categoryFolders}
-                on:move={onMoveFolder}
+                items={wallet['folders']}
+                onmove={onMoveFolder}
             >
                 <Folder
                     slot="item"
                     let:item
                     folder={item}
-                    on:edit={onEditFolder(item)}
+                    onedit={() => onEditFolder(item)}
                     selected={currentFolderId === item.id}
-                    on:click={() => setFolder(item.id)}
+                    onclick={() => setFolder(item.id)}
                 />
             </Sortablegrid>
         {/if}
         <ListItem
-            on:click={() => setFolder('no_folder')}
+            onclick={() => setFolder('no_folder')}
             selected={currentFolderId === 'no_folder'}
             icon="folder_off"
             name="No Folder"
@@ -97,8 +96,8 @@
 
     <EditFolder
         bind:this={folderDialog}
-        on:save={onSaveFolder}
-        on:delete={onDeleteFolder}
+        onsave={onSaveFolder}
+        ondelete={onDeleteFolder}
     />
 </div>
 

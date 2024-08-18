@@ -7,21 +7,18 @@
 <script>
     import Button from '../helpers/Button.svelte'
     import AccountCard from './AccountCard.svelte'
-    import { createEventDispatcher } from 'svelte'
     import Icon from '../helpers/Icon.svelte'
 
     import { digest, passwordStrength } from '../helpers/crypto.js'
 
-    const dispatch = createEventDispatcher()
-
     const url = 'https://api.pwnedpasswords.com/range/'
 
-    export let wallet
+    let { wallet, onedit } = $props()
 
-    let loading = false
-    let leakedAccountsIndex = []
-    let weakAccountsIndex = []
-    let duplicatedIndex = []
+    let loading = $state(false)
+    let leakedAccountsIndex = $state([])
+    let weakAccountsIndex = $state([])
+    let duplicatedIndex = $state([])
 
     async function isPasswordLeaked(password) {
         const hash = await digest(password)
@@ -47,7 +44,7 @@
         leakedAccountsIndex = []
         weakAccountsIndex = []
 
-        const passwords = wallet['accounts']
+        const passwords = wallet.accounts
             .map((account) => account.password)
             .filter((password) => password && password.length)
             .filter((v, i, a) => a.indexOf(v) === i) // keep only unique values
@@ -59,14 +56,14 @@
             }
         }
 
-        for (let i = 0; i < wallet['accounts'].length; i++) {
-            if (leakedPassword.includes(wallet['accounts'][i].password)) {
+        for (let i = 0; i < wallet.accounts.length; i++) {
+            if (leakedPassword.includes(wallet.accounts[i].password)) {
                 leakedAccountsIndex.push(i)
             }
 
             if (
-                passwordStrength(wallet['accounts'][i].password) < 90 &&
-                wallet['accounts'][i].password.length
+                wallet.accounts[i].password?.length &&
+                passwordStrength(wallet.accounts[i].password) < 90
             ) {
                 weakAccountsIndex.push(i)
             }
@@ -75,8 +72,8 @@
         // find duplicated passwords
         const seen = {}
         const _duplicatedIndex = new Set()
-        for (let i = 0; i < wallet['accounts'].length; i++) {
-            const password = wallet['accounts'][i].password
+        for (let i = 0; i < wallet.accounts.length; i++) {
+            const password = wallet.accounts[i].password
             if (!password?.length) {
                 continue
             }
@@ -99,7 +96,7 @@
     <Button
         class="audit-loading"
         color="secondary"
-        on:click={onStartAudit}
+        onclick={onStartAudit}
         disabled={loading}
         icon={loading && 'sync'}
     >
@@ -118,9 +115,8 @@
             {#each leakedAccountsIndex as accountIndex, index}
                 <div {index}>
                     <AccountCard
-                        account={wallet['accounts'][accountIndex]}
-                        on:click={() =>
-                            dispatch('edit', wallet['accounts'][accountIndex])}
+                        account={wallet.accounts[accountIndex]}
+                        onclick={() => onedit(wallet.accounts[accountIndex])}
                         viewMode="minimalist"
                     />
                 </div>
@@ -138,9 +134,8 @@
             {#each weakAccountsIndex as accountIndex, index}
                 <div {index}>
                     <AccountCard
-                        account={wallet['accounts'][accountIndex]}
-                        on:click={() =>
-                            dispatch('edit', wallet['accounts'][accountIndex])}
+                        account={wallet.accounts[accountIndex]}
+                        onclick={() => onedit(wallet.accounts[accountIndex])}
                         viewMode="minimalist"
                     />
                 </div>
@@ -156,9 +151,8 @@
             {#each duplicatedIndex as accountIndex, index}
                 <div {index}>
                     <AccountCard
-                        account={wallet['accounts'][accountIndex]}
-                        on:click={() =>
-                            dispatch('edit', wallet['accounts'][accountIndex])}
+                        account={wallet.accounts[accountIndex]}
+                        onclick={() => onedit(wallet.accounts[accountIndex])}
                         viewMode="minimalist"
                     />
                 </div>

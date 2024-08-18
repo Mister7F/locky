@@ -2,25 +2,23 @@
     import { createRipple } from './ripple.js'
     import { isUrlValid } from '../helpers/utils.js'
     import Icon from './Icon.svelte'
-    import { createEventDispatcher } from 'svelte'
 
-    export let title = ''
-    let className = ''
-    export { className as class }
+    let {
+        title = '',
+        class: className = '',
+        color = 'on-primary',
+        bgColor = false,
+        bgTransparent = false,
+        href = null,
+        icon = false,
+        onclick,
+        onblur,
+    } = $props()
 
-    export let color = 'on-primary'
-
-    export let bgColor = false
-    export let bgTransparent = false
-    export let href = null
-
-    $: backgroundColor =
+    let backgroundColor = $derived(
         bgColor ||
-        (color.includes('on') ? color.replace('on-', '') : `on-${color}`)
-
-    export let icon = false
-
-    const dispatch = createEventDispatcher()
+            (color.includes('on') ? color.replace('on-', '') : `on-${color}`)
+    )
 
     function onClick(event) {
         event.stopPropagation()
@@ -28,7 +26,7 @@
         if (isUrlValid(href)) {
             window.open(href)
         }
-        dispatch('click')
+        onclick(event)
     }
 </script>
 
@@ -36,10 +34,12 @@
     class="ripple icon-button {className} {color === 'on-surface'
         ? 'ripple_dark'
         : ''} {bgTransparent ? 'bg-transparent' : ''}"
-    on:click={onClick}
-    on:mousedown={(event) => createRipple(event, true)}
-    on:blur={() => dispatch('blur')}
-    on:mousedown|stopPropagation={() => {}}
+    onclick={onClick}
+    onmousedown={(event) => {
+        event.stopPropagation()
+        createRipple(event, true)
+    }}
+    {onblur}
     {title}
     style="--background: var(--{backgroundColor});--color: var(--{color})"
 >

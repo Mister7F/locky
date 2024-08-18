@@ -4,12 +4,13 @@
     import * as api from '../api.js'
     import Field from '../../helpers/field/Field.svelte'
 
-    let oldPassword = ''
-    let newPassword = ''
-    let confirmPassword = ''
-    let dialogOpen
-    let error = false
-    $: canSubmit = newPassword && newPassword === confirmPassword
+    let oldPassword = $state('')
+    let newPassword = $state('')
+    let confirmPassword = $state('')
+    let dialogOpen = $state(false)
+    let error = $state(false)
+
+    let canSubmit = $derived(newPassword && newPassword === confirmPassword)
 
     async function changePassword() {
         if (await api.updatePassword(oldPassword, newPassword)) {
@@ -53,7 +54,7 @@
         <Button
             color="secondary"
             variant="outlined"
-            on:click={changePassword}
+            onclick={changePassword}
             disabled={!canSubmit}
         >
             Change

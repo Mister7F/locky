@@ -2,33 +2,24 @@
     import { createRipple } from './ripple.js'
 
     import IconButton from './IconButton.svelte'
-    import { createEventDispatcher } from 'svelte'
     import Icon from './Icon.svelte'
-    const dispatch = createEventDispatcher()
 
-    export let icon
-    export let name
-    export let id = null
-
-    export let edit = false
-    export let selected
-
-    function onClickEdit(ev) {
-        ev.preventDefault()
-        ev.stopPropagation()
-        dispatch('edit')
-    }
-
-    function onCardClick() {
-        dispatch('click')
-    }
+    let {
+        icon,
+        name,
+        id = null,
+        edit = false,
+        selected,
+        onedit,
+        onclick,
+    } = $props()
 </script>
 
 <div
     class="ripple ripple_dark list_item {selected && 'selected'}"
     {id}
-    on:click={onCardClick}
-    on:mousedown={(event) => createRipple(event)}
+    {onclick}
+    onmousedown={(event) => createRipple(event)}
 >
     <div class="left">
         <Icon color="on-surface">{icon}</Icon>
@@ -38,7 +29,7 @@
         <IconButton
             icon="create"
             color="on-surface"
-            on:click={onClickEdit}
+            onclick={onedit}
             bgTransparent="1"
         />
     {/if}

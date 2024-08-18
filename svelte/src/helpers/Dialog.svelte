@@ -1,6 +1,5 @@
 <script>
-    export let open = false
-    export let title
+    let { title, open = $bindable(false) } = $props()
 
     function onClose(event) {
         if (event.target.classList.contains('background')) {
@@ -10,7 +9,7 @@
 </script>
 
 {#if open}
-    <div class="background" on:click={onClose}>
+    <div class="background" onclick={onClose}>
         <div class="dialog">
             <span class="title">{title}</span>
             <hr />

@@ -1,6 +1,5 @@
 <script>
     import Icon from '../../helpers/Icon.svelte'
-    import { createEventDispatcher } from 'svelte'
     import * as dropbox from '../dropbox/dropbox.js'
     import * as api from '../api.js'
     import Field from '../../helpers/field/Field.svelte'
@@ -12,48 +11,51 @@
     import ChooseMethod from './ChooseMethod.svelte'
     import DropboxUpload from './../dropbox/DropboxUpload.svelte'
 
-    const dispatch = createEventDispatcher()
     const maxLen = 8
-    export let wallet
+    let { wallet = $bindable(null), onwallet_openned } = $props()
 
     const allowed_methods = ['login', 'create', 'upload', 'dropbox', null]
-    let method = null
-    let showOptions = false
-    let sessionOpened = false
+    let method = $state(null)
+    let showOptions = $state(false)
+    let sessionOpened = $state(false)
 
-    let filedata = null // File uploaded
+    let filedata = $state(null) // File uploaded
     let dropboxFile = null
-    let dropboxState = ''
-    let loading = false
+    let dropboxState = $state('')
+    let loading = $state(false)
 
-    $: loginDisabled =
+    let loginDisabled = $derived(
         (method === 'upload' && !filedata) ||
-        (method === 'dropbox' && dropboxState !== 'logged')
+            (method === 'dropbox' && dropboxState !== 'logged')
+    )
 
-    let password = ''
+    let password = $state('')
     let wrongPassword = false
-    $: svgValue =
+    let svgValue = $derived(
         wrongPassword || loading
             ? 0
             : ((100 - 33) * (maxLen - Math.min(password.length, maxLen))) /
                   maxLen +
-              33
-    $: fillColor = wrongPassword ? 'var(--error-color)' : 'var(--secondary)'
+                  33
+    )
+    let fillColor = $derived(
+        wrongPassword ? 'var(--error-color)' : 'var(--secondary)'
+    )
 
     async function onLogin() {
         loading = true
         if (method === 'login') {
             const newWallet = await api.unlock(password)
-            if (!newWallet) {
+            if (!newWallet || !password.length) {
                 setWrongPassword()
                 return
             }
             wallet = newWallet
-            dispatch('wallet_openned')
+            onwallet_openned()
         } else if (method === 'create') {
             wallet = await api.newWallet(password)
             dropbox.logout()
-            dispatch('wallet_openned')
+            onwallet_openned()
         } else if (method === 'upload') {
             const newWallet = await api.login(filedata, password)
             if (!newWallet) {
@@ -62,7 +64,7 @@
             }
             dropbox.logout()
             wallet = newWallet
-            dispatch('wallet_openned')
+            onwallet_openned()
         } else if (method === 'dropbox') {
             if (!dropboxFile) {
                 dropboxFile = await dropbox.download('wallet.lck')
@@ -73,7 +75,7 @@
                 return
             }
             wallet = newWallet
-            dispatch('wallet_openned')
+            onwallet_openned()
         }
         loading = false
     }
@@ -109,7 +111,7 @@
         }
     }
 
-    onMount(async () => {
+    $effect(async () => {
         sessionOpened = await api.walletInMemory()
         showOptions = !sessionOpened
 
@@ -133,7 +135,7 @@
 <div class="lock" style="--lock-value: {svgValue}; --fill-color: {fillColor}">
     {#if showOptions}
         <ChooseMethod
-            on:click={async (event) => await setMethod(event.detail)}
+            onclick={async (method) => await setMethod(method)}
             {sessionOpened}
         />
     {:else}
@@ -166,13 +168,13 @@
         <div class="fields">
             {#if method === 'upload'}
                 <FileInput
-                    on:uploaded={(event) => (filedata = event.detail.file)}
-                    on:removed={(event) => (filedata = null)}
+                    onuploaded={(file) => (filedata = file)}
+                    onremoved={(_) => (filedata = null)}
                 />
             {:else if method === 'dropbox'}
                 <DropboxLogin
                     bind:state={dropboxState}
-                    on:logout={() => (dropboxFile = null)}
+                    onlogout={() => (dropboxFile = null)}
                 />
             {:else if method === 'login'}
                 <div class="dropbox_button">
@@ -183,8 +185,8 @@
             <Field
                 label="Password"
                 bind:value={password}
-                on:enter={onLogin}
-                on:input={() => (wrongPassword = false)}
+                onenter={onLogin}
+                oninput={() => (wrongPassword = false)}
                 type="password"
                 showPasswordStrength={method === 'create'}
                 copy="0"
@@ -195,7 +197,7 @@
                 disabled={loginDisabled || loading}
                 color="secondary"
                 class="login-button {loading ? 'loading' : ''}"
-                on:click={onLogin}
+                onclick={onLogin}
             >
                 {#if loading}
                     <Icon class="login-loading" color="on-primary">sync</Icon>
@@ -205,7 +207,7 @@
         </div>
         <Button
             color="secondary"
-            on:click={() => (showOptions = true)}
+            onclick={() => (showOptions = true)}
             variant="text"
         >
             Choose an other method

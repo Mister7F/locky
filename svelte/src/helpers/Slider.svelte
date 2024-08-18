@@ -1,9 +1,7 @@
 <script>
     // Modified from:
     // https://codepen.io/manikantag/pen/rZpNXm
-    export let min
-    export let max
-    export let value
+    let { min, max, value = $bindable() } = $props()
 </script>
 
 <div class="slider">

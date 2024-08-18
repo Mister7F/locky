@@ -1,7 +1,6 @@
 <script>
     import IconButton from '../../helpers/IconButton.svelte'
     import { onMount } from 'svelte'
-    import { createEventDispatcher } from 'svelte'
     import ChangePassword from './ChangePassword.svelte'
     import Settings from './Settings.svelte'
     import * as api from '../api.js'
@@ -10,23 +9,27 @@
     import DropboxUpload from './../dropbox/DropboxUpload.svelte'
     import * as dropbox from './../dropbox/dropbox.js'
 
-    const dispatch = createEventDispatcher()
-    export let viewMode = 'list'
-    export let floatingFolder
-    export let searchText = ''
+    let {
+        viewMode = $bindable('list'),
+        floatingFolder,
+        searchText = $bindable(''),
+        openSearch = false,
+        onshow_folders,
+    } = $props()
+
     let changePassword
-    export let openSearch = false
-    let isDropboxAuthenticated = false
-    let settingsVisible = false
+    let isDropboxAuthenticated = $state(false)
+    let settingsVisible = $state(false)
 
     const viewModes = ['detail', 'minimalist', 'list']
 
-    $: viewModeIcon =
+    let viewModeIcon = $derived(
         {
             detail: 'view_module',
             minimalist: 'view_comfy',
             list: 'list',
         }[viewMode] || 'view_module'
+    )
 
     function changeViewMode() {
         const nextModeIndex =
@@ -58,18 +61,18 @@
     })
 </script>
 
-<Settings bind:visible={settingsVisible} bind:isDropboxAuthenticated on:lock />
+<Settings bind:visible={settingsVisible} {isDropboxAuthenticated} onlock />
 <div class="wallet-navbar" color="primary">
     <div class="folder_menu">
         {#if floatingFolder}
-            <IconButton on:click={() => dispatch('show_folders')} icon="menu" />
+            <IconButton onclick={onshow_folders} icon="menu" />
         {/if}
     </div>
     <div class="actions">
         <IconButton
             title="Search an account"
             icon="search"
-            on:click={() => {
+            onclick={() => {
                 document.querySelector('.search_field input').focus()
                 openSearch = !openSearch
             }}
@@ -77,26 +80,26 @@
         <Field
             class="search_field {openSearch ? 'visible' : ''}"
             copy="0"
-            on:blur={() => (openSearch = !!searchText)}
+            onblur={() => (openSearch = !!searchText)}
             bind:value={searchText}
         />
         {#if !openSearch || !floatingFolder}
             <IconButton
                 title="Download your wallet"
                 icon="download"
-                on:click={async () => await api.downloadWallet()}
+                onclick={async () => await api.downloadWallet()}
             />
-            <DropboxUpload bind:isAuthenticated={isDropboxAuthenticated} />
+            <DropboxUpload isAuthenticated={isDropboxAuthenticated} />
         {/if}
         <IconButton
             title="Change mode"
             icon={viewModeIcon}
-            on:click={changeViewMode}
+            onclick={changeViewMode}
         />
         <IconButton
             title="More options"
             icon="settings"
-            on:click={() => (settingsVisible = true)}
+            onclick={() => (settingsVisible = true)}
         />
     </div>
 </div>

@@ -1,18 +1,14 @@
 <script>
-    import { createEventDispatcher } from 'svelte'
-
-    const dispatch = createEventDispatcher()
-
-    export let visible = false
+    let { visible = $bindable(false), onclose = null } = $props()
 
     function onClose() {
         visible = false
-        dispatch('close')
+        onclose && onclose()
     }
 </script>
 
 {#if visible}
-    <div class="overlay" on:click={onClose}></div>
+    <div class="overlay" onclick={onClose}></div>
 {/if}
 <div class="panel {visible ? '' : 'hidden'}">
     <slot />
