@@ -76,14 +76,14 @@
                 items={wallet['folders']}
                 onmove={onMoveFolder}
             >
-                <Folder
-                    slot="item"
-                    let:item
-                    folder={item}
-                    onedit={() => onEditFolder(item)}
-                    selected={currentFolderId === item.id}
-                    onclick={() => setFolder(item.id)}
-                />
+                {#snippet card(item)}
+                    <Folder
+                        folder={item}
+                        onedit={() => onEditFolder(item)}
+                        selected={currentFolderId === item.id}
+                        onclick={() => setFolder(item.id)}
+                    />
+                {/snippet}
             </Sortablegrid>
         {/if}
         <ListItem

@@ -128,7 +128,7 @@
         you want to upload your local changes and overwrite the current wallet
         on Dropbox ?
 
-        <div slot="actions">
+        {#snippet actions()}
             <Button
                 onclick={() => (confirmationDialogOpen = false)}
                 color="secondary"
@@ -145,13 +145,13 @@
             >
                 Yes
             </Button>
-        </div>
+        {/snippet}
     </Dialog>
     <Dialog bind:open={downloadWalletDialogOpen} title="New wallet available">
         The file on Dropbox has changes you do not have locally, do you want to
         download the wallet on Dropbox and overwrite this one ?
 
-        <div slot="actions">
+        {#snippet actions()}
             <Button
                 onclick={() => (downloadWalletDialogOpen = false)}
                 color="secondary"
@@ -168,7 +168,7 @@
             >
                 Yes
             </Button>
-        </div>
+        {/snippet}
     </Dialog>
 </div>
 

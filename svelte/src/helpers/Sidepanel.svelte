@@ -1,5 +1,5 @@
 <script>
-    let { visible = $bindable(false), onclose = null } = $props()
+    let { visible = $bindable(false), onclose = null, children } = $props()
 
     function onClose() {
         visible = false
@@ -11,7 +11,7 @@
     <div class="overlay" onclick={onClose}></div>
 {/if}
 <div class="panel {visible ? '' : 'hidden'}">
-    <slot />
+    {@render children()}
 </div>
 
 <style>

@@ -95,7 +95,7 @@
         <TextInput bind:value={editedFolder.name} />
     </div>
 
-    <div slot="actions">
+    {#snippet actions()}
         <Button
             onclick={onDeleteFolder}
             style="float: right; margin-top: 10px;"
@@ -113,7 +113,7 @@
         >
             Save
         </Button>
-    </div>
+    {/snippet}
 </Dialog>
 
 <style>

@@ -64,7 +64,7 @@
         bind:value={label}
     />
 
-    <div slot="actions">
+    {#snippet actions()}
         {#if deleteConfirmation}
             <Button
                 style="float: right; margin-top: 10px;"
@@ -100,7 +100,7 @@
                 Close
             </Button>
         {/if}
-    </div>
+    {/snippet}
 </Dialog>
 
 <style>

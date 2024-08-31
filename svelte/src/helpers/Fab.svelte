@@ -9,6 +9,7 @@
         icon = false,
         bgColor = false,
         class: className = '',
+        children,
     } = $props()
 </script>
 
@@ -20,7 +21,7 @@
     {icon}
     {bgColor}
 >
-    <slot />
+    {@render children()}
 </IconButton>
 
 <style>

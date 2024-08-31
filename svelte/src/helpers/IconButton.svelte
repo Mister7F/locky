@@ -13,6 +13,7 @@
         icon = false,
         onclick,
         onblur,
+        children,
     } = $props()
 
     let backgroundColor = $derived(
@@ -46,7 +47,7 @@
     {#if icon}
         <Icon {color}>{icon}</Icon>
     {/if}
-    <slot />
+    {@render children()}
 </button>
 
 <style>

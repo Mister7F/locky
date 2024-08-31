@@ -5,6 +5,7 @@
         color = 'on-primary',
         on = null,
         class: className,
+        children,
     } = $props()
 
     let cssColor = $derived(
@@ -25,7 +26,7 @@
     {on}
     {title}
     {color}
-    style="--color: {cssColor}"><slot /></span
+    style="--color: {cssColor}">{@render children()}</span
 >
 
 <style>

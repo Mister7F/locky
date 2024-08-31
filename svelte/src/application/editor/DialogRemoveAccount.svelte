@@ -14,7 +14,7 @@
 <Dialog bind:open={removeAccountDialogOpen} title="Delete this account">
     Are you sure you want to remove the {account.name} account ?
 
-    <div slot="actions">
+    {#snippet actions()}
         <Button
             style="margin-top: 10px; margin-right: 10px;"
             color="secondary"
@@ -26,5 +26,5 @@
         <Button style="margin-top: 10px;" color="secondary" onclick={onremove}>
             Yes
         </Button>
-    </div>
+    {/snippet}
 </Dialog>

@@ -138,6 +138,7 @@
     bind:searchText
     {openSearch}
 />
+
 <div class="wallet" bind:clientWidth={walletWidth}>
     <Folders
         bind:wallet
@@ -162,14 +163,14 @@
             bind:dragging
             customActions={folderDomIds}
         >
-            <div slot="item" let:item>
+            {#snippet card(item)}
                 <AccountCard
                     account={item}
                     onclick={() => editAccount(item)}
                     {viewMode}
                     onnotify={onNotify}
                 />
-            </div>
+            {/snippet}
         </Sortablegrid>
         <Fab
             class="new_account {dragging ? '' : 'visible'}"

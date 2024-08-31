@@ -10,6 +10,7 @@
         onmove = null,
         onmove_blocked = null,
         onaction = null,
+        card,
     } = $props()
 
     function getElementIndex(element) {
@@ -298,7 +299,9 @@
                 ontouchstartcapture={touchStart}
                 oncontextmenu={(event) => event.preventDefault()}
             >
-                <slot name="item" class="item" {item} {index} />
+                {#if card}
+                    {@render card(item)}
+                {/if}
             </div>
         {/each}
     </div>

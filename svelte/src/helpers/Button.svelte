@@ -12,12 +12,11 @@
 
         class: className = '',
         onclick,
+        children,
     } = $props()
 
     let _variant = $derived(variant || 'standard')
     let iconColor = $derived(_variant === 'standard' ? `on-${color}` : color)
-
-    const SLOTS = $$slots.description
 
     function onClick(event) {
         if (disabled) {
@@ -34,11 +33,11 @@
     {style}
 >
     {#if icon}
-        <Icon color={iconColor} class="button_icon {SLOTS ? 'margin' : ''}"
+        <Icon color={iconColor} class="button_icon {children ? 'margin' : ''}"
             >{icon}</Icon
         >
     {/if}
-    <slot />
+    {@render children()}
 </button>
 
 <style>

@@ -1,5 +1,5 @@
 <script>
-    let { title, open = $bindable(false) } = $props()
+    let { title, open = $bindable(false), children, actions } = $props()
 
     function onClose(event) {
         if (event.target.classList.contains('background')) {
@@ -14,11 +14,13 @@
             <span class="title">{title}</span>
             <hr />
             <div class="content">
-                <slot />
+                {@render children()}
             </div>
             <br />
             <div class="actions">
-                <slot name="actions" />
+                {#if actions}
+                    {@render actions()}
+                {/if}
             </div>
         </div>
     </div>
