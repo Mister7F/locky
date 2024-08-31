@@ -9,6 +9,7 @@ belfius.png
 bing.svg
 bnp-paribas-fortis.png
 bpost.png
+brave.svg
 buzzfeed_buzz feed.png
 chrome.svg
 ctftime_ctf time.png
@@ -16,6 +17,7 @@ dailymotion.svg
 debian.png
 deezer.png
 discord.svg
+dkv.svg
 dropbox.svg
 drupal.svg
 ebay.svg
@@ -37,6 +39,7 @@ hostinger.png
 icloud.svg
 ing.jpg
 instagram.svg
+IBRK_interactive_brokers.svg
 kaspersky.png
 ldlc.png
 leboncoin_le bon coin.png
@@ -51,6 +54,7 @@ minecraft.png
 monster.png
 mumble.png
 netflix.svg
+notion.svg
 onedrive.png
 opera.svg
 orange.png
@@ -68,6 +72,7 @@ safari.svg
 skype.svg
 slack.svg
 snapchat.svg
+societe-wallonne-des-eaux-swde.png
 soundcloud.svg
 spotify.svg
 stackoverflow.svg
@@ -76,6 +81,8 @@ sublime_text.svg
 telegram.svg
 tiktok.svg
 topachat.png
+traderepublic.svg
+trading-212.svg
 trash.svg
 trello.svg
 tripadvisor.svg

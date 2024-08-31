@@ -96,6 +96,7 @@
     </div>
 
     {#snippet actions()}
+    <div>
         <Button
             onclick={onDeleteFolder}
             style="float: right; margin-top: 10px;"
@@ -113,6 +114,7 @@
         >
             Save
         </Button>
+    </div>
     {/snippet}
 </Dialog>
 
