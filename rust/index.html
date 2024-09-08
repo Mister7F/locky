@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en-US">
   <head>
     <meta charset="utf-8" />
@@ -8,14 +8,14 @@
     <script type="module">
       import init, { encrypt, derive_key } from "./pkg/rust_encryptor.js";
       init().then(() => {
-        console.time('Execution Time');
+        console.time("Execution Time");
 
         const salt = new Uint8Array(16);
 
         const key = derive_key("plaintext", salt);
-        console.timeEnd('Execution Time');
+        console.timeEnd("Execution Time");
 
-        console.log(key)
+        console.log(key);
       });
     </script>
   </body>

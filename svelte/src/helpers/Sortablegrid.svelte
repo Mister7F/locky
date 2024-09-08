@@ -108,15 +108,15 @@
             draggedIndex >= 0
         ) {
             let destItem = items[destIndex]
-            // update the UI
-            ghostElement.parentNode.insertBefore(draggedElement, ghostElement)
-            ghostElement.remove()
             onmove({
                 from: draggedIndex,
                 to: destIndex,
                 fromItem: draggedItem,
                 destItem: destItem,
             })
+            // update the UI
+            ghostElement.parentNode.insertBefore(draggedElement, ghostElement)
+            ghostElement.remove()
         } else {
             // Dropped the element outside of the window
             ghostElement.parentNode.insertBefore(draggedElement, ghostElement)

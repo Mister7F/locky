@@ -3,18 +3,38 @@
     import * as dropbox from './dropbox/dropbox.js'
     import Login from './login/Login.svelte'
     import Wallet from './Wallet.svelte'
+    import {
+        initiateWebExtention,
+        savePassword,
+    } from '../helpers/web_extension.js'
+    import { normalizeHost } from '../helpers/utils.js'
 
     let locked = $state(true)
     let walletElement = $state(null)
     let wallet = $state(null)
 
+    let searchText = $state('')
+
     async function lock() {
         await api.logout(true)
         locked = true
+        savePassword('', '')
     }
 
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', async () => {
+            await initiateWebExtention(async (password, key, currentUrl) => {
+                // If we saved the password for the web extension, unlock the wallet
+                const newWallet = await api.unlock(password, key)
+                if (newWallet && password.length) {
+                    if (currentUrl) {
+                        searchText = normalizeHost(currentUrl)
+                    }
+                    wallet = newWallet
+                    locked = false
+                }
+            })
+
             await navigator.serviceWorker.register('sw.js')
         })
     } else {
@@ -31,7 +51,12 @@
     {#if locked}
         <Login onwallet_openned={() => (locked = false)} bind:wallet />
     {:else}
-        <Wallet bind:wallet onlock={lock} bind:this={walletElement} />
+        <Wallet
+            bind:wallet
+            onlock={lock}
+            bind:this={walletElement}
+            bind:searchText
+        />
     {/if}
 </div>
 

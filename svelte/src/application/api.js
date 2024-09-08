@@ -18,13 +18,13 @@ export async function getEncryptedWallet() {
     return encryptedWallet
 }
 
-export async function unlock(password) {
+export async function unlock(password, key) {
     const encryptedWallet = await indexdb.get('wallet')
     if (!encryptedWallet) {
         return
     }
 
-    const newWallet = await decryptDatabase(encryptedWallet, password)
+    const newWallet = await decryptDatabase(encryptedWallet, password, key)
     if (!newWallet) {
         return
     }
@@ -35,13 +35,13 @@ export async function unlock(password) {
 }
 
 export async function login(filedata, password) {
-    const database = await decryptDatabase(filedata, password)
-    if (!database) {
+    const newWallet = await decryptDatabase(filedata, password)
+    if (!newWallet) {
         return
     }
 
     masterPassword = password
-    wallet = database
+    wallet = newWallet
     masterPassword = password
     return await saveWallet()
 }
@@ -62,7 +62,10 @@ export async function walletInMemory() {
 async function saveWallet() {
     setTimeout(async () => {
         // do not block the UI while encrypting the database
-        const encryptedWallet = await encryptDatabase(wallet, masterPassword)
+        const [key, encryptedWallet] = await encryptDatabase(
+            wallet,
+            masterPassword
+        )
         await indexdb.set('wallet', encryptedWallet)
     })
     return { accounts: [...wallet.accounts], folders: [...wallet.folders] }
@@ -72,7 +75,7 @@ async function saveWallet() {
 export async function downloadWallet() {
     let encrypted = await getEncryptedWallet()
     if (!encrypted) {
-        encrypted = await encryptDatabase(wallet, masterPassword)
+        encrypted = (await encryptDatabase(wallet, masterPassword))[1]
     }
 
     const filename = 'wallet.lck'
@@ -86,7 +89,6 @@ export async function downloadWallet() {
 }
 
 export async function moveAccount(fromIndex, toIndex) {
-    console.log(fromIndex, toIndex)
     wallet.accounts = array_move(wallet.accounts, fromIndex, toIndex)
     return await saveWallet()
 }

@@ -11,7 +11,11 @@
     import Sidepanel from '../helpers/Sidepanel.svelte'
     import Sortablegrid from '../helpers/Sortablegrid.svelte'
 
-    let { wallet = $bindable(null) } = $props()
+    let {
+        wallet = $bindable(null),
+        searchText = $bindable(''),
+        onlock,
+    } = $props()
 
     // accounts displayed in the UI
     // care about the search, the current directory, etc
@@ -24,10 +28,11 @@
 
                 ret = wallet.accounts.filter((account) => {
                     if (searchText.length) {
-                        return (
-                            account.name
-                                .toLowerCase()
-                                .indexOf(searchText.toLowerCase()) >= 0
+                        return [account.name, account.url].some(
+                            (value) =>
+                                value
+                                    .toLowerCase()
+                                    .indexOf(searchText.toLowerCase()) >= 0
                         )
                     }
                     if (currentFolderId === 'no_folder') {
@@ -50,7 +55,6 @@
 
     let dragging = $state(false)
     let viewMode = $state(window.localStorage.getItem('viewMode') || 'detail')
-    let searchText = $state('')
     let openSearch = $state(false)
 
     // folders variable
@@ -131,7 +135,7 @@
     {/if}
 </Sidepanel>
 <Navbar
-    onlock
+    {onlock}
     onshow_folders={() => (foldersVisible = !foldersVisible)}
     {floatingFolder}
     bind:viewMode

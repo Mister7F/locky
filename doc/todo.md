@@ -1,4 +1,5 @@
 # Todo
+
 - download image when adding the URL on an account
 - grep Todo
 - improve readme
@@ -15,6 +16,7 @@
 - allow to choose theme color (change favicon ?)
 
 Refactor
+
 - try to remove bind:this
 - remove setTimeout
 - firefox in incognito mode: IndexDB and service worker disabled

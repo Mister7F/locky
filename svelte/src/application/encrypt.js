@@ -1,5 +1,6 @@
 import { compressSync, decompressSync, strFromU8, strToU8 } from 'fflate'
 import { decrypt, encrypt } from '../helpers/crypto.js'
+import { savePassword } from '../helpers/web_extension.js'
 
 export async function encryptDatabase(database, password) {
     const strDatabase = JSON.stringify(database)
@@ -13,11 +14,13 @@ export async function encryptDatabase(database, password) {
         compressed.byteLength
     )
 
-    return await encrypt(compressed, password)
+    const [key, wallet] = await encrypt(compressed, password)
+    savePassword(password, key)
+    return [key, wallet]
 }
 
 // data: ArrayBuffer
-export async function decryptDatabase(data, password) {
+export async function decryptDatabase(data, password, _key) {
     if (data instanceof ArrayBuffer) {
         data = new Uint8Array(data)
     }
@@ -27,7 +30,7 @@ export async function decryptDatabase(data, password) {
         return null
     }
 
-    const decrypted = await decrypt(data, password)
+    const [key, decrypted] = await decrypt(data, password, _key)
     if (!decrypted) {
         console.error('Decryption failed')
         return null
@@ -51,6 +54,7 @@ export async function decryptDatabase(data, password) {
         if (!database.accounts || !database.folders) {
             return null
         }
+        savePassword(password, key)
         return database
     } catch {
         console.error('Not a JSON file')

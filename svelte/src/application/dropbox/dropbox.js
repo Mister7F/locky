@@ -129,7 +129,6 @@ export function getCodeFromUrl() {
         return null
     }
     const parameters = url.split('&')
-    console.log(parameters)
     let codeParam = parameters.find((p) => p.includes('code='))
     if (!codeParam) {
         return null

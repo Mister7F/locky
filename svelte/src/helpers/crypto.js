@@ -169,11 +169,13 @@ export async function encrypt(plaintext, password) {
 
     const ciphertext2 = await encryptAES(ciphertext, keyAes)
 
-    return concatenate(salt, ciphertext2)
+    return [key, concatenate(salt, ciphertext2)]
 }
 
 /**
  * Decrypt the given plaintext with the password
+ *
+ * We can directly give the derived key if it has been saved to speed up.
  *
  * 1. Use Scrypt to derive the password into an encryption key
  * 2. Decrypt the result with AES-256 (PKCS7 padding)
@@ -183,18 +185,18 @@ export async function encrypt(plaintext, password) {
  * @param {string} The password to used (bill be derived)
  * @return {Uint8Array} The decrypted message or null if something bad happened
  */
-export async function decrypt(ciphertext, password) {
+export async function decrypt(ciphertext, password, _key) {
     const salt = ciphertext.slice(0, 16)
     const encrypted = ciphertext.slice(16)
 
-    const [key, _] = await derivePassword(password, salt)
+    const key = _key || (await derivePassword(password, salt))[0]
 
     const keyChaCha = key.slice(0, 32)
     const keyAes = key.slice(32, 64)
 
     const encrypted2 = await decryptAES(encrypted, keyAes)
 
-    return await decryptXChaCha20Poly1305(encrypted2, keyChaCha)
+    return [key, await decryptXChaCha20Poly1305(encrypted2, keyChaCha)]
 }
 
 /**

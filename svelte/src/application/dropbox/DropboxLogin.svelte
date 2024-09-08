@@ -1,6 +1,7 @@
 <script>
     import Button from '../../helpers/Button.svelte'
     import * as dropbox from './dropbox.js'
+    import { openUrl } from '../../helpers/utils.js'
 
     let { state = $bindable(), logout } = $props()
 
@@ -9,7 +10,7 @@
 
     async function onLogin() {
         dropbox.logout()
-        window.location = authenticationUrl
+        openUrl(authenticationUrl)
     }
 
     async function onLogout() {

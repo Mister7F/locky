@@ -15,6 +15,7 @@
         searchText = $bindable(''),
         openSearch = false,
         onshow_folders,
+        onlock,
     } = $props()
 
     let changePassword
@@ -61,7 +62,7 @@
     })
 </script>
 
-<Settings bind:visible={settingsVisible} {isDropboxAuthenticated} onlock />
+<Settings bind:visible={settingsVisible} {isDropboxAuthenticated} {onlock} />
 <div class="wallet-navbar" color="primary">
     <div class="folder_menu">
         {#if floatingFolder}
@@ -78,7 +79,7 @@
             }}
         />
         <Field
-            class="search_field {openSearch ? 'visible' : ''}"
+            class="search_field {openSearch || searchText ? 'visible' : ''}"
             copy="0"
             onblur={() => (openSearch = !!searchText)}
             bind:value={searchText}

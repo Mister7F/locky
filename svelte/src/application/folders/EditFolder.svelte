@@ -96,25 +96,25 @@
     </div>
 
     {#snippet actions()}
-    <div>
-        <Button
-            onclick={onDeleteFolder}
-            style="float: right; margin-top: 10px;"
-            color="secondary"
-            variant="outlined"
-        >
-            Delete
-        </Button>
+        <div>
+            <Button
+                onclick={onDeleteFolder}
+                style="float: right; margin-top: 10px;"
+                color="secondary"
+                variant="outlined"
+            >
+                Delete
+            </Button>
 
-        <Button
-            onclick={onSaveFolder}
-            style="float: right; margin-top: 10px;"
-            color="secondary"
-            variant="outlined"
-        >
-            Save
-        </Button>
-    </div>
+            <Button
+                onclick={onSaveFolder}
+                style="float: right; margin-top: 10px;"
+                color="secondary"
+                variant="outlined"
+            >
+                Save
+            </Button>
+        </div>
     {/snippet}
 </Dialog>
 
