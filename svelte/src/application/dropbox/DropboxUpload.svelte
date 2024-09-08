@@ -3,6 +3,7 @@
     import IconButton from '../../helpers/IconButton.svelte'
     import Dialog from '../../helpers/Dialog.svelte'
     import Button from '../../helpers/Button.svelte'
+    import { openUrl } from '../../helpers/utils.js'
 
     import * as dropbox from './dropbox.js'
     import * as api from '../api.js'
@@ -20,7 +21,7 @@
     )
 
     function onLogin() {
-        document.location = authenticationUrl
+        openUrl(authenticationUrl)
     }
 
     async function onUpload() {

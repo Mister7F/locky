@@ -1,4 +1,5 @@
 # Features
+
 - Synchronize the encrypted wallet with Dropbox (to share the wallet across multiple devices)
 - [zxcvbn](https://github.com/dropbox/zxcvbn) for passwords strength computation
 - [haveibeenpwned.com](https://haveibeenpwned.com/Passwords) to know if some passwords leaked

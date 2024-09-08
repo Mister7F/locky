@@ -3,7 +3,9 @@
     import { createRipple } from '../helpers/ripple.js'
     import Img from '../helpers/Img.svelte'
     import { getTotpCode, passwordStrength } from '../helpers/crypto.js'
-    import { isUrlValid, copyValue } from '../helpers/utils.js'
+    import { isUrlValid, copyValue, fromHex } from '../helpers/utils.js'
+    import { encryptAES } from '../helpers/crypto.js'
+    import { sendCredentials } from '../helpers/web_extension.js'
 
     let { account, viewMode = 'list', onclick, onnotify } = $props()
 
@@ -166,6 +168,17 @@
                     }}
                     title="2FA"
                     icon="schedule"
+                    color="on-surface"
+                    bgTransparent="1"
+                />
+            {/if}
+
+            {#if window.inWebExtension}
+                <IconButton
+                    onclick={async () =>
+                        onnotify(await sendCredentials(account))}
+                    title="Fill the form"
+                    icon="login"
                     color="on-surface"
                     bgTransparent="1"
                 />

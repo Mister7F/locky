@@ -78,7 +78,7 @@
             }}
         />
         <Field
-            class="search_field {openSearch ? 'visible' : ''}"
+            class="search_field {openSearch || searchText ? 'visible' : ''}"
             copy="0"
             onblur={() => (openSearch = !!searchText)}
             bind:value={searchText}
