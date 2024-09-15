@@ -74,11 +74,14 @@ function findInputs(selectorsInput1, selectorsInput2 = null) {
 chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
     if (
         sender.origin !== `moz-extension://${chrome.runtime.id}` &&
-        sender.origin !== `chrome-extension://${chrome.runtime.id}`
+        sender.origin !== `chrome-extension://${chrome.runtime.id}` &&
+        `${sender.origin}/` !== browser.runtime.getURL('/')
     ) {
+        console.error("Wrong origin:", chrome.runtime.id, browser.runtime.getURL('/'), sender.origin)
         return
     }
 
+    console.log("Do action", message.action)
     if (message.action === 'login') {
         if (message.account.url?.length) {
             const walletHost = normalizeHost(message.account.url)
