@@ -181,7 +181,7 @@
         // no action
         action = null
         // check if we will move the item
-        let destItemsFiltered = hoverElements.filter(
+        const destItemsFiltered = hoverElements.filter(
             (el) =>
                 gridElement.contains(el) &&
                 el.classList.contains('dnd_container') &&
@@ -336,7 +336,7 @@
         cursor: pointer;
     }
 
-    :global(.dragged) {
+    .dragged {
         position: absolute;
         left: var(--x);
         top: var(--y);
@@ -346,20 +346,21 @@
         pointer-events: none;
     }
 
-    :global(.dragged),
-    :global(.dragged) *,
-    :global(.dragged) div {
-        cursor: grabbing !important;
-        cursor: -moz-grabbing !important;
-        cursor: -webkit-grabbing !important;
-    }
-
-    :global(.ghost) {
+    .ghost {
         pointer-events: none;
-        opacity: 0.1;
+        opacity: 0;
     }
 
     :global(.move_into) {
         background-color: color-mix(in srgb, #4a6572 20%, transparent);
+    }
+
+    .dragging,
+    .dragging *,
+    :global(body:has(.dragging)),
+    :global(body:has(.dragging) *) {
+        cursor: -webkit-grabbing !important;
+        cursor: -moz-grabbing !important;
+        cursor: grabbing !important;
     }
 </style>
