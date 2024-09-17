@@ -77,10 +77,13 @@
     let auditVisible = $derived(currentFolderId === 'security')
 
     async function onMoveAccount(event) {
-        wallet = await api.moveAccount(event.from, event.to)
+        // from / to are the index on the filtered array (based on search)
+        wallet = await api.moveAccount(event.fromItem, event.destItem)
     }
     function editAccount(account) {
-        editedAccountIndex = wallet.accounts.indexOf(account)
+        editedAccountIndex = wallet.accounts.findIndex(
+            (a) => a.id === account.id
+        )
         // Deep copy, to not change the account before saving
         accountEdited = JSON.parse(JSON.stringify(account))
         accountEditorReadonly = true
@@ -92,7 +95,7 @@
     }
     async function onSaveAccount(account) {
         if (editedAccountIndex !== null) {
-            wallet = await api.updateAccount(editedAccountIndex, account)
+            wallet = await api.updateAccount(account)
         } else {
             account['folder_id'] = currentFolderId
             wallet = await api.newAccount(account)
@@ -110,8 +113,10 @@
     async function onAccountAction(event) {
         const actionElement = event.action
         if (actionElement.id && actionElement.id.startsWith('item_folder_')) {
-            const folderId = parseInt(actionElement.id.split('item_folder_')[1])
+            const folderId = actionElement.id.split('item_folder_')[1]
             wallet = await api.changeFolder(event.item, folderId)
+        } else {
+            console.error(`Wrong action ${event.action}.`)
         }
     }
     function onNotify(text) {

@@ -55,9 +55,32 @@ export async function decryptDatabase(data, password, _key) {
             return null
         }
         savePassword(password, key)
+        fixMissingIds(database)
         return database
     } catch {
         console.error('Not a JSON file')
         return
+    }
+}
+
+/**
+ * Fix in place the missing ids of the accounts / folders.
+ */
+function fixMissingIds(wallet) {
+    for (let account of wallet.accounts) {
+        if (!account.id) {
+            account.id = crypto.randomUUID()
+        }
+        if (account.folder_id) {
+            account.folder_id = account.folder_id.toString()
+        }
+    }
+    for (let folder of wallet.folders) {
+        if (!folder.id) {
+            folder.id = crypto.randomUUID()
+        } else {
+            // For old wallet where the identifier were numbers
+            folder.id = folder.id.toString()
+        }
     }
 }

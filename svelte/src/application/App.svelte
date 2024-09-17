@@ -35,7 +35,8 @@
                 }
             })
 
-            await navigator.serviceWorker.register('sw.js')
+            // TODO: uncomment
+            // await navigator.serviceWorker.register('sw.js')
         })
     } else {
         console.error('Service Worker will not work')

@@ -15,7 +15,8 @@
 
     function getElementIndex(element) {
         // Return the index of the element in its parent
-        return [].indexOf.call(element.parentNode.children, element)
+        const children = [...element.parentNode.children].filter((c) => !c.classList.contains('ghost') && !c.classList.contains('dragged'))
+        return [].indexOf.call(children, element)
     }
 
     // On desktop, the drag even is triggered when a threshold is reached
@@ -24,12 +25,15 @@
     let pressedElementEvent = null
     let desktopDragMove = [0, 0]
 
-    let draggedElement = null
-    let draggedIndex = -1
-    let destIndex = -1
+    let dragX = $state(null)
+    let dragY = $state(null)
+
+    let draggedIndex = $state(-1)
+    let draggedItem = $state(null)
+    let destIndex = $state(-1) // used for the UI
+    let destIndexItem = -1 // used to send the event
     let action = null
     let gridElement = $state()
-    let ghostElement = null
 
     // Position of the mouse on the dragged element
     let xPosElement = 0
@@ -55,9 +59,8 @@
             // must ignore
             return [null, null]
         }
-        draggedElement.classList.add('dragged')
-        draggedElement.style.setProperty('--x', mouseX - xPosElement + 'px')
-        draggedElement.style.setProperty('--y', mouseY - yPosElement + 'px')
+        dragX = mouseX - xPosElement
+        dragY = mouseY - yPosElement
         return [mouseX, mouseY]
     }
 
@@ -90,43 +93,32 @@
         if (mouseTimer) {
             clearTimeout(mouseTimer)
         }
-        if (!draggedElement || (event.button !== 0 && !event.touches)) {
+        if (!dragging || (event.button !== 0 && !event.touches)) {
             return
         }
-        let draggedItem = items[draggedIndex]
         if (action) {
             onaction({
                 action: action,
                 item: draggedItem,
             })
-            const parent = ghostElement.parentNode
-            ghostElement.remove()
-            parent.insertBefore(draggedElement, parent.children[draggedIndex])
         } else if (
-            draggedIndex !== destIndex &&
-            destIndex >= 0 &&
+            draggedIndex !== destIndexItem &&
+            destIndexItem >= 0 &&
             draggedIndex >= 0
         ) {
-            let destItem = items[destIndex]
             onmove({
                 from: draggedIndex,
-                to: destIndex,
+                to: destIndexItem,
                 fromItem: draggedItem,
-                destItem: destItem,
+                destItem: items[destIndexItem],
             })
-            // update the UI
-            ghostElement.parentNode.insertBefore(draggedElement, ghostElement)
-            ghostElement.remove()
-        } else {
-            // Dropped the element outside of the window
-            ghostElement.parentNode.insertBefore(draggedElement, ghostElement)
-            ghostElement.remove()
         }
+
         // clean the state
-        draggedElement.classList.remove('dragged')
-        draggedElement = null
+        draggedItem = null
         draggedIndex = -1
         destIndex = -1
+        destIndexItem = -1
         dragging = false
         action = null
         const previousFolder = document.querySelector('.move_into')
@@ -154,7 +146,7 @@
         if (mouseTimer) {
             clearTimeout(mouseTimer)
         }
-        if (!draggedElement) {
+        if (!dragging) {
             return
         }
         let [mouseX, mouseY] = moveDraggedElement(event)
@@ -162,6 +154,9 @@
         if (mouseX === null || mouseY === null) {
             return
         }
+
+        event.stopPropagation()
+        event.preventDefault()
 
         // move the ghost element if necessary
         let hoverElements = document.elementsFromPoint(mouseX, mouseY)
@@ -182,41 +177,32 @@
         }
         // no action
         action = null
-        // check if will move the item
+        // check if we will move the item
         let destItemsFiltered = hoverElements.filter(
             (el) =>
-                el.classList.contains('container') && gridElement.contains(el)
-        )
-
-        destItemsFiltered = destItemsFiltered.filter(
-            (el) => el !== draggedElement
+                gridElement.contains(el) &&
+                el.classList.contains('dnd_container') &&
+                !el.classList.contains('ghost') &&
+                !el.classList.contains('dragged')
         )
 
         if (destItemsFiltered.length) {
-            let destElement = destItemsFiltered[0]
-            destIndex = getElementIndex(destElement)
-            let previousFolder = document.querySelector('.move_into')
+            let nextIndex = getElementIndex(destItemsFiltered[0])
+            if (draggedIndex < destIndex) {
+                nextIndex += 1
+            }
+            if (destIndex <= nextIndex) {
+                nextIndex += 1
+            }
+            destIndexItem = nextIndex > draggedIndex ? nextIndex - 1 : nextIndex
+            destIndex = nextIndex
+
+            const previousFolder = document.querySelector('.move_into')
             if (previousFolder) {
                 previousFolder.classList.remove('move_into')
             }
-            let ghostIndex = getElementIndex(ghostElement)
-            if (ghostIndex < destIndex) {
-                destElement.parentNode.insertBefore(
-                    ghostElement,
-                    destElement.nextSibling
-                )
-            } else {
-                // Similar to this, but avoid scroll glitch on mobile
-                // destElement.parentNode.insertBefore(ghostElement, destElement);
-                ghostElement.parentNode.replaceChild(ghostElement, destElement)
-                ghostElement.parentNode.insertBefore(
-                    destElement,
-                    ghostElement.nextSibling
-                )
-            }
         } else {
-            destIndex = getElementIndex(ghostElement)
-            let previousFolder = document.querySelector('.move_into')
+            const previousFolder = document.querySelector('.move_into')
             if (previousFolder) {
                 previousFolder.classList.remove('move_into')
             }
@@ -232,35 +218,31 @@
      *   you can also "press" the screen to scroll
      */
     function initDrag(event) {
-        const target = event.currentTarget
+        const target = event.target.closest('.dnd_container')
         if (!movable) {
             // try to move, but can't
             onmove_blocked()
             return
         }
 
-        dragging = true
-        draggedElement = target
-        draggedIndex = getElementIndex(draggedElement)
+        draggedIndex = getElementIndex(target)
+
+        // draggedElement = target.cloneNode(true)
+        draggedItem = items[draggedIndex]
         if (event.touches) {
             // mobile
-            xPosElement = draggedElement.offsetWidth / 2
-            yPosElement = draggedElement.offsetHeight / 2
+            xPosElement = target.offsetWidth / 2
+            yPosElement = target.offsetHeight / 2
             mobile = true
         } else {
             // desktop
-            xPosElement = event.x - draggedElement.offsetLeft
-            yPosElement = event.y - draggedElement.getBoundingClientRect().top
+            xPosElement = event.x - target.offsetLeft
+            yPosElement = event.y - target.getBoundingClientRect().top
             mobile = false
         }
         moveDraggedElement(event)
-        // create a ghost element to fill the space
-        ghostElement = document.createElement('div')
-        ghostElement.style.width = draggedElement.offsetWidth + 'px'
-        ghostElement.style.height = draggedElement.offsetHeight + 'px'
-        ghostElement.setAttribute('class', 'ghost')
-        draggedElement.parentNode.insertBefore(ghostElement, draggedElement)
-        document.body.appendChild(draggedElement)
+
+        dragging = true
     }
 
     function cloneEvent(e) {
@@ -280,8 +262,8 @@
         const body = document.body
         body.addEventListener('mouseup', mouseUp, { passive: true })
         body.addEventListener('touchend', mouseUp, { passive: true })
-        body.addEventListener('mousemove', mouseMove, { passive: true })
-        body.addEventListener('touchmove', mouseMove, { passive: true })
+        body.addEventListener('mousemove', mouseMove, { passive: false })
+        body.addEventListener('touchmove', mouseMove, { passive: false })
     })
 </script>
 
@@ -293,17 +275,34 @@
 >
     <div class="items">
         {#each items as item, index (JSON.stringify(item))}
+            {#if dragging && index === destIndex}
+                <div class="dnd_container ghost">
+                    {#if card}
+                        {@render card(draggedItem)}
+                    {/if}
+                </div>
+            {/if}
             <div
-                class="container"
-                onmousedowncapture={mouseDown}
-                ontouchstartcapture={touchStart}
+                class="dnd_container {item === draggedItem ? 'dragged': ''}"
+                onmousedown={mouseDown}
+                ontouchstart={touchStart}
                 oncontextmenu={(event) => event.preventDefault()}
+                style="--x: {dragX}px; --y: {dragY}px;"
             >
                 {#if card}
                     {@render card(item)}
                 {/if}
             </div>
         {/each}
+
+        {#if dragging && items.length === destIndex}
+                <div class="dnd_container ghost">
+                    {#if card}
+                        {@render card(draggedItem)}
+                    {/if}
+                </div>
+            {/if}
+
     </div>
 </div>
 
@@ -324,13 +323,13 @@
         align-content: flex-start;
     }
 
-    .container {
+    .dnd_container {
         width: auto;
         display: block;
         transition: -webkit-filter 0.5s;
     }
 
-    .container > * {
+    .dnd_container > * {
         width: auto;
         display: block;
         cursor: pointer;
@@ -355,7 +354,8 @@
     }
 
     :global(.ghost) {
-        opacity: 0;
+        pointer-events: none;
+        opacity: 0.1;
     }
 
     :global(.move_into) {
