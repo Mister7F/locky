@@ -103,6 +103,16 @@
                             bgTransparent="1"
                         />
                     {/if}
+                    {#if window.inWebExtension}
+                        <IconButton
+                            onclick={async () =>
+                                onnotify(await sendCredentials(account))}
+                            title="Fill the form"
+                            icon="login"
+                            color="on-surface"
+                            bgTransparent="1"
+                        />
+                    {/if}
                 </div>
             </div>
         </div>

@@ -145,7 +145,7 @@
         height: auto;
         max-height: calc(100vh - 240px) !important;
     }
-    .foldersList :global(.folders .container) {
+    .foldersList :global(.folders .dnd_container) {
         width: 100%;
     }
 

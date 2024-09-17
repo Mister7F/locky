@@ -14,8 +14,7 @@ export async function newWallet(password) {
 }
 
 export async function getEncryptedWallet() {
-    const encryptedWallet = await indexdb.get('wallet')
-    return encryptedWallet
+    return await indexdb.get('wallet')
 }
 
 export async function unlock(password, key) {
@@ -68,8 +67,7 @@ async function saveWallet() {
         )
         await indexdb.set('wallet', encryptedWallet)
     })
-    return { accounts: [...wallet.accounts], folders: [...wallet.folders] }
-    // return JSON.parse(JSON.stringify(wallet))
+    return JSON.parse(JSON.stringify(wallet))
 }
 
 export async function downloadWallet() {
@@ -88,18 +86,36 @@ export async function downloadWallet() {
     document.body.removeChild(elem)
 }
 
-export async function moveAccount(fromIndex, toIndex) {
+export async function moveAccount(fromItem, destItem) {
+    if (!fromItem.id || !destItem.id) {
+        console.error('No ID for', fromItem, destItem)
+        return
+    }
+    const fromIndex = wallet.accounts.findIndex((a) => a.id === fromItem.id)
+    const toIndex = wallet.accounts.findIndex((a) => a.id === destItem.id)
+    if (fromIndex < 0 || toIndex < 0) {
+        console.error('Failed to move', fromItem, destItem)
+        return
+    }
     wallet.accounts = array_move(wallet.accounts, fromIndex, toIndex)
     return await saveWallet()
 }
 
 export async function newAccount(account) {
+    if (!account.id) {
+        account.id = generateId()
+    }
     wallet.accounts.push(account)
     return await saveWallet()
 }
 
-export async function updateAccount(accountIndex, account) {
-    wallet.accounts[accountIndex] = account
+export async function updateAccount(account) {
+    const toUpdate = wallet.accounts.findIndex((a) => a.id === account.id)
+    if (toUpdate < 0) {
+        console.error('Account not found')
+        return
+    }
+    wallet.accounts[toUpdate] = account
     return await saveWallet()
 }
 
@@ -113,7 +129,12 @@ export async function changeFolder(account, newFolderId) {
         console.error("The folder doesn't exist")
         return
     }
-    account['folder_id'] = newFolderId
+    const toUpdate = wallet.accounts.find((a) => a.id === account.id)
+    if (!toUpdate) {
+        console.error('Account not found')
+        return
+    }
+    toUpdate.folder_id = newFolderId
     return await saveWallet()
 }
 
@@ -126,14 +147,8 @@ export async function moveFolder(folder, newIndex) {
 
 export async function updateFolder(folder) {
     if (!folder.id) {
-        let folderId = 0
-        do {
-            // Todo: better ID generation
-            folderId = Math.floor(Math.random() * 10000000000000)
-        } while (wallet.folders.findIndex((f) => f.id === folderId) >= 0)
-
         // New folder
-        folder.id = folderId
+        folder.id = generateId()
         wallet.folders.push(folder)
         return await saveWallet()
     }
@@ -171,4 +186,11 @@ function array_move(arr, old_index, new_index) {
     }
     arr.splice(new_index, 0, arr.splice(old_index, 1)[0])
     return arr
+}
+
+/**
+ * Generate a random identifier for an account / folder.
+ */
+function generateId() {
+    return crypto.randomUUID()
 }

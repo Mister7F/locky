@@ -111,7 +111,7 @@
         class="account_editor_close_button"
         color="on-primary"
         icon="close"
-        onclick={onclose()}
+        onclick={onclose}
     />
     <div class="fields">
         <ImagePicker
