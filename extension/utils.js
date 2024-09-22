@@ -6,6 +6,9 @@ async function generateKey() {
 
 // Code from Locky
 function hex(byteArray) {
+    if (!byteArray) {
+        return ''
+    }
     return Array.from(new Uint8Array(byteArray), function (byte) {
         return ('0' + (byte & 0xff).toString(16)).slice(-2)
     }).join('')

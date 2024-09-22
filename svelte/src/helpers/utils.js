@@ -1,3 +1,5 @@
+import WebExtension from './web_extension.svelte.js'
+
 /**
  * Return true if the URL is valid.
  * Avoid XSS based on `javascript:alert(1)`.
@@ -23,6 +25,9 @@ export function copyValue(str) {
 }
 
 export function hex(byteArray) {
+    if (!byteArray) {
+        return ''
+    }
     return Array.from(new Uint8Array(byteArray), function (byte) {
         return ('0' + (byte & 0xff).toString(16)).slice(-2)
     }).join('')
@@ -51,7 +56,7 @@ export function fromBytes(bytes) {
 }
 
 export function openUrl(url) {
-    if (window.inWebExtension) {
+    if (WebExtension.inWebExtension) {
         window.open(url)
     } else {
         window.location = url
