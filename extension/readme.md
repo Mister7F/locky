@@ -63,5 +63,5 @@ Sources
 
 Before committing, run prettier:
 
-> prettier --write *.js
+> prettier --write *.html *.js
 

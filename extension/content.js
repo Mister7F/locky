@@ -76,12 +76,12 @@ chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
     if (
         sender.origin !== `moz-extension://${chrome.runtime.id}` &&
         sender.origin !== `chrome-extension://${chrome.runtime.id}` &&
-        `${sender.origin}/` !== browser.runtime.getURL('/')
+        `${sender.origin}/` !== chrome.runtime.getURL('/')
     ) {
         console.error(
             'Wrong origin:',
             chrome.runtime.id,
-            browser.runtime.getURL('/'),
+            chrome.runtime.getURL('/'),
             sender.origin
         )
         return

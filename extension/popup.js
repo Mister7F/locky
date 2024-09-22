@@ -1,30 +1,46 @@
 document.body.onload = () => {
     const iframe = document.querySelector('iframe')
-    let url = ''
+    iframe.src = localStorage.getItem('lockyUrl')
+
+    document.querySelector('.error-message a').href =
+        chrome.runtime.getURL('/options.html')
 
     chrome.storage.sync.get('lockyUrl').then((value) => {
+        const newUrl = value.lockyUrl || ''
         if (
-            value.lockyUrl.startsWith('https://') ||
-            value.lockyUrl.startsWith('http://127.0.0.1:') ||
-            value.lockyUrl.startsWith('http://localhost:')
+            !newUrl.startsWith('https://') &&
+            !newUrl.startsWith('http://127.0.0.1:') &&
+            !newUrl.startsWith('http://localhost:')
         ) {
-            const newUrl = value.lockyUrl
-            const currentUrl = localStorage.getItem('lockyUrl')
-            if (currentUrl && newUrl !== currentUrl) {
-                // If the URL of the wallet changed because of browser synchronization, ask to confirm the change
-                if (
-                    !confirm(
-                        `The URL of the wallet changed, confirm the change ?\nFrom: ${currentUrl}\nTo: ${newUrl}`
-                    )
-                ) {
-                    return
-                }
-            }
+            document.querySelector('.error-message').classList.add('show')
+            iframe.remove()
+            return
+        }
+
+        const currentUrl = localStorage.getItem('lockyUrl')
+        if (newUrl === currentUrl) {
+            return
+        }
+        if (!currentUrl) {
+            localStorage.setItem('lockyUrl', newUrl)
+            iframe.src = url
+            return
+        }
+
+        // If the URL of the wallet changed because of browser synchronization, ask to confirm the change
+        iframe.classList.remove('show')
+        document.querySelector('.confirm').classList.add('show')
+        document.querySelector('.from_url').innerText = currentUrl
+        document.querySelector('.to_url').innerText = newUrl
+        document.querySelector('.yes').addEventListener('click', () => {
+            document.querySelector('.confirm').classList.remove('show')
             localStorage.setItem('lockyUrl', newUrl)
             iframe.src = newUrl
-            url = newUrl
-            document.querySelector('.error-message').remove()
-        }
+            iframe.classList.add('show')
+        })
+        document.querySelector('.no').addEventListener('click', () => {
+            window.open(chrome.runtime.getURL('/options.html'))
+        })
     })
 
     /**
@@ -38,7 +54,7 @@ document.body.onload = () => {
     }
 
     window.addEventListener('message', async (ev) => {
-        if (ev.origin !== new URL(url).origin) {
+        if (ev.origin !== new URL(localStorage.getItem('lockyUrl')).origin) {
             console.error('Wrong origin: ', ev.origin)
             return
         }

@@ -36,8 +36,6 @@
     let newWebExtensionKeyDialogKeyHash = $state('')
     let newWebExtensionKeyDialogOk = $state(null)
 
-    $effect(initiateWebExtention)
-
     /**
      * Parse the URL to check if a key is present, and ask to save it.
      */
@@ -210,7 +208,7 @@
             toBytes(JSON.stringify({ password, key: hex(key) })),
             getMasterPasswordKey()
         )
-        const ok = await sendToWebExtension({
+        return await sendToWebExtension({
             action: 'savePassword',
             encryptedPassword: hex(encryptedPassword),
         })
@@ -240,6 +238,8 @@
         window.parent.postMessage(ct, pluginOrigin)
         return true
     }
+
+    $effect(initiateWebExtention)
 </script>
 
 <!-- Trick to make reactivity -->

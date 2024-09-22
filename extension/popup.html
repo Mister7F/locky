@@ -14,6 +14,7 @@
                 overflow: hidden;
             }
             iframe {
+                display: none;
                 width: 100%;
                 height: 590px;
                 margin: 0;
@@ -21,15 +22,65 @@
                 box-sizing: border-box;
                 border: none;
             }
+            iframe.show {
+                display: block;
+            }
             .error-message {
+                display: none;
                 padding: 20px;
                 color: white;
+            }
+            .error-message.show {
+                display: block;
+            }
+            .error-message a {
+                color: #1877f2;
+            }
+            .confirm {
+                padding: 20px;
+                color: white;
+                display: none;
+                text-align: center;
+            }
+            .confirm.show {
+                display: block;
+            }
+            button {
+                display: inline-block;
+                outline: 0;
+                cursor: pointer;
+                border: 1px solid #1d1c1d4d;
+                font-weight: 700;
+                background: #fff;
+                padding: 0 12px 1px;
+                font-size: 15px;
+                border-radius: 4px;
+                color: rgb(29, 28, 29);
+                height: 36px;
+                transition: all 80ms linear;
+                margin: 10px;
+            }
+            button:hover {
+                box-shadow: 0 1px 3px 0 rgb(0 0 0 / 8%);
+                background: rgba(248, 248, 248, 1);
             }
         </style>
     </head>
     <body>
-        <div class="error-message">Configure the URL of your Locky instance in the settings.</div>
-        <iframe allow="clipboard-read; clipboard-write"></iframe>
+        <div class="confirm">
+            <span>The URL of the wallet changed, confirm the change ?</span>
+            <br />
+            <span>From:</span> <span class="from_url"></span>
+            <br />
+            <span>To:</span> <span class="to_url"></span>
+            <br />
+            <button class="yes">Yes</button><button class="no">No</button>
+        </div>
+        <div class="error-message">
+            Configure the URL of your Locky instance in the
+            <a href="" target="_blank">settings</a>.
+        </div>
+        <iframe class="show" allow="clipboard-read; clipboard-write"></iframe>
         <script src="utils.js"></script>
         <script src="crypto.js"></script>
         <script src="popup.js"></script>
