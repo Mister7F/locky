@@ -28,7 +28,16 @@
                 const newWallet = await api.unlock(password, key)
                 if (newWallet && password.length) {
                     if (currentUrl) {
-                        searchText = normalizeHost(currentUrl)
+                        const host = normalizeHost(currentUrl)
+                        const walletText = JSON.stringify(newWallet)
+                        let parts = host.split('.')
+                        while (
+                            parts.length > 2 &&
+                            !walletText.includes(parts.join('.'))
+                        ) {
+                            parts.shift()
+                        }
+                        searchText = parts.join('.')
                     }
                     wallet = newWallet
                     locked = false
