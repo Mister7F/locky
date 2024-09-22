@@ -8,8 +8,21 @@ document.body.onload = () => {
             value.lockyUrl.startsWith('http://127.0.0.1:') ||
             value.lockyUrl.startsWith('http://localhost:')
         ) {
-            iframe.src = value.lockyUrl
-            url = value.lockyUrl
+            const newUrl = value.lockyUrl
+            const currentUrl = localStorage.getItem('lockyUrl')
+            if (currentUrl && newUrl !== currentUrl) {
+                // If the URL of the wallet changed because of browser synchronization, ask to confirm the change
+                if (
+                    !confirm(
+                        `The URL of the wallet changed, confirm the change ?\nFrom: ${currentUrl}\nTo: ${newUrl}`
+                    )
+                ) {
+                    return
+                }
+            }
+            localStorage.setItem('lockyUrl', newUrl)
+            iframe.src = newUrl
+            url = newUrl
             document.querySelector('.error-message').remove()
         }
     })
