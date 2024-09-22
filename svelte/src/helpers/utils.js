@@ -1,3 +1,5 @@
+import WebExtension from './web_extension.svelte.js'
+
 /**
  * Return true if the URL is valid.
  * Avoid XSS based on `javascript:alert(1)`.
@@ -51,7 +53,7 @@ export function fromBytes(bytes) {
 }
 
 export function openUrl(url) {
-    if (window.inWebExtension) {
+    if (WebExtension.inWebExtension) {
         window.open(url)
     } else {
         window.location = url

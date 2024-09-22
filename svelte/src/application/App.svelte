@@ -3,10 +3,8 @@
     import * as dropbox from './dropbox/dropbox.js'
     import Login from './login/Login.svelte'
     import Wallet from './Wallet.svelte'
-    import {
-        initiateWebExtention,
-        savePassword,
-    } from '../helpers/web_extension.js'
+    import IconButton from '../helpers/IconButton.svelte'
+    import WebExtension from '../helpers/WebExtension.svelte'
 
     let locked = $state(true)
     let walletElement = $state(null)
@@ -20,37 +18,19 @@
         savePassword('', '')
     }
 
+    let snackbarText = $state('')
+    let snackbarTimeout
+    function onnotify(text) {
+        clearTimeout(snackbarTimeout)
+        snackbarText = text
+        snackbarTimeout = setTimeout(() => {
+            snackbarText = ''
+        }, 1000)
+    }
+
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', async () => {
-            await initiateWebExtention(async (password, key, host) => {
-                // If we saved the password for the web extension, unlock the wallet
-                const newWallet = await api.unlock(password, key)
-                if (newWallet && password.length) {
-                    if (host) {
-                        const walletText = JSON.stringify(newWallet)
-                        let parts = host.split('.')
-                        while (
-                            parts.length > 2 &&
-                            !walletText.includes(parts.join('.'))
-                        ) {
-                            parts.shift()
-                        }
-                        if (
-                            parts.length &&
-                            !walletText.includes(parts.join('.'))
-                        ) {
-                            parts = [parts[0]]
-                        }
-                        if (walletText.includes(parts.join('.'))) {
-                            searchText = parts.join('.')
-                        }
-                    }
-                    wallet = newWallet
-                    locked = false
-                }
-            })
-
-            await navigator.serviceWorker.register('sw.js')
+            // await navigator.serviceWorker.register('sw.js')
         })
     } else {
         console.error('Service Worker will not work')
@@ -62,6 +42,8 @@
     }, 500)
 </script>
 
+<WebExtension bind:wallet bind:searchText bind:locked {onnotify} />
+
 <div class="root">
     {#if locked}
         <Login onwallet_openned={() => (locked = false)} bind:wallet />
@@ -71,9 +53,18 @@
             onlock={lock}
             bind:this={walletElement}
             bind:searchText
+            {onnotify}
         />
     {/if}
 </div>
+
+<!-- Notifications -->
+{#if snackbarText}
+    <div class="notification">
+        <span>{snackbarText}</span>
+        <IconButton icon="close" onclick={() => (snackbarText = '')} />
+    </div>
+{/if}
 
 <svelte:head>
     <style>
@@ -149,5 +140,39 @@
     /* Handle on hover */
     :global(::-webkit-scrollbar-thumb:hover) {
         background: var(--primary);
+    }
+
+    .notification {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+
+        box-sizing: border-box;
+        text-align: center;
+        position: absolute;
+
+        background-color: var(--primary);
+        border-radius: 4px;
+        left: 50%;
+        transform: translateX(-50%);
+        box-shadow:
+            0 14px 28px rgba(0, 0, 0, 0.25),
+            0 10px 10px rgba(0, 0, 0, 0.22);
+        animation: notification 0.1s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    }
+    .notification > span {
+        margin-right: 15px;
+        margin-left: 20px;
+
+        color: var(--on-primary);
+    }
+    @keyframes notification {
+        from {
+            bottom: -20px;
+        }
+        to {
+            bottom: 20px;
+        }
     }
 </style>

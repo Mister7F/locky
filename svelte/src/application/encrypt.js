@@ -1,6 +1,6 @@
 import { compressSync, decompressSync, strFromU8, strToU8 } from 'fflate'
 import { decrypt, encrypt } from '../helpers/crypto.js'
-import { savePassword } from '../helpers/web_extension.js'
+import WebExtension from '../helpers/web_extension.svelte.js'
 
 export async function encryptDatabase(database, password) {
     const strDatabase = JSON.stringify(database)
@@ -15,7 +15,7 @@ export async function encryptDatabase(database, password) {
     )
 
     const [key, wallet] = await encrypt(compressed, password)
-    savePassword(password, key)
+    WebExtension.savePassword = [password, key]
     return [key, wallet]
 }
 
@@ -49,18 +49,19 @@ export async function decryptDatabase(data, password, _key) {
         return null
     }
 
+    let database
     try {
-        const database = JSON.parse(strFromU8(decompressed))
+        database = JSON.parse(strFromU8(decompressed))
         if (!database.accounts || !database.folders) {
             return null
         }
-        savePassword(password, key)
-        fixMissingIds(database)
-        return database
     } catch {
         console.error('Not a JSON file')
         return
     }
+    WebExtension.savePassword = [password, key]
+    fixMissingIds(database)
+    return database
 }
 
 /**
