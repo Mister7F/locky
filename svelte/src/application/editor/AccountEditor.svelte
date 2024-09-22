@@ -28,6 +28,7 @@
     $inspect(account, readonly).with(() => {
         if (account) updateTotp()
     })
+    $effect(updateTotp)
 
     let iconSrcs = $state([])
 

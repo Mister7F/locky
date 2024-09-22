@@ -37,7 +37,15 @@
                         ) {
                             parts.shift()
                         }
-                        searchText = parts.join('.')
+                        if (
+                            parts.length &&
+                            !walletText.includes(parts.join('.'))
+                        ) {
+                            parts = [parts[0]]
+                        }
+                        if (walletText.includes(parts.join('.'))) {
+                            searchText = parts.join('.')
+                        }
                     }
                     wallet = newWallet
                     locked = false
