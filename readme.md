@@ -33,7 +33,7 @@ Your accounts are encrypted 2 times with modern algorithms;
 - [XChaCha20-Poly1305](https://www.cryptopp.com/wiki/XChaCha20): for a first encryption
 - [AES-256](https://fr.wikipedia.org/wiki/Advanced_Encryption_Standard): for the second encryption
 
-You can also install a Chrome / Firefox extension to automatically fill the forms
+You can also install a [Chrome / Firefox extension](./extension) to automatically fill the forms (and prevent phishing)
 > https://youtu.be/Iayjx8GReKw
 
 ## Summary

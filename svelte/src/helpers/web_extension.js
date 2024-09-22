@@ -1,6 +1,8 @@
 import { fromHex, hex, sleep, fromBytes, toBytes, copyValue } from './utils.js'
 import { encryptAES, decryptAES, getTotpCode } from './crypto.js'
 import * as api from '../application/api.js'
+import { normalizeHost } from '../helpers/utils.js'
+
 let pluginKey = null
 let pluginOrigin = null
 
@@ -49,6 +51,7 @@ export async function initiateWebExtention(unlock) {
             pluginKey = newPluginKey
             pluginOrigin = event.origin
             window.inWebExtension = true
+            window.currentTabHost = normalizeHost(eventData.currentUrl)
 
             // The extension is already loaded, decrypt it and unlock the wallet
             if (eventData.encryptedPassword?.length) {
@@ -61,7 +64,7 @@ export async function initiateWebExtention(unlock) {
                 await unlock(
                     password,
                     new Uint8Array(fromHex(key)),
-                    eventData.currentUrl
+                    window.currentTabHost
                 )
             }
             return

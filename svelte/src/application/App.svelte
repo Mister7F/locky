@@ -7,7 +7,6 @@
         initiateWebExtention,
         savePassword,
     } from '../helpers/web_extension.js'
-    import { normalizeHost } from '../helpers/utils.js'
 
     let locked = $state(true)
     let walletElement = $state(null)
@@ -23,12 +22,11 @@
 
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', async () => {
-            await initiateWebExtention(async (password, key, currentUrl) => {
+            await initiateWebExtention(async (password, key, host) => {
                 // If we saved the password for the web extension, unlock the wallet
                 const newWallet = await api.unlock(password, key)
                 if (newWallet && password.length) {
-                    if (currentUrl) {
-                        const host = normalizeHost(currentUrl)
+                    if (host) {
                         const walletText = JSON.stringify(newWallet)
                         let parts = host.split('.')
                         while (

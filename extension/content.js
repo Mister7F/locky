@@ -21,6 +21,7 @@ const loginSelectors = [
     'input[name="loginfmt"]',
     'input[id="username"]',
     'input[autocomplete="username"]',
+    'input[name="var_login"]',
 ]
 const passwordSelectors = [
     'input[id="password"]',
@@ -77,25 +78,16 @@ chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
         sender.origin !== `chrome-extension://${chrome.runtime.id}` &&
         `${sender.origin}/` !== browser.runtime.getURL('/')
     ) {
-        console.error("Wrong origin:", chrome.runtime.id, browser.runtime.getURL('/'), sender.origin)
+        console.error(
+            'Wrong origin:',
+            chrome.runtime.id,
+            browser.runtime.getURL('/'),
+            sender.origin
+        )
         return
     }
 
-    console.log("Do action", message.action)
     if (message.action === 'login') {
-        if (message.account.url?.length) {
-            const walletHost = normalizeHost(message.account.url)
-            const currentHost = normalizeHost(window.location)
-
-            if (
-                walletHost !== currentHost &&
-                !confirm(
-                    `The current domain (${currentHost}) does not match the URL in your wallet (${walletHost}), are you sure you are not phished?`
-                )
-            ) {
-                return
-            }
-        }
         await login(message.account.login, message.account.password)
     }
 })

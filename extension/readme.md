@@ -5,6 +5,11 @@ The 2FA (TOTP) code is copied if the clipboard after login on the website.
 
 > https://youtu.be/Iayjx8GReKw
 
+Phishing protection.
+<p align="center">
+    <img src="../doc/img/phishing.png">
+</p>
+
 ## Installation
 1. Install the addon (see dev section, or check releases on Github)
 2. Open the settings page

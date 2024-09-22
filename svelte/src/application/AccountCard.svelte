@@ -5,12 +5,53 @@
     import { getTotpCode, passwordStrength } from '../helpers/crypto.js'
     import { isUrlValid, copyValue, fromHex } from '../helpers/utils.js'
     import { encryptAES } from '../helpers/crypto.js'
+    import Dialog from '../helpers/Dialog.svelte'
+    import Button from '../helpers/Button.svelte'
     import { sendCredentials } from '../helpers/web_extension.js'
-
+    import { normalizeHost } from '../helpers/utils.js'
     let { account, viewMode = 'list', onclick, onnotify } = $props()
 
     const strength = passwordStrength(account.password)
+
+    let accountHost = $derived(normalizeHost(account.url))
+    let confirmationDialogOpen = $state(false)
+    async function _sendCredentials(account) {
+        if (!window.inWebExtension) {
+            onnotify('Web Extension is not installed')
+            return
+        }
+        if (!accountHost || accountHost === window.currentTabHost) {
+            onnotify(await sendCredentials(account))
+            return
+        }
+        confirmationDialogOpen = true
+    }
 </script>
+
+<Dialog bind:open={confirmationDialogOpen} title="Are you sure ?">
+    The current domain <b class="host">{window.currentTabHost}</b> does not
+    match the URL in your wallet <b class="host">{accountHost}</b>, are you sure
+    you are not phished?
+
+    {#snippet actions()}
+        <Button
+            onclick={() => (confirmationDialogOpen = false)}
+            color="secondary"
+            variant="outlined"
+        >
+            No
+        </Button>
+        <Button
+            onclick={async () => {
+                confirmationDialogOpen = false
+                onnotify(await sendCredentials(account))
+            }}
+            color="primary"
+        >
+            Yes
+        </Button>
+    {/snippet}
+</Dialog>
 
 {#if viewMode === 'minimalist'}
     <div class="account" {onclick}>
@@ -105,8 +146,7 @@
                     {/if}
                     {#if window.inWebExtension}
                         <IconButton
-                            onclick={async () =>
-                                onnotify(await sendCredentials(account))}
+                            onclick={() => _sendCredentials(account)}
                             title="Fill the form"
                             icon="login"
                             color="on-surface"
@@ -185,8 +225,7 @@
 
             {#if window.inWebExtension}
                 <IconButton
-                    onclick={async () =>
-                        onnotify(await sendCredentials(account))}
+                    onclick={() => _sendCredentials(account)}
                     title="Fill the form"
                     icon="login"
                     color="on-surface"
@@ -439,5 +478,9 @@
         align-items: center;
         justify-content: flex-end;
         min-width: fit-content;
+    }
+
+    .host {
+        color: var(--error);
     }
 </style>

@@ -30,6 +30,7 @@
                     if (searchText.length) {
                         return [account.name, account.url].some(
                             (value) =>
+                                value &&
                                 value
                                     .toLowerCase()
                                     .indexOf(searchText.toLowerCase()) >= 0

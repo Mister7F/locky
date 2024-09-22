@@ -3,7 +3,11 @@ document.body.onload = () => {
     let url = ''
 
     chrome.storage.sync.get('lockyUrl').then((value) => {
-        if (value.lockyUrl.startsWith('https://')) {
+        if (
+            value.lockyUrl.startsWith('https://') ||
+            value.lockyUrl.startsWith('http://127.0.0.1:') ||
+            value.lockyUrl.startsWith('http://localhost:')
+        ) {
             iframe.src = value.lockyUrl
             url = value.lockyUrl
             document.querySelector('.error-message').remove()
