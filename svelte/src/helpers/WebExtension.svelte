@@ -140,8 +140,8 @@
                 searchText = parts.join('.')
             }
         }
-        wallet = newWallet
         locked = false
+        wallet = newWallet
     }
 
     let _p = $derived.by(async () => {
