@@ -13,6 +13,7 @@ const METHODS = {
     'login.microsoftonline.com': { fill: 'write_submit_write' },
     // Other
     'github.com': { fill: 'set_attribute', submit: 'submit' },
+    'paypal.com': { fill: 'write_submit_write' },
 }
 
 const loginSelectors = [
@@ -21,13 +22,19 @@ const loginSelectors = [
     'input[name="loginfmt"]',
     'input[name="var_login"]',
     'input[name="username"]',
+    'input[name="username"]',
+    'input[name="login_email"]',
 
     'input[id="email"]',
     'input[id="login"]',
     'input[id="loginfmt"]',
     'input[id="var_login"]',
     'input[id="username"]',
+    'input[id="login_email"]',
 
+    'input[type="email"]',
+
+    'input[autocomplete="email"]',
     'input[autocomplete="username"]',
 ]
 const passwordSelectors = [
