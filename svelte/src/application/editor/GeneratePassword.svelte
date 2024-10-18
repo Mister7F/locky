@@ -19,7 +19,7 @@
             alphabet = alphabet + '0123456789'
         }
         if (useSymbol) {
-            alphabet = alphabet + `~&$(){}[]+/-*€$£#%^\`\\,.:;!?µ<>@_|`
+            alphabet = alphabet + `~&$(){}[]+-*€$£#%^,.:;!?<>@_|'"`
         }
 
         if (alphabet && passwordLength) {
@@ -38,7 +38,7 @@
     let useNumber = $state(true)
     let useSymbol = $state(true)
 
-    let passwordLength = $state(20)
+    let passwordLength = $state(32)
     let password = $state(generate())
     let generatePasswordDialogOpen = $state(false)
 
