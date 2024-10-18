@@ -1,11 +1,11 @@
 <script>
     // Modified from:
     // https://codepen.io/manikantag/pen/rZpNXm
-    let { min, max, value = $bindable() } = $props()
+    let { min, max, value = $bindable(), onchange = null } = $props()
 </script>
 
 <div class="slider">
-    <input type="range" {min} {max} bind:value />
+    <input type="range" {min} {max} bind:value oninput={onchange} />
 </div>
 
 <style>

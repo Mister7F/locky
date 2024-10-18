@@ -58,35 +58,52 @@
     <div class="options">
         <Button
             color="secondary"
-            onclick={() => (useLower = !useLower)}
+            onclick={() => {
+                useLower = !useLower
+                password = generate()
+            }}
             variant={useLower ? '' : 'outlined'}
         >
             a
         </Button>
         <Button
             color="secondary"
-            onclick={() => (useUpper = !useUpper)}
+            onclick={() => {
+                useUpper = !useUpper
+                password = generate()
+            }}
             variant={useUpper ? '' : 'outlined'}
         >
             A
         </Button>
         <Button
             color="secondary"
-            onclick={() => (useNumber = !useNumber)}
+            onclick={() => {
+                useNumber = !useNumber
+                password = generate()
+            }}
             variant={useNumber ? '' : 'outlined'}
         >
             9
         </Button>
         <Button
             color="secondary"
-            onclick={() => (useSymbol = !useSymbol)}
+            onclick={() => {
+                useSymbol = !useSymbol
+                password = generate()
+            }}
             variant={useSymbol ? '' : 'outlined'}
         >
             $
         </Button>
     </div>
     <div class="password-length">
-        <Slider min={4} max={50} bind:value={passwordLength} />
+        <Slider
+            min={4}
+            max={50}
+            bind:value={passwordLength}
+            onchange={() => (password = generate())}
+        />
         <span>{passwordLength}</span>
     </div>
     <p>{password}</p>

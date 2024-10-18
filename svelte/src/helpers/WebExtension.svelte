@@ -117,7 +117,7 @@
         })
 
         // Ask plugin key
-        await sleep(40)  // for some reason, without that auto-unlock sometimes fail on Firefox
+        await sleep(40) // for some reason, without that auto-unlock sometimes fail on Firefox
         window.parent.postMessage('IFRAME_READY', '*')
     }
 
