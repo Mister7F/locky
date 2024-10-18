@@ -123,6 +123,7 @@
         margin: 0;
         overflow: hidden;
         overflow-x: hidden;
+        --scrollbar-color: var(--primary);
     }
 
     /* Scroll bar */
@@ -132,16 +133,18 @@
 
     /* Track */
     :global(::-webkit-scrollbar-track) {
+        display: none;
     }
 
     /* Handle */
     :global(::-webkit-scrollbar-thumb) {
-        background: var(--primary);
+        background: var(--scrollbar-color);
+        cursor: pointer;
     }
 
     /* Handle on hover */
     :global(::-webkit-scrollbar-thumb:hover) {
-        background: var(--primary);
+        filter: brightness(90%);
     }
 
     .notification {

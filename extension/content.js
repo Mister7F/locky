@@ -22,7 +22,6 @@ const loginSelectors = [
     'input[name="loginfmt"]',
     'input[name="var_login"]',
     'input[name="username"]',
-    'input[name="username"]',
     'input[name="login_email"]',
 
     'input[id="email"]',

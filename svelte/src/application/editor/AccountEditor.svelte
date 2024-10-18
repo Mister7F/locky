@@ -216,6 +216,7 @@
 <style>
     .account {
         padding: 20px;
+        padding-bottom: 90px;
         color: var(--on-primary);
         background-color: var(--primary);
         margin: 0;
@@ -227,6 +228,9 @@
         align-items: center;
         overflow-y: auto;
         box-sizing: border-box;
+        scrollbar-color: light;
+        scrollbar-width: 2px;
+        --scrollbar-color: var(--on-primary);
     }
 
     .fields {
@@ -253,7 +257,8 @@
     }
 
     :global(.account_editor_close_button) {
+        z-index: 99;
         position: absolute;
-        right: 25px;
+        right: 16px;
     }
 </style>
