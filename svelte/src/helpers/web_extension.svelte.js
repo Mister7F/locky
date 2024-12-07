@@ -2,6 +2,7 @@ const Store = () => {
     let sendCredentials = $state(null)
     let savePassword = $state(null)
     let inWebExtension = $state(null)
+    let setSearch = $state(null)
 
     return {
         get sendCredentials() {
@@ -21,6 +22,14 @@ const Store = () => {
         },
         set inWebExtension(v) {
             inWebExtension = v
+        },
+
+        get setSearch() {
+            return setSearch
+        },
+        set setSearch(v) {
+            console.log('set setSearch')
+            setSearch = v
         },
     }
 }

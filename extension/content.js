@@ -157,6 +157,7 @@ async function login(login, password, url) {
     } else if (settings.submit === 'submit') {
         elPassword.closest(formSelector).submit()
     } else {
+        await sleep(50)
         await enter(elPassword)
     }
 }
@@ -255,6 +256,7 @@ async function sleep(ms) {
 }
 
 async function enter(input) {
+    input.focus()
     const keydown = new KeyboardEvent('keydown', {
         key: 'Enter',
         code: 'Enter',
@@ -297,16 +299,24 @@ function showAlert(message) {
                 color: white;
                 border: 1px solid red;
                 z-index: 9999999;
-                top: 25px;
-                right: 25px;
+                top: 20px;
+                right: 20px;
                 text-align: right;
                 padding: 20px;
                 background-color: #292c35;
                 border-radius: 10px;
-        "></div>`)
+                font-size: 20px;
+                font-family: monospace;
+                display: flex;
+                align-items: baseline;
+        ">
+        </div>`)
     }
     alrt.innerText = message
     document.body.appendChild(alrt)
+    setTimeout(() => {
+        document.querySelector('.locky-alert').remove()
+    }, 2500)
 }
 
 function createElementFromHTML(htmlString) {

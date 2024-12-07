@@ -48,7 +48,13 @@
 
 <div class="root">
     {#if locked}
-        <Login onwallet_openned={() => (locked = false)} bind:wallet />
+        <Login
+            onwallet_openned={() => {
+                locked = false
+                WebExtensionStore.setSearch = wallet
+            }}
+            bind:wallet
+        />
     {:else}
         <Wallet
             bind:wallet

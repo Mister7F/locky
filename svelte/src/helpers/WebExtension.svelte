@@ -127,9 +127,31 @@
         if (!newWallet || !password.length) {
             return
         }
-        if (host) {
-            const walletText = JSON.stringify(newWallet)
-            let parts = host.split('.')
+        setSearch(newWallet)
+        locked = false
+        wallet = newWallet
+    }
+
+    function setSearch(wallet) {
+        console.log(currentTabHost)
+        if (!currentTabHost || !wallet) {
+            return
+        }
+
+        const walletText = JSON.stringify(
+            wallet.accounts.map((a) => [a.name, a.url])
+        )
+
+        if (
+            currentTabHost.match(/^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+(:[0-9]+)?$/)
+        ) {
+            // IP address
+            if (walletText.includes(currentTabHost)) {
+                searchText = currentTabHost
+            }
+        } else {
+            // Domain name
+            let parts = currentTabHost.split('.')
             while (parts.length > 2 && !walletText.includes(parts.join('.'))) {
                 parts.shift()
             }
@@ -140,8 +162,6 @@
                 searchText = parts.join('.')
             }
         }
-        locked = false
-        wallet = newWallet
     }
 
     let _p = $derived.by(async () => {
@@ -158,6 +178,15 @@
         }
         await sendCredentials(WebExtension.sendCredentials)
         WebExtension.sendCredentials = null
+    })
+
+    let _s = $derived.by(() => {
+        console.log(WebExtension.setSearch)
+        if (!WebExtension.setSearch) {
+            return
+        }
+        setSearch(WebExtension.setSearch)
+        WebExtension.setSearch = null
     })
 
     async function sendCredentials(_account) {
@@ -244,7 +273,7 @@
 </script>
 
 <!-- Trick to make reactivity -->
-<div {_p} {_c} style="display: none"></div>
+<div {_p} {_c} {_s} style="display: none"></div>
 
 <Dialog bind:open={confirmationDialogOpen} title="Are you sure ?">
     The current domain <b class="host">{WebExtension.currentTabHost}</b>
