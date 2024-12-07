@@ -4,16 +4,20 @@
 
 const METHODS = {
     // Amazon
-    'amazon.fr': { fill: 'set_attribute' },
-    'amazon.be': { fill: 'set_attribute' },
-    'amazon.com': { fill: 'set_attribute' },
-    'amazon.de': { fill: 'set_attribute' },
+    'amazon.fr': { fill: 'set_attribute', submit: 'submit' },
+    'amazon.com': { fill: 'set_attribute', submit: 'submit' },
+    'amazon.com.be': { fill: 'set_attribute', submit: 'submit' },
+    'amazon.de': { fill: 'set_attribute', submit: 'submit' },
     // Microsoft
-    'login.live.com': { fill: 'write_submit_write' },
-    'login.microsoftonline.com': { fill: 'write_submit_write' },
+    'login.live.com': { fill: 'write_submit_write', submit: 'click' },
+    'login.microsoftonline.com': {
+        fill: 'write_submit_write',
+        submit: 'click',
+    },
     // Other
     'github.com': { fill: 'set_attribute', submit: 'submit' },
     'paypal.com': { fill: 'write_submit_write' },
+    'x.com': { fill: 'twitter', submit: 'enter' },
 }
 
 const loginSelectors = [
@@ -30,6 +34,7 @@ const loginSelectors = [
     'input[id="var_login"]',
     'input[id="username"]',
     'input[id="login_email"]',
+    'input[id="account_name_text_field"]',
 
     'input[type="email"]',
 
@@ -47,6 +52,7 @@ const submitSelectors = [
     'input[type="submit"]',
     'button[data-a-target="passport-login-button"]',
     'a[data-a-target="passport-login-button"]',
+    'button[id="sign-in"]',
 ]
 
 const totpSelectors = [
@@ -58,31 +64,38 @@ const totpSelectors = [
     'input[name="otc"]',
 ]
 
+const formSelectors = [
+    'form',
+    'apple-auth', // Apple
+    'sign-in',
+    'div[id="sign_in_form"]',
+]
+const formSelector = formSelectors.join(',')
+
 function findInputs(selectorsInput1, selectorsInput2 = null) {
-    const selector1 = selectorsInput1.map((sel) => `form ${sel}`).join(',')
-    const inputs1 = document.querySelectorAll(selector1)
-    if (!selectorsInput2) {
-        if (!inputs1?.length) {
-            alert('Failed to find the input')
-            return
-        }
-        const input1 = inputs1[0]
-        input1.value = ''
-        return [input1]
-    }
-
-    const selector2 = selectorsInput2.join(',')
-    for (let input1 of inputs1) {
-        const form = input1.closest('form')
-        const input2 = form.querySelector(selector2)
-        if (input2) {
+    for (const form of document.querySelectorAll(formSelector)) {
+        const inputs1 = form.querySelectorAll(selectorsInput1.join(','))
+        if (!selectorsInput2) {
+            if (!inputs1?.length) {
+                continue
+            }
+            const input1 = inputs1[0]
             input1.value = ''
-            input2.value = ''
-            return [input1, input2]
+            return [input1]
+        }
+
+        const selector2 = selectorsInput2.join(',')
+        for (const input1 of inputs1) {
+            const input2 = form.querySelector(selector2)
+            if (input2) {
+                input1.value = ''
+                input2.value = ''
+                return [input1, input2]
+            }
         }
     }
 
-    alert('Failed to find the input')
+    showAlert('Failed to find the login form')
 }
 
 chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
@@ -124,6 +137,8 @@ async function login(login, password, url) {
             loginSelectors,
             passwordSelectors
         )
+    } else if (settings.fill === 'twitter') {
+        elPassword = await _twitter(login, password)
     } else {
         elPassword = await _typeText(
             login,
@@ -133,16 +148,16 @@ async function login(login, password, url) {
         )
     }
 
-    if (settings.submit === 'enter') {
-        await enter(elPassword)
-    } else if (settings.submit === 'submit') {
-        elPassword.closest('form').submit()
-    } else {
+    if (settings.submit === 'click') {
         await sleep(50)
         elPassword
-            .closest('form')
+            .closest(formSelector)
             .querySelector(submitSelectors.join(','))
             .click()
+    } else if (settings.submit === 'submit') {
+        elPassword.closest(formSelector).submit()
+    } else {
+        await enter(elPassword)
     }
 }
 
@@ -180,7 +195,10 @@ async function _writeSubmitWrite(
     elLogin.focus()
     document.execCommand('insertText', false, login)
 
-    elLogin.closest('form').querySelector(submitSelectors.join(',')).click()
+    elLogin
+        .closest(formSelector)
+        .querySelector(submitSelectors.join(','))
+        .click()
 
     await sleep(1000)
 
@@ -188,6 +206,46 @@ async function _writeSubmitWrite(
 
     elPassword.focus()
     document.execCommand('insertText', false, password)
+
+    return elPassword
+}
+
+async function _twitter(login, password) {
+    if (
+        document.location.origin !== 'https://x.com' ||
+        !document.location.pathname.includes('/login')
+    ) {
+        showAlert('Failed to find the login form')
+        return
+    }
+
+    let elLogin = document.querySelector('input[autocomplete="username"]')
+    if (!elLogin) {
+        elLogin = document.querySelector('input[name="text"]')
+    }
+    if (!elLogin) {
+        showAlert('Failed to find the login form')
+        return
+    }
+
+    elLogin.focus()
+    document.execCommand('insertText', false, login)
+    await sleep(500)
+
+    await enter(elLogin)
+
+    let elPassword = null
+    for (let i = 0; i < 30; i++) {
+        elPassword = document.querySelector('input[type="password"]')
+        if (elPassword) {
+            break
+        }
+        await sleep(200)
+    }
+
+    elPassword.focus()
+    document.execCommand('insertText', false, password)
+    await sleep(500)
 
     return elPassword
 }
@@ -202,17 +260,59 @@ async function enter(input) {
         code: 'Enter',
         which: 13,
         keyCode: 13,
+        bubbles: true,
+        view: window,
     })
     const keypress = new KeyboardEvent('keypress', {
         key: 'Enter',
         code: 'Enter',
         which: 13,
         keyCode: 13,
+        bubbles: true,
+        view: window,
+    })
+    const keypup = new KeyboardEvent('keyup', {
+        key: 'Enter',
+        code: 'Enter',
+        which: 13,
+        keyCode: 13,
+        bubbles: true,
+        view: window,
     })
     await sleep(100)
     input.dispatchEvent(keydown)
     await sleep(100)
     input.dispatchEvent(keypress)
+    await sleep(100)
+    input.dispatchEvent(keypup)
+}
+
+function showAlert(message) {
+    let alrt = document.querySelector('.locky-alert')
+
+    if (!alrt) {
+        alrt = createElementFromHTML(`
+            <div class="locky-alert" style="
+                position: absolute;
+                color: white;
+                border: 1px solid red;
+                z-index: 9999999;
+                top: 25px;
+                right: 25px;
+                text-align: right;
+                padding: 20px;
+                background-color: #292c35;
+                border-radius: 10px;
+        "></div>`)
+    }
+    alrt.innerText = message
+    document.body.appendChild(alrt)
+}
+
+function createElementFromHTML(htmlString) {
+    const div = document.createElement('div')
+    div.innerHTML = htmlString.trim()
+    return div.firstChild
 }
 
 // From Locky
