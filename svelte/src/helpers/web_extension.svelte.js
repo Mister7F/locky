@@ -9,13 +9,17 @@ const Store = () => {
             return sendCredentials
         },
         set sendCredentials(v) {
-            sendCredentials = v
+            if (inWebExtension) {
+                sendCredentials = v
+            }
         },
         get savePassword() {
             return savePassword
         },
         set savePassword(v) {
-            savePassword = v
+            if (inWebExtension) {
+                savePassword = v
+            }
         },
         get inWebExtension() {
             return inWebExtension
@@ -23,13 +27,13 @@ const Store = () => {
         set inWebExtension(v) {
             inWebExtension = v
         },
-
         get setSearch() {
             return setSearch
         },
         set setSearch(v) {
-            console.log('set setSearch')
-            setSearch = v
+            if (inWebExtension) {
+                setSearch = v
+            }
         },
     }
 }

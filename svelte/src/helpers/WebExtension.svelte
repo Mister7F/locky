@@ -133,7 +133,6 @@
     }
 
     function setSearch(wallet) {
-        console.log(currentTabHost)
         if (!currentTabHost || !wallet) {
             return
         }
