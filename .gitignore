@@ -259,3 +259,5 @@ databases/*
 certificate/*
 
 svelte/public/build/
+
+firefox-locky.xpi

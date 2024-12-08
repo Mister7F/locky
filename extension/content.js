@@ -73,7 +73,20 @@ const formSelectors = [
 const formSelector = formSelectors.join(',')
 
 function findInputs(selectorsInput1, selectorsInput2 = null) {
-    for (const form of document.querySelectorAll(formSelector)) {
+    function formScore(form) {
+        if (form.querySelectorAll(passwordSelectors.join(',')).length === 1) {
+            // Form with 1 and only one password field (2 might be sign up form)
+            return 0
+        }
+        return 1
+    }
+
+    // Get the form by priorities
+    const forms = [...document.querySelectorAll(formSelector)].sort(
+        (a, b) => formScore(a) - formScore(b)
+    )
+
+    for (const form of forms) {
         const inputs1 = form.querySelectorAll(selectorsInput1.join(','))
         if (!selectorsInput2) {
             if (!inputs1?.length) {

@@ -1,7 +1,7 @@
 {
     "manifest_version": 3,
     "name": "Locky",
-    "version": "1.8",
+    "version": "1.9",
     "description": "Password manager",
     "permissions": ["activeTab", "scripting", "nativeMessaging", "storage"],
     "action": {
