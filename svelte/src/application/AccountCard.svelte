@@ -170,9 +170,7 @@
                 <IconButton
                     onclick={async () => {
                         onnotify('2FA copied')
-                        copyValue(
-                            (await getTotpCode(account.totp)).replace(' ', '')
-                        )
+                        copyValue(getTotpCode(account.totp))
                     }}
                     title="2FA"
                     icon="schedule"
