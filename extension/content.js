@@ -156,9 +156,16 @@ async function login(login, password, url) {
             .click()
     } else if (settings.submit === 'submit') {
         elPassword.closest(formSelector).submit()
-    } else {
+    } else if (settings.submit === 'enter') {
         await sleep(50)
         await enter(elPassword)
+    } else {
+        const form = elPassword.closest(formSelector)
+        await sleep(50)
+        await enter(elPassword)
+        if (form) {
+            form.submit()
+        }
     }
 }
 
