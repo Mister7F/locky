@@ -156,7 +156,7 @@
             messagePersistent="1"
             onshow_qrcode={() => qrCodeDialog.open()}
             onchange={updateTotp}
-            oncopy={async () => copyValue(await getTotpCode(account.totp))}
+            oncopy={async () => copyValue(getTotpCode(account.totp))}
         />
 
         {#each account.fields || [] as field, i}

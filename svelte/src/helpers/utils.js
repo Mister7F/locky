@@ -20,8 +20,64 @@ export function getCookie(name) {
     if (parts.length === 2) return parts.pop().split(';').shift()
 }
 
-export function copyValue(str) {
-    navigator.clipboard.writeText(str)
+/**
+ * Copy the given value in the clipboard.
+ *
+ * @param {string | Promise} text: the text to copy, or a Promise that return the text to copy
+ */
+export function copyValue(text) {
+    if (text.constructor.name === 'Promise') {
+        copyValueAsync(text)
+        return
+    }
+
+    if (!navigator.clipboard) {
+        copyValueFallback(text)
+        return
+    }
+    navigator.clipboard.writeText(text).catch((err) => copyValueFallback(text))
+}
+
+function copyValueFallback(text) {
+    const textArea = document.createElement('textarea')
+    textArea.value = text
+
+    textArea.style.top = '0'
+    textArea.style.left = '0'
+    textArea.style.position = 'fixed'
+
+    document.body.appendChild(textArea)
+    textArea.focus()
+    textArea.select()
+
+    try {
+        const successful = document.execCommand('copy')
+        const msg = successful ? 'successful' : 'unsuccessful'
+        console.error('Copy Fallback failed')
+    } catch (err) {
+        console.error('Copy Fallback failed', err)
+    }
+
+    document.body.removeChild(textArea)
+}
+
+/**
+ * On Safari, we can not copy text in an async event handler.
+ *
+ * See https://developer.apple.com/forums/thread/691873
+ */
+function copyValueAsync(asyncGetText) {
+    if (!typeof ClipboardItem || !navigator.clipboard.write) {
+        asyncGetText.then((text) => copyValue(text))
+        return
+    }
+
+    const text = new ClipboardItem({
+        'text/plain': asyncGetText.then(
+            (text) => new Blob([text], { type: 'text/plain' })
+        ),
+    })
+    navigator.clipboard.write([text])
 }
 
 export function hex(byteArray) {
