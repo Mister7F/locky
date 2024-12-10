@@ -14,6 +14,8 @@ const METHODS = {
         fill: 'write_submit_write',
         submit: 'click',
     },
+    // Google
+    'accounts.google.com': { fill: 'write_enter_write', submit: 'enter' },
     // Other
     'github.com': { fill: 'set_attribute', submit: 'submit' },
     'paypal.com': { fill: 'write_submit_write' },
@@ -72,7 +74,7 @@ const formSelectors = [
 ]
 const formSelector = formSelectors.join(',')
 
-function findInputs(selectorsInput1, selectorsInput2 = null) {
+function findInputs(selectorsInput1, selectorsInput2 = null, alrt = true) {
     function formScore(form) {
         if (form.querySelectorAll(passwordSelectors.join(',')).length === 1) {
             // Form with 1 and only one password field (2 might be sign up form)
@@ -94,7 +96,7 @@ function findInputs(selectorsInput1, selectorsInput2 = null) {
             }
             const input1 = inputs1[0]
             input1.value = ''
-            return [input1]
+            return input1
         }
 
         const selector2 = selectorsInput2.join(',')
@@ -107,8 +109,9 @@ function findInputs(selectorsInput1, selectorsInput2 = null) {
             }
         }
     }
-
-    showAlert('Failed to find the login form')
+    if (alrt) {
+        showAlert('Failed to find the login form')
+    }
 }
 
 chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
@@ -150,6 +153,13 @@ async function login(login, password, url) {
             loginSelectors,
             passwordSelectors
         )
+    } else if (settings.fill === 'write_enter_write') {
+        elPassword = await _writeEnterWrite(
+            login,
+            password,
+            loginSelectors,
+            passwordSelectors
+        )
     } else if (settings.fill === 'twitter') {
         elPassword = await _twitter(login, password)
     } else {
@@ -173,11 +183,9 @@ async function login(login, password, url) {
         await sleep(50)
         await enter(elPassword)
     } else {
-        const form = elPassword.closest(formSelector)
         await sleep(50)
-        await enter(elPassword)
-        if (form) {
-            form.submit()
+        if (!sendClick(elPassword)) {
+            await enter(elPassword)
         }
     }
 }
@@ -211,7 +219,7 @@ async function _writeSubmitWrite(
     loginSelectors,
     passwordSelectors
 ) {
-    const [elLogin] = findInputs(loginSelectors)
+    const elLogin = findInputs(loginSelectors)
 
     elLogin.focus()
     document.execCommand('insertText', false, login)
@@ -221,12 +229,33 @@ async function _writeSubmitWrite(
         .querySelector(submitSelectors.join(','))
         .click()
 
-    await sleep(1000)
-
-    const [elPassword] = findInputs(passwordSelectors)
+    const elPassword = await waitPasswordInput(passwordSelectors)
 
     elPassword.focus()
     document.execCommand('insertText', false, password)
+
+    return elPassword
+}
+
+async function _writeEnterWrite(
+    login,
+    password,
+    loginSelectors,
+    passwordSelectors
+) {
+    const elLogin = findInputs(loginSelectors)
+
+    elLogin.focus()
+    document.execCommand('insertText', false, login)
+
+    await sleep(200)
+    await enter(elLogin)
+
+    const elPassword = await waitPasswordInput(passwordSelectors)
+
+    elPassword.focus()
+    document.execCommand('insertText', false, password)
+    await sleep(200)
 
     return elPassword
 }
@@ -255,7 +284,8 @@ async function _twitter(login, password) {
 
     await enter(elLogin)
 
-    let elPassword = null
+    // Twitter has no `<form/>`
+    const elPassword = null
     for (let i = 0; i < 30; i++) {
         elPassword = document.querySelector('input[type="password"]')
         if (elPassword) {
@@ -309,6 +339,31 @@ async function enter(input) {
     input.dispatchEvent(keypup)
 }
 
+async function waitPasswordInput(passwordSelectors) {
+    let elPassword = null
+    for (let i = 0; i < 40; ++i) {
+        elPassword = findInputs(passwordSelectors, null, false)
+        // Google, Paypal have a hidden input password in its form
+        if (elPassword && elPassword.name && !isHidden(elPassword)) {
+            return elPassword
+        }
+        await sleep(100)
+    }
+}
+
+function sendClick(elPassword) {
+    const form = elPassword.closest(formSelector)
+    if (!form) {
+        return false
+    }
+    const submit = form.querySelector(submitSelectors.join(','))
+    if (!submit) {
+        return false
+    }
+    submit.click()
+    return true
+}
+
 function showAlert(message) {
     let alrt = document.querySelector('.locky-alert')
 
@@ -337,6 +392,11 @@ function showAlert(message) {
     setTimeout(() => {
         document.querySelector('.locky-alert').remove()
     }, 2500)
+}
+
+function isHidden(el) {
+    // https://stackoverflow.com/questions/19669786/check-if-element-is-visible-in-dom
+    return el.offsetParent === null
 }
 
 function createElementFromHTML(htmlString) {
