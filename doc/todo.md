@@ -9,9 +9,6 @@
 - account editor: press tab go to next field instead of "Copy" button
 - when entering an email, suggest existing email
 - better password generation (list of words...)
-- clipboard: find a better solution (browser extension with an iframe to the Locky instance ?)
-- automatically remove the clipboard after 1 minute
-  (possible if the window doesn't have the focus ?)
 - mobile: automatically close the session after a period of inactivity
 - allow to choose theme color (change favicon ?)
 
