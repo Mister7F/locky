@@ -6,11 +6,13 @@ The 2FA (TOTP) code is copied if the clipboard after login on the website.
 > https://youtu.be/Iayjx8GReKw
 
 Phishing protection.
+
 <p align="center">
     <img src="../doc/img/phishing.png">
 </p>
 
 ## Installation
+
 1. Install the addon (see dev section, or check releases on Github)
 2. Open the settings page
     - Chrome: left click on the addon icon, then click on option
@@ -20,12 +22,15 @@ Phishing protection.
 ## Development
 
 ### Chrome
+
 Chrome keeps the dev addon after a restart, you don't need to build the addon
+
 -   Open chrome://extensions/
 -   Activate the dev mode
 -   "Load unpacked extension"
 
 ### Firefox
+
 -   Open about:debugging#/runtime/this-firefox
 -   "Load temporary addon"
 -   Select manifest.json

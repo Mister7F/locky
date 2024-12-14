@@ -4,6 +4,7 @@
     import AccountCard from './AccountCard.svelte'
     import AccountEditor from './editor/AccountEditor.svelte'
     import * as api from './api.js'
+    import { cleanSearchValue } from '../helpers/utils.js'
     import Folders from './folders/Folders.svelte'
     import Navbar from './navbar/Navbar.svelte'
     import Sidepanel from '../helpers/Sidepanel.svelte'
@@ -27,10 +28,9 @@
                 if (searchText.length) {
                     return [account.name, account.url].some(
                         (value) =>
-                            value &&
-                            value
-                                .toLowerCase()
-                                .indexOf(searchText.toLowerCase()) >= 0
+                            cleanSearchValue(value).indexOf(
+                                cleanSearchValue(searchText)
+                            ) >= 0
                     )
                 }
                 if (currentFolderId === 'no_folder') {

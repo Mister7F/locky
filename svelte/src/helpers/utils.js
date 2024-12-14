@@ -137,3 +137,7 @@ export function normalizeHost(url) {
     }
     return origin
 }
+
+export function cleanSearchValue(txt) {
+    return (txt || '').replace(' ', '').toLowerCase()
+}

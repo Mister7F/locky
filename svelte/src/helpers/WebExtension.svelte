@@ -10,6 +10,7 @@
         fromBytes,
         toBytes,
         copyValue,
+        cleanSearchValue,
     } from './utils.js'
     import { encryptAES, decryptAES, getTotpCode } from './crypto.js'
     import * as api from '../application/api.js'
@@ -138,26 +139,35 @@
         }
 
         const walletText = JSON.stringify(
-            wallet.accounts.map((a) => [a.name, a.url])
+            wallet.accounts.map((a) => [
+                cleanSearchValue(a.name),
+                cleanSearchValue(a.url),
+            ])
         )
 
         if (
             currentTabHost.match(/^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+(:[0-9]+)?$/)
         ) {
             // IP address
-            if (walletText.includes(currentTabHost)) {
+            if (walletText.includes(cleanSearchValue(currentTabHost))) {
                 searchText = currentTabHost
             }
         } else {
             // Domain name
             let parts = currentTabHost.split('.')
-            while (parts.length > 2 && !walletText.includes(parts.join('.'))) {
+            while (
+                parts.length > 2 &&
+                !walletText.includes(cleanSearchValue(parts.join('.')))
+            ) {
                 parts.shift()
             }
-            if (parts.length && !walletText.includes(parts.join('.'))) {
+            if (
+                parts.length &&
+                !walletText.includes(cleanSearchValue(parts.join('.')))
+            ) {
                 parts = [parts[0]]
             }
-            if (walletText.includes(parts.join('.'))) {
+            if (walletText.includes(cleanSearchValue(parts.join('.')))) {
                 searchText = parts.join('.')
             }
         }
