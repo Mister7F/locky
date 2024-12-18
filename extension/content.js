@@ -71,11 +71,11 @@ const formSelectors = [
     'apple-auth', // Apple
     'sign-in',
     'div[id="sign_in_form"]',
-    'div[id="loginBloc"]',
     'div[id="loginBloc"]', // SWDE
     '.login-screen', // SWDE
     '.webform-component-fieldset',
     '.node-webform',
+    '*[id*="login"]',
 ]
 const formSelector = formSelectors.join(',')
 
@@ -167,13 +167,30 @@ async function login(login, password, url) {
         )
     } else if (settings.fill === 'twitter') {
         elPassword = await _twitter(login, password)
-    } else {
+    } else if (settings.fill === 'type_text') {
         elPassword = await _typeText(
             login,
             password,
             loginSelectors,
             passwordSelectors
         )
+    } else {
+        // Auto mode
+        elPassword = await _typeText(
+            login,
+            password,
+            loginSelectors,
+            passwordSelectors,
+            false
+        )
+        if (!elPassword) {
+            elPassword = await _writeSubmitWrite(
+                login,
+                password,
+                loginSelectors,
+                passwordSelectors
+            )
+        }
     }
 
     if (settings.submit === 'click') {
@@ -195,8 +212,19 @@ async function login(login, password, url) {
     }
 }
 
-async function _typeText(login, password, loginSelector, passwordSelector) {
-    const [elLogin, elPassword] = findInputs(loginSelectors, passwordSelectors)
+async function _typeText(
+    login,
+    password,
+    loginSelector,
+    passwordSelector,
+    alrt = true
+) {
+    const inputs = findInputs(loginSelectors, passwordSelectors, alrt)
+    if (!inputs) {
+        return
+    }
+
+    const [elLogin, elPassword] = inputs
 
     elLogin.focus()
     document.execCommand('insertText', false, login)
@@ -222,17 +250,23 @@ async function _writeSubmitWrite(
     login,
     password,
     loginSelectors,
-    passwordSelectors
+    passwordSelectors,
+    alrt = true
 ) {
-    const elLogin = findInputs(loginSelectors)
+    const elLogin = findInputs(loginSelectors, null, alrt)
 
     elLogin.focus()
     document.execCommand('insertText', false, login)
 
-    elLogin
+    const submit = elLogin
         .closest(formSelector)
         .querySelector(submitSelectors.join(','))
-        .click()
+
+    if (!submit) {
+        return
+    }
+
+    submit.click()
 
     const elPassword = await waitPasswordInput(passwordSelectors)
 
@@ -349,7 +383,7 @@ async function waitPasswordInput(passwordSelectors) {
     for (let i = 0; i < 40; ++i) {
         elPassword = findInputs(passwordSelectors, null, false)
         // Google, Paypal have a hidden input password in its form
-        if (elPassword && elPassword.name && !isHidden(elPassword)) {
+        if (elPassword && !isHidden(elPassword)) {
             return elPassword
         }
         await sleep(100)
