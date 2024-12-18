@@ -216,16 +216,17 @@
      * Send the encrypted account credentials to the Web Extension popup.
      */
     async function _sendCredentials() {
+        if (account.totp) {
+            copyValue(getTotpCode(account.totp))
+        }
         const event = {
             action: 'login',
             account: {
                 login: account.login,
                 password: account.password,
                 url: account.url,
+                totp: (await getTotpCode(account.totp)),
             },
-        }
-        if (account.totp) {
-            copyValue((await getTotpCode(account.totp)).replace(' ', ''))
         }
         return (await sendToWebExtension(event))
             ? `Credentials sent${account.totp ? 'and TOTP code copied' : ''}`

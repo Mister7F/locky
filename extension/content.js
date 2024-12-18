@@ -135,7 +135,10 @@ chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
     }
 
     if (message.action === 'login') {
-        await login(message.account.login, message.account.password)
+        const ok = await login(message.account.login, message.account.password)
+        if (ok && message.account.totp) {
+            showAlert(`${message.account.totp} copied`)
+        }
     }
 })
 
@@ -210,6 +213,7 @@ async function login(login, password, url) {
             await enter(elPassword)
         }
     }
+    return true
 }
 
 async function _typeText(
@@ -414,7 +418,8 @@ function showAlert(message) {
                 border: 1px solid red;
                 z-index: 9999999;
                 top: 20px;
-                right: 20px;
+                left: 50%;
+                transform: translate(-50%, 0%);
                 text-align: right;
                 padding: 20px;
                 background-color: #292c35;
