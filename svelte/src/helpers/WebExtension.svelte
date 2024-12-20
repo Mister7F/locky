@@ -225,7 +225,7 @@
                 login: account.login,
                 password: account.password,
                 url: account.url,
-                totp: (await getTotpCode(account.totp)),
+                totp: await getTotpCode(account.totp),
             },
         }
         return (await sendToWebExtension(event))

@@ -10,27 +10,18 @@
     import WebExtension from '../helpers/web_extension.svelte.js'
 
     import { normalizeHost } from '../helpers/utils.js'
-    let { account, viewMode = 'list', onclick, onnotify } = $props()
+    let {
+        account,
+        viewMode = 'list',
+        onclick,
+        onnotify,
+        minimalist = false,
+    } = $props()
 
     const strength = passwordStrength(account.password)
 </script>
 
-{#if viewMode === 'minimalist'}
-    <div class="account" {onclick}>
-        <div class="card">
-            <div class="row">
-                <div class="image">
-                    <Img
-                        src={account.icon || 'img/accounts/default.svg'}
-                        alt="Account"
-                    />
-                </div>
-                <h5>{account.name}</h5>
-            </div>
-        </div>
-        <div class="strength" style="--force: {strength}"></div>
-    </div>
-{:else if viewMode === 'detail'}
+{#if viewMode === 'detail'}
     <div class="detail-card">
         <div>
             {#if strength !== 0}
@@ -131,64 +122,66 @@
                 <p>{account.login?.split('@')[0]}</p>
             </div>
         </div>
-        <div class="account_list_item_actions">
-            {#if account.url && isUrlValid(account.url)}
-                <IconButton
-                    class="account_list_item_url"
-                    title="Open URL"
-                    href={account.url}
-                    icon="launch"
-                    color="on-surface"
-                    bgTransparent="1"
-                />
-            {/if}
-            {#if account.login}
-                <IconButton
-                    onclick={() => {
-                        onnotify('Login copied')
-                        copyValue(account.login)
-                    }}
-                    title="Login"
-                    icon="alternate_email"
-                    color="on-surface"
-                    bgTransparent="1"
-                />
-            {/if}
-            {#if account.password}
-                <IconButton
-                    onclick={() => {
-                        onnotify('Password copied')
-                        copyValue(account.password)
-                    }}
-                    title="Password"
-                    icon="vpn_key"
-                    color="on-surface"
-                    bgTransparent="1"
-                />
-            {/if}
-            {#if account.totp}
-                <IconButton
-                    onclick={async () => {
-                        onnotify('2FA copied')
-                        copyValue(getTotpCode(account.totp))
-                    }}
-                    title="2FA"
-                    icon="schedule"
-                    color="on-surface"
-                    bgTransparent="1"
-                />
-            {/if}
+        {#if viewMode !== 'minimalist'}
+            <div class="account_list_item_actions">
+                {#if account.url && isUrlValid(account.url)}
+                    <IconButton
+                        class="account_list_item_url"
+                        title="Open URL"
+                        href={account.url}
+                        icon="launch"
+                        color="on-surface"
+                        bgTransparent="1"
+                    />
+                {/if}
+                {#if account.login}
+                    <IconButton
+                        onclick={() => {
+                            onnotify('Login copied')
+                            copyValue(account.login)
+                        }}
+                        title="Login"
+                        icon="alternate_email"
+                        color="on-surface"
+                        bgTransparent="1"
+                    />
+                {/if}
+                {#if account.password}
+                    <IconButton
+                        onclick={() => {
+                            onnotify('Password copied')
+                            copyValue(account.password)
+                        }}
+                        title="Password"
+                        icon="vpn_key"
+                        color="on-surface"
+                        bgTransparent="1"
+                    />
+                {/if}
+                {#if account.totp}
+                    <IconButton
+                        onclick={async () => {
+                            onnotify('2FA copied')
+                            copyValue(getTotpCode(account.totp))
+                        }}
+                        title="2FA"
+                        icon="schedule"
+                        color="on-surface"
+                        bgTransparent="1"
+                    />
+                {/if}
 
-            {#if WebExtension.inWebExtension}
-                <IconButton
-                    onclick={() => (WebExtension.sendCredentials = account)}
-                    title="Fill the form"
-                    icon="login"
-                    color="on-surface"
-                    bgTransparent="1"
-                />
-            {/if}
-        </div>
+                {#if WebExtension.inWebExtension}
+                    <IconButton
+                        onclick={() => (WebExtension.sendCredentials = account)}
+                        title="Fill the form"
+                        icon="login"
+                        color="on-surface"
+                        bgTransparent="1"
+                    />
+                {/if}
+            </div>
+        {/if}
         {#if strength !== 0}
             <div class="strength" style="--force: {strength}"></div>
         {/if}
@@ -196,65 +189,6 @@
 {/if}
 
 <style>
-    .account {
-        padding: 0;
-        margin: 0;
-        width: 200px;
-        height: 70px;
-        margin: 10px;
-        cursor: pointer;
-    }
-
-    .account:hover {
-        box-shadow:
-            0 10px 20px rgba(0, 0, 0, 0.19),
-            0 6px 6px rgba(0, 0, 0, 0.23);
-    }
-
-    .card {
-        padding: 0;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        background-color: var(--surface);
-        border: 1px solid var(--on-surface);
-        border-radius: 2px;
-        transition: 0.1s;
-        box-shadow:
-            0 1px 3px rgba(0, 0, 0, 0.12),
-            0 1px 2px rgba(0, 0, 0, 0.24);
-        width: 200px;
-        height: 70px;
-        margin: 0;
-        overflow: hidden;
-        box-sizing: border-box;
-    }
-
-    .row {
-        display: flex;
-        flex-direction: row;
-        justify-content: center;
-        align-items: center;
-        max-height: 100%;
-        width: 100%;
-    }
-
-    .account h5 {
-        font-size: 1.2em;
-        max-width: calc(100% - 50px);
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-    }
-
-    .image {
-        margin-right: 10px;
-        max-height: 40px;
-        max-width: 100%;
-        user-select: none;
-    }
-
     .strength {
         float: right;
         margin-top: -30px;
@@ -272,17 +206,6 @@
             RGBA(var(--red), var(--green), 0, 0) 50%,
             RGBA(var(--red), var(--green), 0, 1)
         );
-    }
-    :global(.drag_over) .account {
-        color: var(--accent);
-        border: 1px solid var(--accent);
-    }
-
-    .image :global(Img) {
-        pointer-events: none;
-        max-height: 100%;
-        max-width: 100%;
-        height: 30px;
     }
 
     /* Detail mode */

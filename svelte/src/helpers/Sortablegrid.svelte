@@ -32,6 +32,12 @@
     let dragX = $state(null)
     let dragY = $state(null)
 
+    // Do not load all items for performance reason (items will be loaded dynamically when scrolling)
+    const minCardSurface = 432 * 78
+    const initialSlice =
+        Math.ceil(window.innerWidth * window.innerHeight) / minCardSurface
+    let currentSlice = $state(initialSlice)
+
     let draggedIndex = $state(-1)
     let draggedItem = $state(null)
     let destIndex = $state(-1) // used for the UI
@@ -260,6 +266,16 @@
         return clone
     }
 
+    function onScroll(event) {
+        const element = event.target
+        if (element.scrollTop !== element.scrollHeight - element.offsetHeight) {
+            return
+        }
+
+        // scrolled to bottom
+        currentSlice = currentSlice + initialSlice
+    }
+
     $effect(() => {
         const body = document.body
         body.addEventListener('mouseup', mouseUp, { passive: true })
@@ -273,10 +289,11 @@
     class="grid {className}
     {dragging ? 'dragging' : ''}"
     oncontextmenu={() => false}
+    onscroll={onScroll}
     bind:this={gridElement}
 >
     <div class="items">
-        {#each items as item, index (item.id || JSON.stringify(item))}
+        {#each items.slice(0, currentSlice) as item, index (item.id || JSON.stringify(item))}
             {#if dragging && index === destIndex}
                 <div class="dnd_container ghost">
                     {#if card}
@@ -297,7 +314,7 @@
             </div>
         {/each}
 
-        {#if dragging && items.length === destIndex}
+        {#if dragging && items.slice(0, currentSlice).length === destIndex}
             <div class="dnd_container ghost">
                 {#if card}
                     {@render card(draggedItem)}

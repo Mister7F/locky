@@ -22,12 +22,11 @@
     let isDropboxAuthenticated = $state(false)
     let settingsVisible = $state(false)
 
-    const viewModes = ['detail', 'minimalist', 'list']
+    const viewModes = ['detail', 'list']
 
     let viewModeIcon = $derived(
         {
             detail: 'view_module',
-            minimalist: 'view_comfy',
             list: 'list',
         }[viewMode] || 'view_module'
     )
