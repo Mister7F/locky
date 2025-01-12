@@ -40,8 +40,15 @@ const loginSelectors = [
 
     'input[type="email"]',
 
-    'input[autocomplete="email"]',
-    'input[autocomplete="username"]',
+    'input[autocomplete~="email"]',
+    'input[autocomplete~="username"]',
+
+    'input[id*="email"]',
+    'input[id*="login"]',
+    'input[id*="username"]',
+    'input[name*="email"]',
+    'input[name*="login"]',
+    'input[name*="username"]',
 ]
 const passwordSelectors = [
     'input[id="password"]',

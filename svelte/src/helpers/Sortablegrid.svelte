@@ -321,6 +321,14 @@
                 {/if}
             </div>
         {/if}
+
+        {#if parseInt(currentSlice) < items.length}
+            <span
+                class="load_more"
+                onclick={() => (currentSlice = items.length)}
+                >Load more {items.length - parseInt(currentSlice)} elements</span
+            >
+        {/if}
     </div>
 </div>
 
@@ -379,5 +387,11 @@
         cursor: -webkit-grabbing !important;
         cursor: -moz-grabbing !important;
         cursor: grabbing !important;
+    }
+
+    .load_more {
+        width: 100%;
+        text-align: center;
+        cursor: pointer;
     }
 </style>
