@@ -2,7 +2,7 @@ const Store = () => {
     let sendCredentials = $state(null)
     let savePassword = $state(null)
     let inWebExtension = $state(null)
-    let setSearch = $state(null)
+    let onWalletOpen = $state(null)
 
     return {
         get sendCredentials() {
@@ -27,12 +27,12 @@ const Store = () => {
         set inWebExtension(v) {
             inWebExtension = v
         },
-        get setSearch() {
-            return setSearch
+        get onWalletOpen() {
+            return onWalletOpen
         },
-        set setSearch(v) {
+        set onWalletOpen(wallet) {
             if (inWebExtension) {
-                setSearch = v
+                onWalletOpen = wallet
             }
         },
     }

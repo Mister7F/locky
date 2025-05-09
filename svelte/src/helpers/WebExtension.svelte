@@ -15,6 +15,7 @@
     import { encryptAES, decryptAES, getTotpCode } from './crypto.js'
     import * as api from '../application/api.js'
     import { normalizeHost } from '../helpers/utils.js'
+    import { untrack } from 'svelte'
 
     let pluginKey = null
     let pluginOrigin = null
@@ -36,6 +37,26 @@
     let newWebExtensionKeyDialogOrigin = $state('')
     let newWebExtensionKeyDialogKeyHash = $state('')
     let newWebExtensionKeyDialogOk = $state(null)
+
+    // TODO: remove untrack and just use `searchText` in dependencies once https://github.com/sveltejs/svelte/issues/9248 is merged
+    function explicitEffect(fn, depsFn) {
+        $effect(() => {
+            depsFn()
+            untrack(fn)
+        })
+    }
+    explicitEffect(
+        () => {
+            if (WebExtension.inWebExtension) {
+                // Save the current search and the current tab to restore it when we re-open the extension
+                window.localStorage.setItem(
+                    'extension_state',
+                    JSON.stringify({ url: currentTabHost, search: searchText })
+                )
+            }
+        },
+        () => [searchText]
+    )
 
     /**
      * Parse the URL to check if a key is present, and ask to save it.
@@ -138,6 +159,22 @@
             return
         }
 
+        const extensionState = JSON.parse(
+            window.localStorage.getItem('extension_state')
+        )
+        console.log(
+            'setSearch',
+            window.localStorage.getItem('extension_state'),
+            extensionState?.url === currentTabHost,
+            currentTabHost
+        )
+        if (extensionState?.url === currentTabHost) {
+            // If we are still on the same page, set the old search
+            searchText = extensionState.search || ''
+            console.log(searchText)
+            return
+        }
+
         const walletText = JSON.stringify(
             wallet.accounts.map((a) => [
                 cleanSearchValue(a.name),
@@ -190,12 +227,11 @@
     })
 
     let _s = $derived.by(() => {
-        console.log(WebExtension.setSearch)
-        if (!WebExtension.setSearch) {
+        if (!WebExtension.onWalletOpen) {
             return
         }
-        setSearch(WebExtension.setSearch)
-        WebExtension.setSearch = null
+        setSearch(WebExtension.onWalletOpen)
+        WebExtension.onWalletOpen = null
     })
 
     async function sendCredentials(_account) {

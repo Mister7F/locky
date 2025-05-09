@@ -51,7 +51,7 @@
         <Login
             onwallet_openned={() => {
                 locked = false
-                WebExtensionStore.setSearch = wallet
+                WebExtensionStore.onWalletOpen = wallet
             }}
             bind:wallet
         />
