@@ -23,7 +23,7 @@ document.body.onload = () => {
         }
         if (!currentUrl) {
             localStorage.setItem('lockyUrl', newUrl)
-            iframe.src = url
+            iframe.src = newUrl
             return
         }
 
