@@ -62,6 +62,7 @@ const submitSelectors = [
     'button[data-a-target="passport-login-button"]',
     'a[data-a-target="passport-login-button"]',
     'button[id="sign-in"]',
+    'button[id*="login"]',
 ]
 
 const totpSelectors = [
@@ -82,7 +83,7 @@ const formSelectors = [
     '.login-screen', // SWDE
     '.webform-component-fieldset',
     '.node-webform',
-    '*[id*="login"]',
+    'div[id*="login"]',
 ]
 const formSelector = formSelectors.join(',')
 
@@ -96,9 +97,19 @@ function findInputs(selectorsInput1, selectorsInput2 = null, alrt = true) {
     }
 
     // Get the form by priorities
-    const forms = [...document.querySelectorAll(formSelector)].sort(
-        (a, b) => formScore(a) - formScore(b)
-    )
+    let forms = document.querySelectorAll(formSelector)
+
+    if (!forms?.length && selectorsInput2) {
+        // Fallback to anything containing a password field
+        forms = document.querySelectorAll(`div:has(${selectorsInput2})`)
+    }
+
+    if (!forms?.length) {
+        // Fallback to anything containing a login field
+        forms = document.querySelectorAll(`div:has(${selectorsInput1})`)
+    }
+
+    forms = [...forms].sort((a, b) => formScore(a) - formScore(b))
 
     for (const form of forms) {
         const inputs1 = form.querySelectorAll(selectorsInput1.join(','))
