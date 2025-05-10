@@ -164,16 +164,9 @@
         const extensionState = JSON.parse(
             window.localStorage.getItem('extension_state')
         )
-        console.log(
-            'setSearch',
-            window.localStorage.getItem('extension_state'),
-            extensionState?.url === currentTabHost,
-            currentTabHost
-        )
         if (extensionState?.url === currentTabHost) {
             // If we are still on the same page, set the old search
             searchText = extensionState.search || ''
-            console.log(searchText)
             return
         }
 
@@ -255,7 +248,7 @@
         }
 
         // Look for URL in custom fields
-        const hosts = account.fields
+        const hosts = (account.fields || [])
             .filter((f) => f.type === 'url' && f.value)
             .map((f) => normalizeHost(f.value))
             .filter((h) => h === currentTabHost)
@@ -343,7 +336,7 @@
 </script>
 
 <Dialog bind:open={confirmationDialogOpen} title="Are you sure ?">
-    The current domain <b class="host">{WebExtension.currentTabHost}</b>
+    The current domain <b class="host">{currentTabHost}</b>
     does not match the URL in your wallet <b class="host">{accountHost}</b>, are
     you sure you are not phished?
     <br />
@@ -351,7 +344,7 @@
     Did you get here by yourself, and not through a link you received?
     <br />
     <br />
-    If yes, consider clicking "No" and adding a new URL field for that account.
+    Consider clicking "No" and adding a new URL field for that account to not see this warning again.
     <br />
 
     {#snippet actions()}
@@ -365,7 +358,7 @@
         <Button
             onclick={async () => {
                 confirmationDialogOpen = false
-                onnotify(await _sendCredentials(WebExtension.sendCredentials))
+                onnotify(await _sendCredentials())
             }}
             color="primary"
         >
