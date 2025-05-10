@@ -79,8 +79,6 @@ const formSelectors = [
     'apple-auth', // Apple
     'sign-in',
     'div[id="sign_in_form"]',
-    'div[id="loginBloc"]', // SWDE
-    '.login-screen', // SWDE
     '.webform-component-fieldset',
     '.node-webform',
     'div[id*="login"]',

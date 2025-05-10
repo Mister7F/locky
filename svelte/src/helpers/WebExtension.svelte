@@ -38,7 +38,7 @@
     let newWebExtensionKeyDialogKeyHash = $state('')
     let newWebExtensionKeyDialogOk = $state(null)
 
-    // TODO: remove untrack and just use `searchText` in dependencies once https://github.com/sveltejs/svelte/issues/9248 is merged
+    // TODO: remove explicitEffect / untrack and just use `searchText` in dependencies once https://github.com/sveltejs/svelte/issues/9248 is merged
     function explicitEffect(fn, depsFn) {
         $effect(() => {
             depsFn()
