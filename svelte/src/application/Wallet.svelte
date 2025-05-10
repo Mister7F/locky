@@ -58,16 +58,13 @@
     let walletWidth = $state(null)
     let foldersVisible = $state(false)
     let floatingFolder = $derived(walletWidth < 870)
-    let folderDomIds = $derived(
-        (() => {
-            // TODO: derived.with
-            let ret = []
-            for (let folder of wallet['folders'] || []) {
-                ret = ret.concat(['item_folder_' + folder.id])
-            }
-            return ret
-        })()
-    )
+    let folderDomIds = $derived.by(() => {
+        let ret = []
+        for (let folder of wallet['folders'] || []) {
+            ret = ret.concat(['item_folder_' + folder.id])
+        }
+        return ret
+    })
     // Accounts audit
     let auditVisible = $derived(currentFolderId === 'security')
 
