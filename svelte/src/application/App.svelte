@@ -6,6 +6,10 @@
     import IconButton from '../helpers/IconButton.svelte'
     import WebExtension from '../helpers/WebExtension.svelte'
     import WebExtensionStore from '../helpers/web_extension.svelte.js'
+    import {
+        walletOpened,
+        savePassword,
+    } from '../helpers/web_extension.svelte.js'
 
     let locked = $state(true)
     let walletElement = $state(null)
@@ -16,8 +20,7 @@
     async function lock() {
         await api.logout(true)
         locked = true
-
-        WebExtensionStore.savePassword = ['', null]
+        savePassword('', null)
     }
 
     let snackbarText = $state('')
@@ -51,7 +54,7 @@
         <Login
             onwallet_openned={() => {
                 locked = false
-                WebExtensionStore.onWalletOpen = wallet
+                walletOpened(wallet)
             }}
             bind:wallet
         />

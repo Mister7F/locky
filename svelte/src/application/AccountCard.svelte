@@ -8,6 +8,7 @@
     import Dialog from '../helpers/Dialog.svelte'
     import Button from '../helpers/Button.svelte'
     import WebExtension from '../helpers/web_extension.svelte.js'
+    import { sendCredentials } from '../helpers/web_extension.svelte.js'
 
     import { normalizeHost } from '../helpers/utils.js'
     let {
@@ -94,8 +95,7 @@
                     {/if}
                     {#if WebExtension.inWebExtension}
                         <IconButton
-                            onclick={() =>
-                                (WebExtension.sendCredentials = account)}
+                            onclick={() => sendCredentials(account)}
                             title="Fill the form"
                             icon="login"
                             color="on-surface"
@@ -173,7 +173,7 @@
 
                 {#if WebExtension.inWebExtension}
                     <IconButton
-                        onclick={() => (WebExtension.sendCredentials = account)}
+                        onclick={() => sendCredentials(account)}
                         title="Fill the form"
                         icon="login"
                         color="on-surface"

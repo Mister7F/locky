@@ -9,16 +9,16 @@
         "preview": "vite preview"
     },
     "dependencies": {
-        "fflate": "^0.7.1",
+        "fflate": "^0.7.4",
         "qrious": "^4.0.2",
         "scrypt-async": "^2.0.1"
     },
     "devDependencies": {
-        "@sveltejs/vite-plugin-svelte": "^3.0.2",
-        "prettier": "^3.2.5",
-        "prettier-plugin-svelte": "^3.2.3",
-        "svelte": "^5.0.0-next.1",
-        "svelte-check": "^3.6.7",
-        "vite": "^5.2.0"
+        "@sveltejs/vite-plugin-svelte": "^5.0.3",
+        "prettier": "^3.5.3",
+        "prettier-plugin-svelte": "^3.3.3",
+        "svelte": "^5.28.2",
+        "svelte-check": "^3.8.6",
+        "vite": "^6.3.5"
     }
 }

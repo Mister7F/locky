@@ -1,41 +1,37 @@
 const Store = () => {
-    let sendCredentials = $state(null)
-    let savePassword = $state(null)
     let inWebExtension = $state(null)
-    let onWalletOpen = $state(null)
 
     return {
-        get sendCredentials() {
-            return sendCredentials
-        },
-        set sendCredentials(v) {
-            if (inWebExtension) {
-                sendCredentials = v
-            }
-        },
-        get savePassword() {
-            return savePassword
-        },
-        set savePassword(v) {
-            if (inWebExtension) {
-                savePassword = v
-            }
-        },
         get inWebExtension() {
             return inWebExtension
         },
         set inWebExtension(v) {
             inWebExtension = v
         },
-        get onWalletOpen() {
-            return onWalletOpen
-        },
-        set onWalletOpen(wallet) {
-            if (inWebExtension) {
-                onWalletOpen = wallet
-            }
-        },
     }
 }
 
 export default Store()
+
+export const eventBus = new EventTarget()
+
+export function sendCredentials(account) {
+    const event = new CustomEvent('extension-send-credentials', {
+        detail: account,
+    })
+    eventBus.dispatchEvent(event)
+}
+
+export function savePassword(password, key) {
+    const event = new CustomEvent('extension-save-password', {
+        detail: { password, key },
+    })
+    eventBus.dispatchEvent(event)
+}
+
+export function walletOpened(wallet) {
+    const event = new CustomEvent('extension-wallet-opened', {
+        detail: wallet,
+    })
+    eventBus.dispatchEvent(event)
+}

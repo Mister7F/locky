@@ -47,7 +47,9 @@
     {#if icon}
         <Icon {color}>{icon}</Icon>
     {/if}
-    {@render children()}
+    {#if children}
+        {@render children()}
+    {/if}
 </button>
 
 <style>

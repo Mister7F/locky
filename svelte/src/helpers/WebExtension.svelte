@@ -2,6 +2,7 @@
     import Dialog from './Dialog.svelte'
     import Button from './Button.svelte'
     import WebExtension from './web_extension.svelte.js'
+    import { eventBus } from './web_extension.svelte.js'
 
     import {
         fromHex,
@@ -15,7 +16,7 @@
     import { encryptAES, decryptAES, getTotpCode } from './crypto.js'
     import * as api from '../application/api.js'
     import { normalizeHost } from '../helpers/utils.js'
-    import { untrack } from 'svelte'
+    import { untrack, onMount, onDestroy } from 'svelte'
 
     let pluginKey = null
     let pluginOrigin = null
@@ -149,12 +150,13 @@
         if (!newWallet || !password.length) {
             return
         }
-        setSearch(newWallet)
+        setSearch({ detail: newWallet })
         locked = false
         wallet = newWallet
     }
 
-    function setSearch(wallet) {
+    function setSearch(event) {
+        const wallet = event.detail
         if (!currentTabHost || !wallet) {
             return
         }
@@ -210,36 +212,42 @@
         }
     }
 
-    let _p = $derived.by(async () => {
-        if (!WebExtension.savePassword) {
-            return
-        }
-        await savePassword(...WebExtension.savePassword)
-        WebExtension.savePassword = null
+    // ---------------------------------------------------------------
+    // EVENTS
+    // ---------------------------------------------------------------
+    onMount(() => {
+        eventBus.addEventListener('extension-send-credentials', sendCredentials)
     })
 
-    let _c = $derived.by(async () => {
-        if (!WebExtension.sendCredentials) {
-            return
-        }
-        await sendCredentials(WebExtension.sendCredentials)
-        WebExtension.sendCredentials = null
+    onDestroy(() => {
+        eventBus.removeEventListener(
+            'extension-send-credentials',
+            sendCredentials
+        )
     })
 
-    let _s = $derived.by(() => {
-        if (!WebExtension.onWalletOpen) {
-            return
-        }
-        setSearch(WebExtension.onWalletOpen)
-        WebExtension.onWalletOpen = null
+    onMount(() => {
+        eventBus.addEventListener('extension-save-password', savePassword)
     })
 
-    async function sendCredentials(_account) {
+    onDestroy(() => {
+        eventBus.removeEventListener('extension-save-password', savePassword)
+    })
+
+    onMount(() => {
+        eventBus.addEventListener('extension-wallet-opened', setSearch)
+    })
+
+    onDestroy(() => {
+        eventBus.removeEventListener('extension-wallet-opened', setSearch)
+    })
+
+    async function sendCredentials(event) {
         if (!WebExtension.inWebExtension) {
             onnotify('Web Extension is not installed')
             return
         }
-        account = _account
+        account = event.detail
         accountHost = normalizeHost(account.url)
         if (!accountHost || accountHost === currentTabHost) {
             onnotify(await _sendCredentials())
@@ -252,7 +260,6 @@
             .map((f) => normalizeHost(f.value))
             .filter((h) => h === currentTabHost)
         if (hosts.length) {
-            accountHost = hosts[0]
             onnotify(await _sendCredentials())
             return
         }
@@ -287,13 +294,18 @@
      * - the data persist if we close the popup
      * - the web extension can not read it, since it does not have the key
      */
-    async function savePassword(password, key) {
+    async function savePassword(event) {
         if (!pluginKey?.byteLength) {
             return
         }
 
         const encryptedPassword = await encryptAES(
-            toBytes(JSON.stringify({ password, key: hex(key) })),
+            toBytes(
+                JSON.stringify({
+                    password: event.detail.password,
+                    key: hex(event.detail.key),
+                })
+            ),
             getMasterPasswordKey()
         )
         return await sendToWebExtension({
@@ -330,20 +342,17 @@
     $effect(initiateWebExtention)
 </script>
 
-<!-- Trick to make reactivity -->
-<div {_p} {_c} {_s} style="display: none"></div>
-
 <Dialog bind:open={confirmationDialogOpen} title="Are you sure ?">
     The current domain <b class="host">{WebExtension.currentTabHost}</b>
     does not match the URL in your wallet <b class="host">{accountHost}</b>, are
     you sure you are not phished?
-    <br/>
-    <br/>
+    <br />
+    <br />
     Did you get here by yourself, and not through a link you received?
-    <br/>
-    <br/>
+    <br />
+    <br />
     If yes, consider clicking "No" and adding a new URL field for that account.
-    <br/>
+    <br />
 
     {#snippet actions()}
         <Button
@@ -376,7 +385,7 @@
         <br />
         h(key):
         <span>{newWebExtensionKeyDialogKeyHash}</span>
-        <br/>
+        <br />
     </div>
 
     {#snippet actions()}
