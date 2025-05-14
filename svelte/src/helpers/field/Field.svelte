@@ -105,7 +105,7 @@
 {#if value || !readonly}
     <div class="field {className}">
         {#if readonly}
-            <div class="label">{label}</div>
+            <div class="label-readonly">{label}</div>
         {/if}
 
         <div class="content">
@@ -115,8 +115,12 @@
                         <span>{urlLeft}</span><span class="host">{urlHost}</span
                         ><span>{urlPath}</span>
                     </a>
-                {:else if type === 'password' && !passwordVisible}
-                    <div class="value">{'•••••••••'}</div>
+                {:else if type === 'password'}
+                    {#if !passwordVisible}
+                        <div class="value">{'•••••••••'}</div>
+                    {:else}
+                        <div class="multi-line-value">{value}</div>
+                    {/if}
                 {:else if type === 'totp'}
                     <div class="value">{message}</div>
                 {:else}
@@ -172,11 +176,11 @@
 
 <style>
     .field {
-        height: 72px;
         max-height: 100%;
         width: auto;
         text-align: left;
         max-width: 350px;
+        padding: 8px 0;
     }
 
     .content {
@@ -185,11 +189,11 @@
         justify-content: space-between;
         align-items: center;
         width: 100%;
-        height: 50px;
+        min-height: 50px;
         box-sizing: border-box;
     }
 
-    .label {
+    .label-readonly {
         min-width: calc(100% - 50px);
         max-width: calc(100% - 50px);
         letter-spacing: 0.4px;
@@ -207,6 +211,13 @@
         text-overflow: ellipsis;
         white-space: nowrap;
         color: var(--on-primary);
+        padding: 12px 0;
+    }
+
+    .multi-line-value {
+        width: 100%;
+        color: var(--on-primary);
+        padding: 12px 0;
     }
 
     a {
