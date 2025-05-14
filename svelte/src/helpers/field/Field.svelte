@@ -6,6 +6,7 @@
     import { passwordStrength } from '../crypto.js'
     import { isUrlValid } from '../utils.js'
     import Icon from '../Icon.svelte'
+    import GeneratePassword from '../../application/editor/GeneratePassword.svelte'
 
     let {
         label = $bindable(''),
@@ -20,6 +21,7 @@
         canEditType = false,
         index = 0,
         passwordVisible = false,
+        showGeneratePassword = false,
         onchange = null,
         oninput = null,
         onkeydown = null,
@@ -31,6 +33,7 @@
     } = $props()
 
     let copied = $state(false)
+    let generatePasswordDialog = $state(null)
 
     let computedType = $derived(
         passwordVisible || type !== 'password' ? 'text' : 'password'
@@ -108,7 +111,16 @@
                     onclick={() => (passwordVisible = !passwordVisible)}
                     icon={passwordVisible ? 'visibility' : 'visibility_off'}
                 />
-                {#if strengthResult && strengthResult.feedback}
+                {#if showGeneratePassword && !value?.length}
+                    <GeneratePassword
+                        bind:this={generatePasswordDialog}
+                        onuse={(password) => (value = password)}
+                    />
+                    <IconButton
+                        onclick={() => generatePasswordDialog.open()}
+                        icon="refresh"
+                    />
+                {:else if strengthResult && strengthResult.feedback}
                     <PasswordWarning {strengthResult} />
                 {/if}
             {:else if type === 'totp' && value}

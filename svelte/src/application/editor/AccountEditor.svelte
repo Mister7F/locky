@@ -139,6 +139,7 @@
             type="password"
             showPasswordStrength="1"
             oncopy={() => copyValue(account.password)}
+            showGeneratePassword="1"
         />
         <Field
             label="URL"
@@ -169,6 +170,7 @@
                 canEditType="1"
                 onremove={() => removeField(i)}
                 oncopy={() => copyValue(field.value)}
+                showGeneratePassword="1"
             />
         {/each}
 
@@ -179,24 +181,12 @@
         {/if}
     </div>
 
-    {#if readonly}
+    {#if !readonly}
         <Fab
             class="remove_account"
             color="on-primary"
             onclick={() => removeAccountDialog.open()}
             icon="delete"
-        />
-    {:else}
-        <GeneratePassword
-            bind:this={generatePasswordDialog}
-            onuse={(password) => (account.password = password)}
-        />
-        <Fab
-            class="generate_password"
-            color="secondary"
-            bgColor="primary"
-            icon="password"
-            onclick={() => generatePasswordDialog.open()}
         />
     {/if}
     <Fab
