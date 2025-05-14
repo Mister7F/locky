@@ -45,6 +45,34 @@
             : [null, null]
     )
 
+    let [urlLeft, urlHost, urlPath] = $derived.by(() => {
+        if (type !== 'url' || !isUrlValid(value)) {
+            return [null, null, null]
+        }
+
+        let url = null
+        try {
+            url = new URL(value)
+        } catch {
+            return [null, null, null]
+        }
+
+        let leftPart = url.protocol + '//'
+        if (url.username) {
+            leftPart += url.username
+            if (url.password) {
+                leftPart += ':' + url.password
+            }
+            leftPart += '@'
+        }
+
+        return [
+            leftPart,
+            url.host,
+            value.slice(leftPart.length + url.host.length),
+        ]
+    })
+
     const getMessage = (message, strength) => {
         if (message && message.length) {
             return message
@@ -82,8 +110,11 @@
 
         <div class="content">
             {#if readonly}
-                {#if type === 'url' && isUrlValid(value)}
-                    <a class="value" href={value} target="_blank">{value}</a>
+                {#if type === 'url' && isUrlValid(value) && urlLeft && urlHost}
+                    <a class="value" href={value} title={value} target="_blank">
+                        <span>{urlLeft}</span><span class="host">{urlHost}</span
+                        ><span>{urlPath}</span>
+                    </a>
                 {:else if type === 'password' && !passwordVisible}
                     <div class="value">{'•••••••••'}</div>
                 {:else if type === 'totp'}
@@ -179,10 +210,15 @@
     }
 
     a {
-        color: var(--link-color) !important;
         text-decoration: none;
     }
-    a:hover {
+    a span:not(.host) {
+        color: var(--on-primary) !important;
+    }
+    a span.host {
+        color: var(--link-color) !important;
+    }
+    a:hover span {
         text-decoration: underline;
     }
 </style>
