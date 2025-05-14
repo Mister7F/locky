@@ -110,7 +110,7 @@
     .label {
         color: var(--disabled-color);
         font-size: 1rem;
-        line-height: 1.15rem;
+        line-height: 1.2rem;
         font-weight: 400;
         transform-origin: left top;
         font-weight: normal;
@@ -130,7 +130,7 @@
 
     input.focused ~ .label,
     input:valid ~ .label {
-        transform: translateY(-50%) scale(0.75);
+        transform: translateY(-70%) scale(0.75);
         color: var(--disabled-color);
     }
     input.focused ~ .label {

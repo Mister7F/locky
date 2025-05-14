@@ -180,11 +180,12 @@
         width: auto;
         text-align: left;
         max-width: 350px;
-        padding: 18px 0;
+        padding: 16px 0;
     }
     .field.readonly {
         /* need less space because no help (TOTP / password) */
-        padding: 5px 0;
+        padding: 12px 0;
+        margin-bottom: 6px;
     }
 
     .content {
@@ -195,18 +196,24 @@
         width: 100%;
         min-height: 50px;
         box-sizing: border-box;
+        font-size: 16px;
     }
 
     .label-readonly {
+        /* Same style as TextInput */
+        --color: hsla(200, 5%, 88%, 0.87);
+        --disabled-color: color-mix(in srgb, var(--color) 65%, transparent);
+        color: var(--disabled-color) !important;
+        font-size: 12px;
+        font-weight: 400;
+
         min-width: calc(100% - 50px);
         max-width: calc(100% - 50px);
         letter-spacing: 0.4px;
-        font-size: 13px;
-        margin-bottom: -6px;
+        margin-bottom: -12px;
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
-        color: var(--on-primary);
     }
 
     .value {
