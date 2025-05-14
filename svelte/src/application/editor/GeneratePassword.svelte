@@ -19,6 +19,9 @@
             alphabet = alphabet + '0123456789'
         }
         if (useSymbol) {
+            alphabet = alphabet + `+-,.:;!?@_`
+        }
+        if (useComplexSymbol) {
             alphabet = alphabet + `~&$(){}[]+-*€$£#%^,.:;!?<>@_|'"`
         }
 
@@ -37,6 +40,7 @@
     let useUpper = $state(true)
     let useNumber = $state(true)
     let useSymbol = $state(true)
+    let useComplexSymbol = $state(false)
 
     let passwordLength = $state(32)
     let password = $state(generate())
@@ -63,6 +67,7 @@
                 password = generate()
             }}
             variant={useLower ? '' : 'outlined'}
+            title="Lower case"
         >
             a
         </Button>
@@ -73,6 +78,7 @@
                 password = generate()
             }}
             variant={useUpper ? '' : 'outlined'}
+            title="Upper case"
         >
             A
         </Button>
@@ -83,6 +89,7 @@
                 password = generate()
             }}
             variant={useNumber ? '' : 'outlined'}
+            title="Digits"
         >
             9
         </Button>
@@ -93,14 +100,26 @@
                 password = generate()
             }}
             variant={useSymbol ? '' : 'outlined'}
+            title="Standard symbols"
         >
-            $
+            !
+        </Button>
+        <Button
+            color="secondary"
+            onclick={() => {
+                useComplexSymbol = !useComplexSymbol
+                password = generate()
+            }}
+            variant={useComplexSymbol ? '' : 'outlined'}
+            title="Complex symbols"
+        >
+            £
         </Button>
     </div>
     <div class="password-length">
         <Slider
             min={4}
-            max={50}
+            max={64}
             bind:value={passwordLength}
             onchange={() => (password = generate())}
         />

@@ -344,7 +344,8 @@
     Did you get here by yourself, and not through a link you received?
     <br />
     <br />
-    Consider clicking "No" and adding a new URL field for that account to not see this warning again.
+    Consider clicking "No" and adding a new URL field for that account to not see
+    this warning again.
     <br />
 
     {#snippet actions()}

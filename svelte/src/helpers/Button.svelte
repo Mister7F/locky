@@ -11,6 +11,7 @@
         ripple = true,
 
         class: className = '',
+        title = '',
         onclick,
         children,
     } = $props()
@@ -28,6 +29,7 @@
 
 <button
     class="ripple {color} {className} {disabled && 'disabled'} {_variant}"
+    {title}
     onclick={onClick}
     onmousedown={(event) => ripple && createRipple(event)}
     {style}
@@ -37,7 +39,9 @@
             >{icon}</Icon
         >
     {/if}
-    {@render children()}
+    {#if children}
+        {@render children()}
+    {/if}
 </button>
 
 <style>

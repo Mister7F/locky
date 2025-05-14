@@ -14,7 +14,9 @@
             <span class="title">{title}</span>
             <hr />
             <div class="content">
-                {@render children()}
+                {#if children}
+                    {@render children()}
+                {/if}
             </div>
             <br />
             <div class="actions">

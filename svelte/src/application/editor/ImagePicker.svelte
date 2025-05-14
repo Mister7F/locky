@@ -145,6 +145,7 @@
         width: 100%;
         position: sticky;
         height: 140px;
+        padding-top: 15px;
     }
 
     .url {
