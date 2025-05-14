@@ -103,7 +103,7 @@
 </script>
 
 {#if value || !readonly}
-    <div class="field {className}">
+    <div class="field {className} {readonly && 'readonly'}">
         {#if readonly}
             <div class="label-readonly">{label}</div>
         {/if}
@@ -180,7 +180,11 @@
         width: auto;
         text-align: left;
         max-width: 350px;
-        padding: 8px 0;
+        padding: 18px 0;
+    }
+    .field.readonly {
+        /* need less space because no help (TOTP / password) */
+        padding: 5px 0;
     }
 
     .content {
@@ -218,6 +222,7 @@
         width: 100%;
         color: var(--on-primary);
         padding: 12px 0;
+        word-break: break-all;
     }
 
     a {
