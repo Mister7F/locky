@@ -1,7 +1,7 @@
 # Web Extension
 Web Extension to automatically fill the form.
 
-The 2FA (TOTP) code is copied if the clipboard after login on the website.
+The 2FA (TOTP) code is copied in the clipboard after login on the website.
 
 > https://youtu.be/Iayjx8GReKw
 
