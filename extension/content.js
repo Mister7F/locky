@@ -29,6 +29,7 @@ const loginSelectors = [
     'input[name="var_login"]',
     'input[name="username"]',
     'input[name="login_email"]',
+    'input[name="account"]',
 
     'input[id="email"]',
     'input[id="login"]',
@@ -36,6 +37,7 @@ const loginSelectors = [
     'input[id="var_login"]',
     'input[id="username"]',
     'input[id="login_email"]',
+    'input[id="account"]',
     'input[id="account_name_text_field"]',
 
     'input[type="email"]',
@@ -46,9 +48,13 @@ const loginSelectors = [
     'input[id*="email"]',
     'input[id*="login"]',
     'input[id*="username"]',
+    'input[id*="account"]',
     'input[name*="email"]',
     'input[name*="login"]',
     'input[name*="username"]',
+    'input[name*="account"]',
+
+    'input[label*="Email"]', // aliexpress
 ]
 const passwordSelectors = [
     'input[id="password"]',
@@ -82,6 +88,7 @@ const formSelectors = [
     '.webform-component-fieldset',
     '.node-webform',
     'div[id*="login"]',
+    'div.login-container', // aliexpress
 ]
 const formSelector = formSelectors.join(',')
 
@@ -96,18 +103,26 @@ function findInputs(selectorsInput1, selectorsInput2 = null, alrt = true) {
 
     // Get the form by priorities
     let forms = document.querySelectorAll(formSelector)
-
-    if (!forms?.length && selectorsInput2) {
-        // Fallback to anything containing a password field
-        forms = document.querySelectorAll(`div:has(${selectorsInput2})`)
-    }
-
-    if (!forms?.length) {
-        // Fallback to anything containing a login field
-        forms = document.querySelectorAll(`div:has(${selectorsInput1})`)
-    }
-
     forms = [...forms].sort((a, b) => formScore(a) - formScore(b))
+
+    if (selectorsInput2) {
+        // Fallback to anything containing a login and password field
+        let to_add = document.querySelectorAll(
+            `div:has(${selectorsInput2}):has(${selectorsInput1})`
+        )
+        to_add = [...to_add].sort((a, b) => formScore(a) - formScore(b))
+        forms.push(...to_add)
+
+        // Fallback to anything containing a password field
+        to_add = document.querySelectorAll(`div:has(${selectorsInput2})`)
+        to_add = [...to_add].sort((a, b) => formScore(a) - formScore(b))
+        forms.push(...to_add)
+    }
+
+    // Fallback to anything containing a login field
+    let to_add = document.querySelectorAll(`div:has(${selectorsInput1})`)
+    to_add = [...to_add].sort((a, b) => formScore(a) - formScore(b))
+    forms.push(...to_add)
 
     for (const form of forms) {
         const inputs1 = form.querySelectorAll(selectorsInput1.join(','))
