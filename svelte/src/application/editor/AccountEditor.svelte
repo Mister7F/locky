@@ -199,9 +199,7 @@
 
 <DialogTotpQrCode {account} bind:this={qrCodeDialog} />
 
-{#if readonly}
-    <DialogRemoveAccount bind:this={removeAccountDialog} {account} {onremove} />
-{/if}
+<DialogRemoveAccount bind:this={removeAccountDialog} {account} {onremove} />
 
 <style>
     .account {
