@@ -23,117 +23,57 @@
 </script>
 
 {#if viewMode === 'detail'}
-    <div class="detail-card">
-        <div>
-            {#if strength !== 0}
-                <div class="strength" style="--force: {strength}"></div>
-            {/if}
-            <div
-                class="detail_main_action ripple ripple_dark ripple_fast"
-                {onclick}
-                onmousedown={(event) => createRipple(event)}
-            >
-                <div class="detail_img">
-                    <Img
-                        src={account.icon || 'img/accounts/default.svg'}
-                        alt="Account"
-                    />
-                </div>
-                <div class="detail_title">
-                    <div class="detail_name">{account.name}</div>
-                    <div class="detail_login">{account.login}</div>
-                </div>
-            </div>
-            <div class="detail_account_actions">
-                <div>
-                    {#if account.url && isUrlValid(account.url)}
-                        <IconButton
-                            title="Open URL"
-                            href={account.url}
-                            icon="launch"
-                            color="on-surface"
-                            bgTransparent="1"
-                        />
-                    {/if}
-                </div>
-                <div>
-                    {#if account.login}
-                        <IconButton
-                            onclick={() => {
-                                onnotify('Login copied')
-                                copyValue(account.login)
-                            }}
-                            title="Login"
-                            icon="alternate_email"
-                            color="on-surface"
-                            bgTransparent="1"
-                        />
-                    {/if}
-                    {#if account.password}
-                        <IconButton
-                            onclick={() => {
-                                onnotify('Password copied')
-                                copyValue(account.password)
-                            }}
-                            icon="vpn_key"
-                            title="Password"
-                            color="on-surface"
-                            bgTransparent="1"
-                        />
-                    {/if}
-                    {#if account.totp}
-                        <IconButton
-                            onclick={async () => {
-                                onnotify('2FA copied')
-                                copyValue(getTotpCode(account.totp))
-                            }}
-                            title="2FA"
-                            icon="schedule"
-                            color="on-surface"
-                            bgTransparent="1"
-                        />
-                    {/if}
-                    {#if WebExtension.inWebExtension}
-                        <IconButton
-                            onclick={() => sendCredentials(account)}
-                            title="Fill the form"
-                            icon="login"
-                            color="on-surface"
-                            bgTransparent="1"
-                        />
-                    {/if}
-                </div>
-            </div>
-        </div>
-    </div>
-{:else}
     <div
-        class="account_list_item ripple ripple_dark ripple_fast"
-        {onclick}
-        onmousedown={(event) => createRipple(event)}
+        class="detail-card"
+        style="view-transition-name: account_card_{account.id}"
     >
-        <div class="account_list_item_title">
-            <Img
-                src={account.icon || 'img/accounts/default.svg'}
-                alt="Account"
-            />
-            <div>
-                <h5>{account.name}</h5>
-                <p>{account.login?.split('@')[0]}</p>
+        {#if strength !== 0}
+            <div
+                class="strength"
+                style="--force: {strength}; view-transition-name: strength_{account.id};"
+            ></div>
+        {/if}
+        <div
+            class="detail_main_action ripple ripple_dark ripple_fast"
+            {onclick}
+            onmousedown={(event) => createRipple(event)}
+        >
+            <div class="detail_img">
+                <Img
+                    src={account.icon || 'img/accounts/default.svg'}
+                    alt="Account"
+                    style="view-transition-name: image_{account.id}"
+                />
+            </div>
+            <div class="detail_title">
+                <div
+                    class="detail_name"
+                    style="view-transition-name: name_{account.id}"
+                >
+                    {account.name}
+                </div>
+                <div
+                    class="detail_login"
+                    style="view-transition-name: login_{account.id}"
+                >
+                    {account.login}
+                </div>
             </div>
         </div>
-        {#if viewMode !== 'minimalist'}
-            <div class="account_list_item_actions">
+        <div class="detail_account_actions">
+            <div>
                 {#if account.url && isUrlValid(account.url)}
                     <IconButton
-                        class="account_list_item_url"
                         title="Open URL"
                         href={account.url}
                         icon="launch"
                         color="on-surface"
                         bgTransparent="1"
+                        style="view-transition-name: url_button_{account.id}"
                     />
                 {/if}
+            </div>
+            <div>
                 {#if account.login}
                     <IconButton
                         onclick={() => {
@@ -144,6 +84,7 @@
                         icon="alternate_email"
                         color="on-surface"
                         bgTransparent="1"
+                        style="view-transition-name: login_button_{account.id}"
                     />
                 {/if}
                 {#if account.password}
@@ -152,10 +93,11 @@
                             onnotify('Password copied')
                             copyValue(account.password)
                         }}
-                        title="Password"
                         icon="vpn_key"
+                        title="Password"
                         color="on-surface"
                         bgTransparent="1"
+                        style="view-transition-name: password_button_{account.id}"
                     />
                 {/if}
                 {#if account.totp}
@@ -168,6 +110,94 @@
                         icon="schedule"
                         color="on-surface"
                         bgTransparent="1"
+                        style="view-transition-name: totp_button_{account.id}"
+                    />
+                {/if}
+                {#if WebExtension.inWebExtension}
+                    <IconButton
+                        onclick={() => sendCredentials(account)}
+                        title="Fill the form"
+                        icon="login"
+                        color="on-surface"
+                        bgTransparent="1"
+                        style="view-transition-name: extension_button_{account.id}"
+                    />
+                {/if}
+            </div>
+        </div>
+    </div>
+{:else}
+    <div
+        class="account_list_item ripple ripple_dark ripple_fast"
+        {onclick}
+        onmousedown={(event) => createRipple(event)}
+        style="view-transition-name: account_card_{account.id}"
+    >
+        <div class="account_list_item_title">
+            <Img
+                src={account.icon || 'img/accounts/default.svg'}
+                alt="Account"
+                style="view-transition-name: image_{account.id}"
+            />
+            <div>
+                <h5 style="view-transition-name: name_{account.id}">
+                    {account.name}
+                </h5>
+                <p style="view-transition-name: login_{account.id}">
+                    {account.login}
+                </p>
+            </div>
+        </div>
+        {#if viewMode !== 'minimalist'}
+            <div class="account_list_item_actions">
+                {#if account.url && isUrlValid(account.url)}
+                    <IconButton
+                        class="account_list_item_url url_button"
+                        title="Open URL"
+                        href={account.url}
+                        icon="launch"
+                        color="on-surface"
+                        bgTransparent="1"
+                        style="view-transition-name: url_button_{account.id}"
+                    />
+                {/if}
+                {#if account.login}
+                    <IconButton
+                        onclick={() => {
+                            onnotify('Login copied')
+                            copyValue(account.login)
+                        }}
+                        title="Login"
+                        icon="alternate_email"
+                        color="on-surface"
+                        bgTransparent="1"
+                        style="view-transition-name: login_button_{account.id}"
+                    />
+                {/if}
+                {#if account.password}
+                    <IconButton
+                        onclick={() => {
+                            onnotify('Password copied')
+                            copyValue(account.password)
+                        }}
+                        title="Password"
+                        icon="vpn_key"
+                        color="on-surface"
+                        bgTransparent="1"
+                        style="view-transition-name: password_button_{account.id}"
+                    />
+                {/if}
+                {#if account.totp}
+                    <IconButton
+                        onclick={async () => {
+                            onnotify('2FA copied')
+                            copyValue(getTotpCode(account.totp))
+                        }}
+                        title="2FA"
+                        icon="schedule"
+                        color="on-surface"
+                        bgTransparent="1"
+                        style="view-transition-name: totp_button_{account.id}"
                     />
                 {/if}
 
@@ -178,12 +208,16 @@
                         icon="login"
                         color="on-surface"
                         bgTransparent="1"
+                        style="view-transition-name: extension_button_{account.id}"
                     />
                 {/if}
             </div>
         {/if}
         {#if strength !== 0}
-            <div class="strength" style="--force: {strength}"></div>
+            <div
+                class="strength"
+                style="--force: {strength}; view-transition-name: strength_{account.id};"
+            ></div>
         {/if}
     </div>
 {/if}
@@ -218,6 +252,7 @@
         border: 1px solid var(--on-surface);
         border-radius: 4px;
     }
+
     .detail_main_action {
         padding: 5px;
         border-bottom: 1px solid var(--on-surface);
@@ -308,9 +343,6 @@
         margin: 10px 5px;
         border: 1px solid var(--on-surface);
         border-radius: 4px;
-        box-shadow:
-            0 1px 3px rgb(0 0 0 / 12%),
-            0 1px 2px rgb(0 0 0 / 24%);
         color: var(--on-surface);
         cursor: pointer;
     }

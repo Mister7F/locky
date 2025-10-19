@@ -3,6 +3,7 @@
         src = null,
         alt = null,
         class: className = '',
+        style = '',
         noimageSet = false,
     } = $props()
 
@@ -14,7 +15,7 @@
     }
 </script>
 
-<img class={className} {src} {alt} onerror={onError} />
+<img class={className} {src} {alt} onerror={onError} {style} />
 
 <style>
     img {

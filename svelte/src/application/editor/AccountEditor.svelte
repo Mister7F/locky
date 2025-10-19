@@ -117,6 +117,7 @@
             {readonly}
             size="100px"
             bind:srcs={iconSrcs}
+            transitionName="image_{account.id}"
         />
 
         <Field

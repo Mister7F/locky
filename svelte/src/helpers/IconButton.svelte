@@ -6,6 +6,7 @@
     let {
         title = '',
         class: className = '',
+        style = '',
         color = 'on-primary',
         bgColor = false,
         bgTransparent = false,
@@ -42,7 +43,7 @@
     }}
     {onblur}
     {title}
-    style="--background: var(--{backgroundColor});--color: var(--{color})"
+    style="--background: var(--{backgroundColor});--color: var(--{color}); {style}"
 >
     {#if icon}
         <Icon {color}>{icon}</Icon>

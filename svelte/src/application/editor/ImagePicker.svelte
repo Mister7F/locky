@@ -12,6 +12,7 @@
         readonly = false,
         size = '100px',
         srcs = $bindable([]),
+        transitionName = '',
     } = $props()
 
     let currentSrcs = $derived(
@@ -49,7 +50,11 @@
 <div class="image_picker" style="--size: {size}">
     <div class="img {readonly ? 'readonly' : ''}" onclick={open}>
         {#if src}
-            <Img {src} alt={src} />
+            <Img
+                {src}
+                alt={src}
+                style="view-transition-name: {transitionName}"
+            />
         {:else}<img src="img/accounts/default.svg" alt="default" />{/if}
     </div>
     <div class="icons {chooseIcon && !readonly ? 'visible' : ''}">

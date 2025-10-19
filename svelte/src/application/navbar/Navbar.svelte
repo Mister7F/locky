@@ -32,10 +32,16 @@
     )
 
     function changeViewMode() {
-        const nextModeIndex =
-            (viewModes.indexOf(viewMode) + 1) % viewModes.length
-        viewMode = viewModes[nextModeIndex]
-        window.localStorage.setItem('viewMode', viewMode)
+        if (!document.startViewTransition) {
+            console.warn('Transition not available')
+            document.startViewTransition = (f) => f()
+        }
+        document.startViewTransition(() => {
+            const nextModeIndex =
+                (viewModes.indexOf(viewMode) + 1) % viewModes.length
+            viewMode = viewModes[nextModeIndex]
+            window.localStorage.setItem('viewMode', viewMode)
+        })
     }
 
     onMount(() => {
