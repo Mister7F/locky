@@ -1,3 +1,4 @@
+import { savePassword } from '../helpers/web_extension.svelte.js'
 import { decryptDatabase, encryptDatabase } from './encrypt.js'
 import * as indexdb from './indexdb.js'
 
@@ -23,25 +24,33 @@ export async function unlock(password, key) {
         return
     }
 
-    const newWallet = await decryptDatabase(encryptedWallet, password, key)
+    const [newWallet, next_key] = await decryptDatabase(
+        encryptedWallet,
+        password,
+        key
+    )
     if (!newWallet) {
         return
     }
 
     wallet = newWallet
     masterPassword = password
+    if (!key) {
+        savePassword(password, next_key)
+    }
+
     return wallet
 }
 
 export async function login(filedata, password) {
-    const newWallet = await decryptDatabase(filedata, password)
+    const [newWallet, key] = await decryptDatabase(filedata, password)
     if (!newWallet) {
         return
     }
 
     masterPassword = password
     wallet = newWallet
-    masterPassword = password
+    savePassword(password, key)
     return await saveWallet()
 }
 

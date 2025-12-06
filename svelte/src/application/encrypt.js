@@ -28,13 +28,13 @@ export async function decryptDatabase(data, password, _key) {
 
     if (!data || !data.length) {
         console.error('Empty file')
-        return null
+        return [null, null]
     }
 
     const [key, decrypted] = await decrypt(data, password, _key)
     if (!decrypted) {
         console.error('Decryption failed')
-        return null
+        return [null, null]
     }
 
     let decompressed = null
@@ -42,27 +42,26 @@ export async function decryptDatabase(data, password, _key) {
         decompressed = decompressSync(decrypted)
     } catch (error) {
         console.error('Decompression failed')
-        return null
+        return [null, null]
     }
 
     if (!decompressed || !decompressed.length) {
         console.error('Decompression failed')
-        return null
+        return [null, null]
     }
 
     let database
     try {
         database = JSON.parse(strFromU8(decompressed))
         if (!database.accounts || !database.folders) {
-            return null
+            return [null, null]
         }
     } catch {
         console.error('Not a JSON file')
-        return
+        return [null, null]
     }
-    savePassword(password, key)
     fixMissingIds(database)
-    return database
+    return [database, key]
 }
 
 /**

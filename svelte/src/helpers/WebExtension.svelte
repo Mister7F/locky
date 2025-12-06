@@ -299,7 +299,7 @@
                     key: hex(event.detail.key),
                 })
             ),
-            getMasterPasswordKey()
+            getMasterPasswordKey(true)
         )
         return await sendToWebExtension({
             action: 'savePassword',
@@ -310,8 +310,8 @@
     /**
      * Key used to store the master password in the Web Extension session storage.
      */
-    function getMasterPasswordKey() {
-        if (!localStorage.getItem('masterPasswordKey')?.length) {
+    function getMasterPasswordKey(regenerate) {
+        if (!localStorage.getItem('masterPasswordKey')?.length || regenerate) {
             localStorage.setItem('masterPasswordKey', hex(generateToken(32)))
         }
         return fromHex(localStorage.getItem('masterPasswordKey'))
