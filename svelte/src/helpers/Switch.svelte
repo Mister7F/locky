@@ -1,7 +1,12 @@
-<script>
-    const elId = Math.floor(Math.random() * 10000000)
+<script lang="ts">
+    const elId = String(Math.floor(Math.random() * 10000000))
 
-    let { label = '', checked = $bindable(false) } = $props()
+    interface Props {
+        label?: string
+        checked?: boolean
+    }
+
+    let { label = '', checked = $bindable(false) }: Props = $props()
 </script>
 
 <div>

@@ -1,13 +1,23 @@
-<script>
+<script lang="ts">
     import Button from '../../helpers/Button.svelte'
     import IconButton from '../../helpers/IconButton.svelte'
     import Sidepanel from '../../helpers/Sidepanel.svelte'
     import ChangePassword from './ChangePassword.svelte'
-    import * as dropbox from './../dropbox/dropbox.js'
+    import * as dropbox from './../dropbox/dropbox.ts'
 
-    let { onlock, isDropboxAuthenticated, visible = $bindable(true) } = $props()
+    interface Props {
+        visible?: boolean
+        onlock: () => any
+        isDropboxAuthenticated: boolean
+    }
 
-    let changePasswordDialog = $state()
+    let {
+        onlock,
+        isDropboxAuthenticated,
+        visible = $bindable(true),
+    }: Props = $props()
+
+    let changePasswordDialog: InstanceType<typeof ChangePassword> = $state()
 
     async function onDropboxClick() {
         if (isDropboxAuthenticated) {

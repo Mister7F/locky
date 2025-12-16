@@ -1,17 +1,21 @@
-<script>
+<script lang="ts">
     import Icon from '../../helpers/Icon.svelte'
     import IconButton from '../../helpers/IconButton.svelte'
     import Dialog from '../../helpers/Dialog.svelte'
     import Button from '../../helpers/Button.svelte'
-    import { openUrl } from '../../helpers/utils.js'
+    import { openUrl } from '../../helpers/utils.ts'
 
-    import * as dropbox from './dropbox.js'
-    import * as api from '../api.js'
+    import * as dropbox from './dropbox.ts'
+    import * as api from '../api.ts'
     import { onMount } from 'svelte'
 
-    let { isAuthenticated = false } = $props()
+    interface Props {
+        isAuthenticated?: boolean
+    }
 
-    let authenticationUrl = null
+    let { isAuthenticated = false }: Props = $props()
+
+    let authenticationUrl: string | undefined
     let uploadingState = $state('wait')
     let confirmationDialogOpen = $state(false)
     let downloadWalletDialogOpen = $state(false)
@@ -71,7 +75,7 @@
             return dropboxFile && dropboxFile.content_hash
         } catch {}
         isAuthenticated = false
-        return null
+        return
     }
 
     onMount(async () => {
@@ -207,7 +211,7 @@
         margin: 0;
     }
 
-    @-webkit-keyframes rotating {
+    @keyframes rotating {
         from {
             -webkit-transform: rotate(0deg);
         }
@@ -217,7 +221,7 @@
     }
 
     .container :global(.dropbox-uploading) {
-        -webkit-animation: rotating 2s linear infinite;
+        animation: rotating 2s linear infinite;
     }
 
     .container :global(.mdc-dialog__surface) {

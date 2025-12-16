@@ -1,48 +1,73 @@
-<script>
+<script lang="ts">
     import FieldAction from './FieldAction.svelte'
     import IconButton from '../IconButton.svelte'
     import TextInput from '../TextInput.svelte'
     import PasswordWarning from './PasswordWarning.svelte'
-    import { passwordStrength } from '../crypto.js'
-    import { isUrlValid } from '../utils.js'
+    import { passwordStrength } from '../crypto.ts'
+    import { isUrlValid } from '../utils.ts'
     import Icon from '../Icon.svelte'
     import GeneratePassword from '../../application/editor/GeneratePassword.svelte'
+    import zxcvbn from 'zxcvbn'
+
+    interface Props {
+        label?: string
+        readonly?: boolean
+        type?: string
+        showPasswordStrength?: boolean
+        value?: string
+        message?: string
+        messagePersistent?: boolean
+        copy?: boolean
+        class?: string
+        canEditType?: boolean
+        index?: number
+        passwordVisible?: boolean
+        showGeneratePassword?: boolean
+        onchange?: (event: Event) => void
+        oninput?: (event: Event) => void
+        onkeydown?: (event: KeyboardEvent) => void
+        onblur?: () => void
+        onenter?: () => void
+        oncopy?: () => void
+        onshow_qrcode?: () => void
+        onremove?: (index?: number) => void
+    }
 
     let {
         label = $bindable(''),
-        readonly = 0,
+        readonly = false,
         type = $bindable('text'),
         showPasswordStrength = false,
         value = $bindable(),
-        message = null,
+        message = '',
         messagePersistent = false,
-        copy = 1,
+        copy = true,
         class: className = '',
         canEditType = false,
         index = 0,
         passwordVisible = false,
         showGeneratePassword = false,
-        onchange = null,
-        oninput = null,
-        onkeydown = null,
-        onblur = null,
-        onenter = null,
-        oncopy = null,
-        onshow_qrcode = null,
-        onremove = null,
-    } = $props()
+        onchange,
+        oninput,
+        onkeydown,
+        onblur,
+        onenter,
+        oncopy,
+        onshow_qrcode,
+        onremove,
+    }: Props = $props()
 
     let copied = $state(false)
-    let generatePasswordDialog = $state(null)
+    let generatePasswordDialog = $state<any>(null)
 
     let computedType = $derived(
         passwordVisible || type !== 'password' ? 'text' : 'password'
     )
 
-    let [strength, strengthResult] = $derived(
+    let { strength, detail: strengthResult } = $derived(
         type === 'password' && showPasswordStrength && value && value.length
             ? passwordStrength(value, true)
-            : [null, null]
+            : { strength: null, detail: null }
     )
 
     let [urlLeft, urlHost, urlPath] = $derived.by(() => {
@@ -73,8 +98,11 @@
         ]
     })
 
-    const getMessage = (message, strength) => {
-        if (message && message.length) {
+    const getMessage = (
+        message?: string,
+        strength?: number
+    ): string | undefined => {
+        if (message?.length) {
             return message
         } else if (strength !== null) {
             return 'Strength: ' + (strength || 0) + ' / 100'
@@ -85,18 +113,19 @@
     /**
      * Generate the event "enter" when pressing enter.
      */
-    function onKeyPress(e) {
+    function onKeyPress(e: KeyboardEvent | Event) {
         if (!e) e = window.event
-        if ((e.keyCode || e.which) == 13) {
+        const keyEvent = e as KeyboardEvent
+        if ((keyEvent.keyCode || keyEvent.which) == 13) {
             e.preventDefault()
             e.stopPropagation()
-            onenter()
+            onenter?.()
             return false
         }
     }
 
     function onCopyClick() {
-        oncopy()
+        oncopy?.()
         copied = true
         setTimeout(() => (copied = false), 1000)
     }
@@ -138,7 +167,7 @@
                     {onkeydown}
                     {onblur}
                     help={computedMessage}
-                    helpPersistent={messagePersistent}
+                    helpPersistent={!!messagePersistent}
                 />
             {/if}
             {#if type === 'password'}
@@ -164,7 +193,7 @@
             {#if canEditType && !readonly}
                 <FieldAction bind:type bind:label {onremove} />
             {/if}
-            {#if parseInt(copy) && value}
+            {#if parseInt(String(copy)) && value}
                 <IconButton
                     onclick={onCopyClick}
                     icon={copied ? 'check' : 'content_copy'}

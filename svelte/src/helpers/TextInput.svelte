@@ -1,4 +1,21 @@
-<script>
+<script lang="ts">
+    type InputEventHandler = (event: Event) => void
+
+    interface Props {
+        label?: string
+        class?: string
+        help?: string
+        helpPersistent?: boolean
+        value?: string
+        type?: string
+        onkeypress?: InputEventHandler
+        onchange?: InputEventHandler
+        oninput?: InputEventHandler
+        onkeydown?: InputEventHandler
+        onfocus?: () => void
+        onblur?: () => void
+    }
+
     let {
         label = '',
         class: className,
@@ -6,42 +23,48 @@
         helpPersistent = true,
         value = $bindable(),
         type = 'text',
-        onkeypress = null,
-        onchange = null,
-        oninput = null,
-        onkeydown = null,
-        onfocus = null,
-        onblur = null,
-    } = $props()
+        onkeypress,
+        onchange,
+        oninput,
+        onkeydown,
+        onfocus,
+        onblur,
+    }: Props = $props()
 
     let focused = $state(false)
     let selectionIndex = $state(-1)
-    let timeoutHandle = null
+    let timeoutHandle: number | undefined
     let loosingFocus = $state(false)
 
-    function onFocus(event) {
+    function onFocus(event: FocusEvent) {
         focused = true
         loosingFocus = false
-        clearTimeout(timeoutHandle)
-        selectionIndex = event.target.selectionStart
-        onfocus && onfocus()
+        if (timeoutHandle) {
+            clearTimeout(timeoutHandle)
+            timeoutHandle = null
+        }
+        const target = event.target as HTMLInputElement | null
+        selectionIndex = target?.selectionStart ?? -1
+        onfocus?.()
     }
 
     function onBlur() {
         loosingFocus = true
         focused = false
         selectionIndex = -1
-        clearTimeout(timeoutHandle)
+        if (timeoutHandle) {
+            clearTimeout(timeoutHandle)
+        }
         timeoutHandle = setTimeout(() => {
             loosingFocus = false
         }, 180)
-        onblur && onblur()
+        onblur?.()
     }
 </script>
 
 <div class="container {className}">
     <input
-        required="required"
+        required
         class="
             {focused ? 'focused' : ''}
             {selectionIndex === 0 ? 'selection-zero' : ''}

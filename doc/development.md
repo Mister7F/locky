@@ -18,7 +18,7 @@ To run your development server just run,
 
 Before committing, please run prettier to automatically format your code,
 
-> `npx prettier --write .`
+> `npm run prettier`
 
 # Build
 

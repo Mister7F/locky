@@ -1,10 +1,19 @@
-<script>
+<script lang="ts">
     import IconButton from '../../helpers/IconButton.svelte'
 
     import Icon from '../../helpers/Icon.svelte'
     import { onMount } from 'svelte'
     import Field from '../../helpers/field/Field.svelte'
     import Img from '../../helpers/Img.svelte'
+
+    interface Props {
+        src: string
+        chooseIcon?: boolean
+        readonly: boolean
+        size: string
+        srcs: string[]
+        transitionName: string
+    }
 
     let {
         src = $bindable(''),
@@ -13,7 +22,10 @@
         size = '100px',
         srcs = $bindable([]),
         transitionName = '',
-    } = $props()
+    }: Props = $props()
+
+    let previewSrc = $state(src || 'img/accounts/default.svg')
+    let searchValue = $state('')
 
     let currentSrcs = $derived(
         !searchValue || !searchValue.length
@@ -24,8 +36,6 @@
                   )
               })
     )
-
-    let searchValue = $state('')
 
     // Fetch the list of account logos
     onMount(async () => {
@@ -40,34 +50,37 @@
         chooseIcon = readonly ? false : true
     }
 
-    function choose(isrc) {
+    function choose(isrc: string) {
         searchValue = ''
         src = isrc
+        previewSrc = isrc || 'img/accounts/default.svg'
         chooseIcon = false
     }
 </script>
 
 <div class="image_picker" style="--size: {size}">
     <div class="img {readonly ? 'readonly' : ''}" onclick={open}>
-        {#if src}
-            <Img
-                {src}
-                alt={src}
-                style="view-transition-name: {transitionName}"
-            />
-        {:else}<img src="img/accounts/default.svg" alt="default" />{/if}
+        <Img
+            src={previewSrc}
+            alt={previewSrc}
+            style="view-transition-name: {transitionName}"
+        />
     </div>
     <div class="icons {chooseIcon && !readonly ? 'visible' : ''}">
         <div class="img-header">
             <div class="url">
-                <Field label="Image URL" copy="0" bind:value={src} />
+                <Field label="Image URL" copy={false} bind:value={src} />
                 <IconButton onclick={() => choose(src)} icon="save_alt" />
             </div>
-            <Field label="Search" copy="0" bind:value={searchValue} />
+            <Field label="Search" copy={false} bind:value={searchValue} />
         </div>
         <div class="container">
-            {#each currentSrcs as src}
-                <img {src} onclick={() => choose(src)} alt={src} />
+            {#each currentSrcs as iconSrc}
+                <img
+                    src={iconSrc}
+                    onclick={() => choose(iconSrc)}
+                    alt={iconSrc}
+                />
             {/each}
         </div>
     </div>

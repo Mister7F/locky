@@ -1,16 +1,26 @@
-<script>
+<script lang="ts">
     import Icon from './Icon.svelte'
     import IconButton from './IconButton.svelte'
+
+    interface Props {
+        onclick?: (event: MouseEvent) => void
+        title?: string
+        color?: string
+        icon?: string
+        bgColor?: string
+        class?: string
+        children?: () => any
+    }
 
     let {
         onclick,
         title = '',
         color = 'on-primary',
-        icon = false,
-        bgColor = false,
+        icon = '',
+        bgColor = '',
         class: className = '',
         children,
-    } = $props()
+    }: Props = $props()
 </script>
 
 <IconButton

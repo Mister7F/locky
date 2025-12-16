@@ -1,17 +1,34 @@
-<script>
+<script lang="ts" generics="DragItem extends { id: any }">
+    interface Props {
+        items: DragItem[]
+        dragging?: boolean
+        movable?: boolean
+        class?: string
+        customActions?: string[]
+        onmove?: (payload: {
+            from: number
+            to: number
+            fromItem: DragItem
+            destItem: DragItem
+        }) => void
+        onmove_blocked?: () => void
+        onaction?: (payload: { action: HTMLElement; item: DragItem }) => void
+        card?: (item: DragItem) => any
+    }
+
     let {
-        items,
+        items = [],
         dragging = $bindable(false),
         movable = true,
         class: className = '',
         // List of [dom_id], when an item is dropped on the specified DOM id
         // the event "action" is called
         customActions = [],
-        onmove = null,
-        onmove_blocked = null,
-        onaction = null,
+        onmove,
+        onmove_blocked,
+        onaction,
         card,
-    } = $props()
+    }: Props = $props()
 
     function getElementIndex(element) {
         // Return the index of the element in its parent
@@ -26,11 +43,11 @@
     // On desktop, the drag even is triggered when a threshold is reached
     // for the movement of the mouse. So we do not interpret "click" events as
     // drag events
-    let pressedElementEvent = null
+    let pressedElementEvent: MouseEvent | TouchEvent | undefined
     let desktopDragMove = [0, 0]
 
-    let dragX = $state(null)
-    let dragY = $state(null)
+    let dragX = $state<number | undefined>()
+    let dragY = $state<number | undefined>()
 
     // Do not load all items for performance reason (items will be loaded dynamically when scrolling)
     const minCardSurface = 432 * 78
@@ -39,24 +56,24 @@
     let currentSlice = $state(initialSlice)
 
     let draggedIndex = $state(-1)
-    let draggedItem = $state(null)
+    let draggedItem = $state<DragItem>()
     let destIndex = $state(-1) // used for the UI
     let destIndexItem = -1 // used to send the event
-    let action = null
-    let gridElement = $state()
+    let action: HTMLElement | undefined
+    let gridElement = $state<HTMLElement>()
 
     // Position of the mouse on the dragged element
     let xPosElement = 0
     let yPosElement = 0
-    let mouseTimer = null
+    let mouseTimer: number = 0
     let mobile = false
 
-    function moveDraggedElement(event) {
+    function moveDraggedElement(event: MouseEvent | TouchEvent) {
         // move the dragged element to the mouse position
         let mouseX
         let mouseY
 
-        if (event.touches) {
+        if (event instanceof TouchEvent) {
             // mobile
             mouseX = event.touches[0].clientX
             mouseY = event.touches[0].clientY
@@ -73,11 +90,7 @@
         return [mouseX, mouseY]
     }
 
-    function touchStart(event) {
-        if (event.button !== 0 && !event.touches) {
-            return
-        }
-
+    function touchStart(event: TouchEvent) {
         // on mobile, should press and wait a bit before dragging
         // (because we should be able to scroll)
         const clonedEvent = cloneEvent(event)
@@ -86,8 +99,8 @@
         }, 300)
     }
 
-    function mouseDown(event) {
-        if (event.button !== 0 && !event.touches) {
+    function mouseDown(event: MouseEvent | TouchEvent) {
+        if (event instanceof MouseEvent && event.button !== 0) {
             return
         }
 
@@ -96,17 +109,18 @@
         desktopDragMove = [0, 0]
     }
 
-    function mouseUp(event) {
+    function mouseUp(event: MouseEvent | TouchEvent) {
         pressedElementEvent = null
 
         if (mouseTimer) {
             clearTimeout(mouseTimer)
+            mouseTimer = null
         }
-        if (!dragging || (event.button !== 0 && !event.touches)) {
+        if (!dragging || (event instanceof MouseEvent && event.button !== 0)) {
             return
         }
         if (action) {
-            onaction({
+            onaction?.({
                 action: action,
                 item: draggedItem,
             })
@@ -115,7 +129,10 @@
             destIndexItem >= 0 &&
             draggedIndex >= 0
         ) {
-            onmove({
+            if (!draggedItem || !items[destIndexItem]) {
+                return
+            }
+            onmove?.({
                 from: draggedIndex,
                 to: destIndexItem,
                 fromItem: draggedItem,
@@ -124,12 +141,12 @@
         }
 
         // clean the state
-        draggedItem = null
+        draggedItem = undefined
         draggedIndex = -1
         destIndex = -1
         destIndexItem = -1
         dragging = false
-        action = null
+        action = undefined
         const previousFolder = document.querySelector('.move_into')
         if (previousFolder) {
             previousFolder.classList.remove('move_into')
@@ -175,7 +192,7 @@
             (el) => customActions.indexOf(el.id) >= 0
         )
         if (customActionElement.length) {
-            action = customActionElement[0]
+            action = customActionElement[0] as HTMLElement
             // Todo: rename `move_into` into `action_hover`
             let previousFolder = document.querySelector('.move_into')
             if (previousFolder) {
@@ -189,6 +206,7 @@
         // check if we will move the item
         const destItemsFiltered = hoverElements.filter(
             (el) =>
+                gridElement &&
                 gridElement.contains(el) &&
                 el.classList.contains('dnd_container') &&
                 !el.classList.contains('ghost') &&
@@ -226,18 +244,24 @@
      * - on Mobile, you need to press the element and wait a bit. This is because
      *   you can also "press" the screen to scroll
      */
-    function initDrag(event) {
-        const target = event.target.closest('.dnd_container')
+    function initDrag(event: MouseEvent | TouchEvent) {
+        const target = (event.target as HTMLElement | null)?.closest(
+            '.dnd_container'
+        ) as HTMLElement | null
         if (!movable) {
             // try to move, but can't
-            onmove_blocked()
+            onmove_blocked?.()
+            return
+        }
+
+        if (!target) {
             return
         }
 
         draggedIndex = getElementIndex(target)
 
         draggedItem = items[draggedIndex]
-        if (event.touches) {
+        if (event instanceof TouchEvent) {
             // mobile
             xPosElement = target.offsetWidth / 2
             yPosElement = target.offsetHeight / 2
@@ -322,11 +346,11 @@
             </div>
         {/if}
 
-        {#if parseInt(currentSlice) < items.length}
+        {#if currentSlice < items.length}
             <span
                 class="load_more"
                 onclick={() => (currentSlice = items.length)}
-                >Load more {items.length - parseInt(currentSlice)} elements</span
+                >Load more {items.length - currentSlice} elements</span
             >
         {/if}
     </div>

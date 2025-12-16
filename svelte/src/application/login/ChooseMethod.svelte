@@ -1,7 +1,12 @@
-<script>
+<script lang="ts">
     import Button from '../../helpers/Button.svelte'
 
-    let { sessionOpened = false, onclick } = $props()
+    interface Props {
+        sessionOpened?: boolean
+        onclick: (method: 'login' | 'create' | 'upload' | 'dropbox') => void
+    }
+
+    let { sessionOpened = false, onclick }: Props = $props()
 </script>
 
 <h1>Open your wallet</h1>

@@ -1,25 +1,35 @@
-<script>
+<script lang="ts">
     import IconButton from '../helpers/IconButton.svelte'
-    import { createRipple } from '../helpers/ripple.js'
+    import { createRipple } from '../helpers/ripple.ts'
     import Img from '../helpers/Img.svelte'
-    import { getTotpCode, passwordStrength } from '../helpers/crypto.js'
-    import { isUrlValid, copyValue, fromHex } from '../helpers/utils.js'
-    import { encryptAES } from '../helpers/crypto.js'
+    import { getTotpCode, passwordStrength } from '../helpers/crypto.ts'
+    import { isUrlValid, copyValue, fromHex } from '../helpers/utils.ts'
+    import { encryptAES } from '../helpers/crypto.ts'
     import Dialog from '../helpers/Dialog.svelte'
     import Button from '../helpers/Button.svelte'
-    import WebExtension from '../helpers/web_extension.svelte.js'
-    import { sendCredentials } from '../helpers/web_extension.svelte.js'
+    import WebExtension from '../helpers/web_extension.svelte.ts'
+    import { sendCredentials } from '../helpers/web_extension.svelte.ts'
 
-    import { normalizeHost } from '../helpers/utils.js'
+    import { normalizeHost } from '../helpers/utils.ts'
+    import Account from '../models/account.ts'
+
+    interface Props {
+        account: Account
+        viewMode?: string
+        onclick: (event: MouseEvent) => void
+        onnotify?: (message: string) => void
+        minimalist?: boolean
+    }
+
     let {
         account,
         viewMode = 'list',
         onclick,
         onnotify,
         minimalist = false,
-    } = $props()
+    }: Props = $props()
 
-    const strength = passwordStrength(account.password)
+    const strength = passwordStrength(account.password || '').strength
 </script>
 
 {#if viewMode === 'detail'}
@@ -68,7 +78,7 @@
                         href={account.url}
                         icon="launch"
                         color="on-surface"
-                        bgTransparent="1"
+                        bgTransparent={true}
                         style="view-transition-name: url_button_{account.id}"
                     />
                 {/if}
@@ -77,39 +87,39 @@
                 {#if account.login}
                     <IconButton
                         onclick={() => {
-                            onnotify('Login copied')
+                            onnotify?.('Login copied')
                             copyValue(account.login)
                         }}
                         title="Login"
                         icon="alternate_email"
                         color="on-surface"
-                        bgTransparent="1"
+                        bgTransparent={true}
                         style="view-transition-name: login_button_{account.id}"
                     />
                 {/if}
                 {#if account.password}
                     <IconButton
                         onclick={() => {
-                            onnotify('Password copied')
+                            onnotify?.('Password copied')
                             copyValue(account.password)
                         }}
                         icon="vpn_key"
                         title="Password"
                         color="on-surface"
-                        bgTransparent="1"
+                        bgTransparent={true}
                         style="view-transition-name: password_button_{account.id}"
                     />
                 {/if}
                 {#if account.totp}
                     <IconButton
                         onclick={async () => {
-                            onnotify('2FA copied')
+                            onnotify?.('2FA copied')
                             copyValue(getTotpCode(account.totp))
                         }}
                         title="2FA"
                         icon="schedule"
                         color="on-surface"
-                        bgTransparent="1"
+                        bgTransparent={true}
                         style="view-transition-name: totp_button_{account.id}"
                     />
                 {/if}
@@ -119,7 +129,7 @@
                         title="Fill the form"
                         icon="login"
                         color="on-surface"
-                        bgTransparent="1"
+                        bgTransparent={true}
                         style="view-transition-name: extension_button_{account.id}"
                     />
                 {/if}
@@ -157,46 +167,46 @@
                         href={account.url}
                         icon="launch"
                         color="on-surface"
-                        bgTransparent="1"
+                        bgTransparent={true}
                         style="view-transition-name: url_button_{account.id}"
                     />
                 {/if}
                 {#if account.login}
                     <IconButton
                         onclick={() => {
-                            onnotify('Login copied')
+                            onnotify?.('Login copied')
                             copyValue(account.login)
                         }}
                         title="Login"
                         icon="alternate_email"
                         color="on-surface"
-                        bgTransparent="1"
+                        bgTransparent={true}
                         style="view-transition-name: login_button_{account.id}"
                     />
                 {/if}
                 {#if account.password}
                     <IconButton
                         onclick={() => {
-                            onnotify('Password copied')
+                            onnotify?.('Password copied')
                             copyValue(account.password)
                         }}
                         title="Password"
                         icon="vpn_key"
                         color="on-surface"
-                        bgTransparent="1"
+                        bgTransparent={true}
                         style="view-transition-name: password_button_{account.id}"
                     />
                 {/if}
                 {#if account.totp}
                     <IconButton
                         onclick={async () => {
-                            onnotify('2FA copied')
+                            onnotify?.('2FA copied')
                             copyValue(getTotpCode(account.totp))
                         }}
                         title="2FA"
                         icon="schedule"
                         color="on-surface"
-                        bgTransparent="1"
+                        bgTransparent={true}
                         style="view-transition-name: totp_button_{account.id}"
                     />
                 {/if}
@@ -207,7 +217,7 @@
                         title="Fill the form"
                         icon="login"
                         color="on-surface"
-                        bgTransparent="1"
+                        bgTransparent={true}
                         style="view-transition-name: extension_button_{account.id}"
                     />
                 {/if}

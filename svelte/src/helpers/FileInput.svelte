@@ -1,11 +1,16 @@
-<script>
+<script lang="ts">
     import Button from './Button.svelte'
 
-    let filedata = null
-    let filename = $state(null)
-    let fileInput = null
+    interface Props {
+        onremoved: () => void
+        onuploaded: (data: ArrayBuffer) => void
+    }
 
-    let { onremoved, onuploaded } = $props()
+    let filedata: ArrayBuffer | undefined
+    let filename = $state<string | undefined>()
+    let fileInput: HTMLInputElement | undefined
+
+    let { onremoved, onuploaded }: Props = $props()
 
     let truncatedFilename = $derived(
         !filename || filename.length <= 18
@@ -13,10 +18,10 @@
             : filename.substr(0, 15) + '...'
     )
 
-    async function onFileUploaded(event) {
-        const target = event.target
+    async function onFileUploaded(event: Event) {
+        const target = event.target as HTMLInputElement | null
 
-        const file = target.files && target.files.length && target.files[0]
+        const file = target?.files && target.files.length && target.files[0]
         if (!file) {
             filename = null
             filedata = null

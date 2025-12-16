@@ -1,23 +1,34 @@
-<script>
+<script lang="ts">
     import TextInput from '../../helpers/TextInput.svelte'
     import Icon from '../Icon.svelte'
     import IconButton from '../IconButton.svelte'
     import Button from '../Button.svelte'
     import Dialog from '../../helpers/Dialog.svelte'
 
-    let { type = $bindable('text'), label = $bindable(''), onremove } = $props()
+    interface Props {
+        type?: string
+        label?: string
+        onremove?: () => void
+    }
+
+    let {
+        type = $bindable('text'),
+        label = $bindable(''),
+        onremove,
+    }: Props = $props()
 
     let fieldNameDialogOpen = $state(false)
     let deleteConfirmation = $state(false)
 
     function onDelete() {
-        onremove()
+        onremove?.()
         deleteConfirmation = false
     }
 
-    function onKeyPressFieldLabel(e) {
+    function onKeyPressFieldLabel(e: KeyboardEvent | Event) {
         if (!e) e = window.event
-        if ((e.keyCode || e.which) == 13) {
+        const keyEvent = e as KeyboardEvent
+        if ((keyEvent.keyCode || keyEvent.which) == 13) {
             // Press enter
             fieldNameDialogOpen = false
             return false

@@ -1,12 +1,25 @@
-<script>
+<script lang="ts">
     import Icon from './Icon.svelte'
-    import { createRipple } from './ripple.js'
+    import { createRipple } from './ripple.ts'
+
+    interface Props {
+        variant?: string
+        color?: string
+        disabled?: boolean
+        icon?: string
+        style?: string
+        ripple?: boolean
+        class?: string
+        title?: string
+        onclick: (event: MouseEvent) => void
+        children?: () => any
+    }
 
     let {
-        variant = false,
+        variant = '',
         color = 'primary',
         disabled = false,
-        icon = false,
+        icon = '',
         style = '',
         ripple = true,
 
@@ -14,16 +27,16 @@
         title = '',
         onclick,
         children,
-    } = $props()
+    }: Props = $props()
 
     let _variant = $derived(variant || 'standard')
     let iconColor = $derived(_variant === 'standard' ? `on-${color}` : color)
 
-    function onClick(event) {
+    function onClick(event: MouseEvent) {
         if (disabled) {
             return
         }
-        onclick()
+        onclick(event)
     }
 </script>
 
@@ -61,7 +74,7 @@
         font-weight: 500;
         letter-spacing: 0.08929em;
         line-height: 2.25rem;
-        -webkit-appearance: none;
+        appearance: none;
         border: none;
         border-radius: 4px;
         box-sizing: border-box;

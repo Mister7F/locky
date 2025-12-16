@@ -1,11 +1,21 @@
-<script>
+<script lang="ts">
     import ListItem from '../../helpers/ListItem.svelte'
     import IconButton from '../../helpers/IconButton.svelte'
-    import * as api from '../api.js'
+    import * as api from '../api.ts'
     import Icon from '../../helpers/Icon.svelte'
     import Sortablegrid from '../../helpers/Sortablegrid.svelte'
     import EditFolder from './EditFolder.svelte'
     import Folder from './Folder.svelte'
+    import FolderType from '../../models/folder.ts'
+    import Wallet from '../../models/wallet.ts'
+
+    interface Props {
+        wallet?: Wallet
+        currentFolderId?: string
+        visible?: boolean
+        floating?: boolean
+        onchange: () => void
+    }
 
     let {
         wallet = $bindable(),
@@ -13,33 +23,41 @@
         visible = $bindable(true),
         floating = false,
         onchange,
-    } = $props()
+    }: Props = $props()
 
-    let folderDialog
+    let folderDialog: EditFolder | null = null
 
-    async function onEditFolder(folder) {
-        folderDialog.editFolder(folder)
+    async function onEditFolder(folder: FolderType) {
+        folderDialog?.editFolder(folder)
     }
-    async function onDeleteFolder(folder) {
+    async function onDeleteFolder(folder: FolderType) {
         wallet = await api.deleteFolder(folder)
     }
-    async function onSaveFolder(folder) {
+    async function onSaveFolder(folder: FolderType) {
         wallet = await api.updateFolder(folder)
     }
     async function onNewFolder() {
-        folderDialog.editFolder({ icon: null, name: '' })
+        folderDialog.editFolder(new FolderType())
     }
-    async function onMoveFolder(event) {
+    async function onMoveFolder(event: {
+        from: number
+        to: number
+        fromItem: FolderType
+        destItem: FolderType
+    }) {
         wallet = await api.moveFolder(event.fromItem, event.to)
     }
 
-    function setFolder(folderId) {
+    function setFolder(folderId: string) {
         currentFolderId = folderId
         onchange()
         if (floating) {
             visible = false
         }
     }
+
+    const ALL_FOLDER = FolderType.fromJson({ name: 'All', icon: 'home' })
+    ALL_FOLDER.id = ''
 </script>
 
 {#if visible && floating}
@@ -66,9 +84,9 @@
         />
         {#if wallet['folders']}
             <Folder
-                folder={{ id: 0, name: 'All', icon: 'home' }}
-                selected={currentFolderId === 0}
-                onclick={() => setFolder(0)}
+                folder={ALL_FOLDER}
+                selected={currentFolderId === ''}
+                onclick={() => setFolder('')}
                 edit={false}
             />
             <Sortablegrid

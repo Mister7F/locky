@@ -1,21 +1,31 @@
-<script>
+<script lang="ts">
     import Fab from '../helpers/Fab.svelte'
     import Audit from './Audit.svelte'
     import AccountCard from './AccountCard.svelte'
     import AccountEditor from './editor/AccountEditor.svelte'
-    import * as api from './api.js'
-    import { cleanSearchValue } from '../helpers/utils.js'
+    import * as api from './api.ts'
+    import { cleanSearchValue } from '../helpers/utils.ts'
     import Folders from './folders/Folders.svelte'
     import Navbar from './navbar/Navbar.svelte'
     import Sidepanel from '../helpers/Sidepanel.svelte'
     import Sortablegrid from '../helpers/Sortablegrid.svelte'
+    import Account from '../models/account.ts'
+
+    import Wallet from '../models/wallet.ts'
+
+    interface Props {
+        wallet?: Wallet
+        searchText?: string
+        onlock: () => void
+        onnotify: (message: string) => void
+    }
 
     let {
-        wallet = $bindable(null),
+        wallet = $bindable(),
         searchText = $bindable(''),
         onlock,
         onnotify,
-    } = $props()
+    }: Props = $props()
 
     // accounts displayed in the UI
     // care about the search, the current directory, etc
@@ -26,12 +36,13 @@
 
             ret = wallet.accounts.filter((account) => {
                 if (searchText.length) {
-                    return [account.name, account.url].some(
-                        (value) =>
+                    return [account.name, account.url].some((value: string) => {
+                        return (
                             cleanSearchValue(value).indexOf(
                                 cleanSearchValue(searchText)
                             ) >= 0
-                    )
+                        )
+                    })
                 }
                 if (currentFolderId === 'no_folder') {
                     return !folderIds.includes(account.folder_id)
@@ -43,10 +54,10 @@
         }
         return ret
     })
-    let currentFolderId = $state(0)
+    let currentFolderId = $state<string>('')
 
     // Account edition
-    let accountEdited = $state(null)
+    let accountEdited: Account | undefined = $state()
     let accountEditorReadonly = $state(false)
     let editedAccountIndex = $state(null)
 
@@ -68,24 +79,30 @@
     // Accounts audit
     let auditVisible = $derived(currentFolderId === 'security')
 
-    async function onMoveAccount(event) {
+    async function onMoveAccount(event: {
+        from: number
+        to: number
+        fromItem: Account
+        destItem: Account
+    }) {
         // from / to are the index on the filtered array (based on search)
         wallet = await api.moveAccount(event.fromItem, event.destItem)
     }
-    function editAccount(account) {
+    function editAccount(account: Account) {
         editedAccountIndex = wallet.accounts.findIndex(
             (a) => a.id === account.id
         )
         // Deep copy, to not change the account before saving
-        accountEdited = JSON.parse(JSON.stringify(account))
+        accountEdited = Account.fromJson(JSON.parse(JSON.stringify(account)))
         accountEditorReadonly = true
     }
     function onNewAccount() {
         editedAccountIndex = null
-        accountEdited = { icon: 'img/accounts/default.svg' }
+        accountEdited = Account.fromJson({ icon: 'img/accounts/default.svg' })
+
         accountEditorReadonly = false
     }
-    async function onSaveAccount(account) {
+    async function onSaveAccount(account: Account) {
         if (editedAccountIndex !== null) {
             wallet = await api.updateAccount(account)
         } else {
@@ -96,13 +113,16 @@
         }
     }
     async function onRemoveAccount() {
-        accountEdited = null
+        accountEdited = undefined
         if (editedAccountIndex !== null) {
             wallet = await api.removeAccount(editedAccountIndex)
             editedAccountIndex = null
         }
     }
-    async function onAccountAction(event) {
+    async function onAccountAction(event: {
+        action: HTMLElement
+        item: Account
+    }) {
         const actionElement = event.action
         if (actionElement.id && actionElement.id.startsWith('item_folder_')) {
             const folderId = actionElement.id.split('item_folder_')[1]
@@ -113,14 +133,17 @@
     }
 </script>
 
-<Sidepanel visible={!!accountEdited} onclose={() => (accountEdited = null)}>
+<Sidepanel
+    visible={!!accountEdited}
+    onclose={() => (accountEdited = undefined)}
+>
     {#if accountEdited}
         <AccountEditor
             account={accountEdited}
             readonly={accountEditorReadonly}
             onsave={onSaveAccount}
             onremove={onRemoveAccount}
-            onclose={() => (accountEdited = null)}
+            onclose={() => (accountEdited = undefined)}
         />
     {/if}
 </Sidepanel>
@@ -152,7 +175,7 @@
             onmove={onMoveAccount}
             onaction={onAccountAction}
             onmove_blocked={() =>
-                onNotify('Can not move accounts in this folder')}
+                onnotify('Can not move accounts in this folder')}
             items={accounts}
             bind:dragging
             customActions={folderDomIds}

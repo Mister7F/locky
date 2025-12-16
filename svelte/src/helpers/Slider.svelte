@@ -1,7 +1,14 @@
-<script>
+<script lang="ts">
     // Modified from:
     // https://codepen.io/manikantag/pen/rZpNXm
-    let { min, max, value = $bindable(), onchange = null } = $props()
+    interface Props {
+        min: number
+        max: number
+        value?: number
+        onchange?: (event: Event) => void
+    }
+
+    let { min, max, value = $bindable(), onchange }: Props = $props()
 </script>
 
 <div class="slider">
@@ -20,6 +27,7 @@
     input {
         position: relative;
         display: block;
+        appearance: none;
         -webkit-appearance: none;
         margin: 0;
         width: 100%;

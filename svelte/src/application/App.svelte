@@ -1,21 +1,22 @@
-<script>
-    import * as api from './api.js'
-    import * as dropbox from './dropbox/dropbox.js'
+<script lang="ts">
+    import * as api from './api.ts'
+    import * as dropbox from './dropbox/dropbox.ts'
     import Login from './login/Login.svelte'
     import Wallet from './Wallet.svelte'
     import IconButton from '../helpers/IconButton.svelte'
     import WebExtension from '../helpers/WebExtension.svelte'
-    import WebExtensionStore from '../helpers/web_extension.svelte.js'
+    import WebExtensionStore from '../helpers/web_extension.svelte.ts'
+    import type { SvelteComponent } from 'svelte'
     import {
         walletOpened,
         savePassword,
-    } from '../helpers/web_extension.svelte.js'
+    } from '../helpers/web_extension.svelte.ts'
 
     let locked = $state(true)
-    let walletElement = $state(null)
+    let walletElement: SvelteComponent = $state()
     let wallet = $state(null)
 
-    let searchText = $state('')
+    let searchText: string = $state('')
 
     async function lock() {
         await api.logout(true)
@@ -23,19 +24,22 @@
         savePassword('', null)
     }
 
-    let snackbarText = $state('')
-    let snackbarTimeout
-    function onnotify(text) {
+    let snackbarText: string = $state('')
+    let snackbarTimeout: number | undefined
+    function onnotify(text: string) {
         clearTimeout(snackbarTimeout)
         snackbarText = text
         snackbarTimeout = setTimeout(() => {
             snackbarText = ''
         }, 1000)
     }
+    function onHideNotification() {
+        snackbarText = ''
+    }
 
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', async () => {
-            // await navigator.serviceWorker.register('sw.js')
+            await navigator.serviceWorker.register('sw.js')
         })
     } else {
         console.error('Service Worker will not work')
@@ -73,7 +77,7 @@
 {#if snackbarText}
     <div class="notification">
         <span>{snackbarText}</span>
-        <IconButton icon="close" onclick={() => (snackbarText = '')} />
+        <IconButton icon="close" onclick={onHideNotification} />
     </div>
 {/if}
 

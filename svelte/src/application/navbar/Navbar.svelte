@@ -1,13 +1,22 @@
-<script>
+<script lang="ts">
     import IconButton from '../../helpers/IconButton.svelte'
     import { onMount } from 'svelte'
     import ChangePassword from './ChangePassword.svelte'
     import Settings from './Settings.svelte'
-    import * as api from '../api.js'
+    import * as api from '../api.ts'
     import Field from '../../helpers/field/Field.svelte'
     import Icon from '../../helpers/Icon.svelte'
     import DropboxUpload from './../dropbox/DropboxUpload.svelte'
-    import * as dropbox from './../dropbox/dropbox.js'
+    import * as dropbox from './../dropbox/dropbox.ts'
+
+    interface Props {
+        viewMode: string
+        floatingFolder: boolean
+        searchText: string
+        openSearch: boolean
+        onshow_folders: () => void
+        onlock: () => void
+    }
 
     let {
         viewMode = $bindable('list'),
@@ -16,7 +25,7 @@
         openSearch = false,
         onshow_folders,
         onlock,
-    } = $props()
+    }: Props = $props()
 
     let changePassword
     let isDropboxAuthenticated = $state(false)
@@ -32,16 +41,18 @@
     )
 
     function changeViewMode() {
-        if (!document.startViewTransition) {
-            console.warn('Transition not available')
-            document.startViewTransition = (f) => f()
-        }
-        document.startViewTransition(() => {
+        const _changeViewMode = () => {
             const nextModeIndex =
                 (viewModes.indexOf(viewMode) + 1) % viewModes.length
             viewMode = viewModes[nextModeIndex]
             window.localStorage.setItem('viewMode', viewMode)
-        })
+        }
+        if (!document.startViewTransition) {
+            console.warn('Transition not available')
+            _changeViewMode()
+        } else {
+            document.startViewTransition(() => _changeViewMode())
+        }
     }
 
     onMount(() => {
@@ -52,10 +63,13 @@
             if (
                 topElement &&
                 topElement.classList.contains('wallet-navbar') &&
+                event.target instanceof HTMLElement &&
                 event.target.tagName !== 'INPUT'
             ) {
                 openSearch = true
-                const input = document.querySelector('.search_field input')
+                const input = document.querySelector<HTMLInputElement>(
+                    '.search_field input'
+                )
                 if (input !== document.activeElement) {
                     setTimeout(() => {
                         input.focus()
@@ -79,13 +93,15 @@
             title="Search an account"
             icon="search"
             onclick={() => {
-                document.querySelector('.search_field input').focus()
+                document
+                    .querySelector<HTMLInputElement>('.search_field input')
+                    .focus()
                 openSearch = !openSearch
             }}
         />
         <Field
             class="search_field {openSearch || searchText ? 'visible' : ''}"
-            copy="0"
+            copy={false}
             onblur={() => (openSearch = !!searchText)}
             bind:value={searchText}
         />

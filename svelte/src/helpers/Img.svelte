@@ -1,16 +1,25 @@
-<script>
+<script lang="ts">
+    interface Props {
+        src?: string
+        alt?: string
+        class?: string
+        style?: string
+        noimageSet?: boolean
+    }
+
     let {
-        src = null,
-        alt = null,
+        src = '',
+        alt = '',
         class: className = '',
         style = '',
         noimageSet = false,
-    } = $props()
+    }: Props = $props()
 
-    function onError(event) {
-        if (event.target.src !== 'img/noimage.svg' && !noimageSet) {
+    function onError(event: Event) {
+        const target = event.target as HTMLImageElement | null
+        if (target?.src !== 'img/noimage.svg' && !noimageSet) {
             noimageSet = true
-            event.target.src = 'img/noimage.svg'
+            target.src = 'img/noimage.svg'
         }
     }
 </script>

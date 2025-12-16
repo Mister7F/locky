@@ -1,10 +1,14 @@
-<script>
+<script lang="ts">
     import Slider from '../../helpers/Slider.svelte'
     import Dialog from '../../helpers/Dialog.svelte'
     import Button from '../../helpers/Button.svelte'
     import Icon from '../../helpers/Icon.svelte'
 
-    let { onuse } = $props()
+    interface Props {
+        onuse: (password: string) => void
+    }
+
+    let { onuse }: Props = $props()
 
     function generate() {
         let password = ''

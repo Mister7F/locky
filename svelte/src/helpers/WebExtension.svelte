@@ -1,8 +1,8 @@
-<script>
+<script lang="ts">
     import Dialog from './Dialog.svelte'
     import Button from './Button.svelte'
-    import WebExtension from './web_extension.svelte.js'
-    import { eventBus } from './web_extension.svelte.js'
+    import WebExtension from './web_extension.svelte.ts'
+    import { eventBus } from './web_extension.svelte.ts'
 
     import {
         fromHex,
@@ -12,22 +12,30 @@
         toBytes,
         copyValue,
         cleanSearchValue,
-    } from './utils.js'
-    import { encryptAES, decryptAES, getTotpCode } from './crypto.js'
-    import * as api from '../application/api.js'
-    import { normalizeHost } from '../helpers/utils.js'
+    } from './utils.ts'
+    import { encryptAES, decryptAES, getTotpCode } from './crypto.ts'
+    import Wallet from '../models/wallet.ts'
+    import * as api from '../application/api.ts'
+    import { normalizeHost } from '../helpers/utils.ts'
     import { untrack, onMount, onDestroy } from 'svelte'
 
     let pluginKey = null
     let pluginOrigin = null
 
+    interface Props {
+        wallet: Wallet
+        searchText?: string
+        locked?: boolean
+        onnotify: (message: string) => void
+    }
+
     let {
-        wallet = $bindable({}),
+        wallet = $bindable({} as Wallet),
         searchText = $bindable(''),
         locked = $bindable(false),
 
         onnotify,
-    } = $props()
+    }: Props = $props()
 
     let currentTabHost = $state(null)
 
@@ -86,7 +94,10 @@
             let ok = false
             let inExtension = false
             const newPluginKeyHash = hex(
-                await crypto.subtle.digest('SHA-256', newPluginKey)
+                await crypto.subtle.digest(
+                    'SHA-256',
+                    newPluginKey as BufferSource
+                )
             )
             const existingPluginKeyHash = localStorage.getItem('pluginKeyHash')
             const existingPluginOrigin = localStorage.getItem('pluginOrigin')
@@ -263,7 +274,7 @@
     /**
      * Send the encrypted account credentials to the Web Extension popup.
      */
-    async function _sendCredentials() {
+    async function _sendCredentials(): Promise<string> {
         if (account.totp) {
             copyValue(getTotpCode(account.totp))
         }
@@ -310,7 +321,7 @@
     /**
      * Key used to store the master password in the Web Extension session storage.
      */
-    function getMasterPasswordKey(regenerate) {
+    function getMasterPasswordKey(regenerate: boolean = false) {
         if (!localStorage.getItem('masterPasswordKey')?.length || regenerate) {
             localStorage.setItem('masterPasswordKey', hex(generateToken(32)))
         }
@@ -332,7 +343,9 @@
         return true
     }
 
-    $effect(initiateWebExtention)
+    $effect(() => {
+        initiateWebExtention()
+    })
 </script>
 
 <Dialog bind:open={confirmationDialogOpen} title="Are you sure ?">

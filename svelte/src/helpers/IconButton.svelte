@@ -1,34 +1,48 @@
-<script>
-    import { createRipple } from './ripple.js'
-    import { isUrlValid } from '../helpers/utils.js'
+<script lang="ts">
+    import { createRipple } from './ripple.ts'
+    import { isUrlValid } from '../helpers/utils.ts'
     import Icon from './Icon.svelte'
 
+    interface Props {
+        title?: string
+        class?: string
+        style?: string
+        color?: string
+        bgColor?: string
+        bgTransparent?: boolean
+        href?: string
+        icon?: string
+        onclick?: (event: MouseEvent) => void
+        onblur?: () => void
+        children?: () => any
+    }
+
     let {
-        title = '',
-        class: className = '',
-        style = '',
+        title,
+        class: className,
+        style,
         color = 'on-primary',
-        bgColor = false,
-        bgTransparent = false,
-        href = null,
-        icon = false,
+        bgColor,
+        bgTransparent,
+        href,
+        icon,
         onclick,
         onblur,
         children,
-    } = $props()
+    }: Props = $props()
 
     let backgroundColor = $derived(
         bgColor ||
             (color.includes('on') ? color.replace('on-', '') : `on-${color}`)
     )
 
-    function onClick(event) {
+    function onClick(event: MouseEvent) {
         event.stopPropagation()
         event.preventDefault()
         if (isUrlValid(href)) {
             window.open(href)
         }
-        onclick(event)
+        onclick?.(event)
     }
 </script>
 

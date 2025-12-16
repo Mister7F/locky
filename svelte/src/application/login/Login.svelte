@@ -1,26 +1,32 @@
-<script>
+<script lang="ts">
     import Icon from '../../helpers/Icon.svelte'
-    import * as dropbox from '../dropbox/dropbox.js'
-    import * as api from '../api.js'
+    import * as dropbox from '../dropbox/dropbox.ts'
+    import * as api from '../api.ts'
     import Field from '../../helpers/field/Field.svelte'
     import Button from '../../helpers/Button.svelte'
     import { onMount } from 'svelte'
-    import { getCookie } from '../../helpers/utils.js'
+    import { getCookie } from '../../helpers/utils.ts'
     import FileInput from '../../helpers/FileInput.svelte'
     import DropboxLogin from '../dropbox/DropboxLogin.svelte'
     import ChooseMethod from './ChooseMethod.svelte'
     import DropboxUpload from './../dropbox/DropboxUpload.svelte'
+    import Wallet from '../../models/wallet.ts'
 
     const maxLen = 8
-    let { wallet = $bindable(null), onwallet_openned } = $props()
+    interface Props {
+        wallet?: Wallet
+        onwallet_openned: () => void
+    }
+
+    let { wallet = $bindable(), onwallet_openned }: Props = $props()
 
     const allowed_methods = ['login', 'create', 'upload', 'dropbox', null]
-    let method = $state(null)
+    let method = $state<string | undefined>()
     let showOptions = $state(false)
     let sessionOpened = $state(false)
 
-    let filedata = $state(null) // File uploaded
-    let dropboxFile = null
+    let filedata = $state<ArrayBuffer | undefined>() // File uploaded
+    let dropboxFile: ArrayBuffer | undefined
     let dropboxState = $state('')
     let loading = $state(false)
 
@@ -111,8 +117,9 @@
         }
     }
 
-    $effect(async () => {
-        sessionOpened = await api.walletInMemory()
+    const init = async () => {
+        const inMemory = await api.walletInMemory()
+        sessionOpened = !!inMemory
         showOptions = !sessionOpened
 
         if (sessionOpened) {
@@ -129,6 +136,10 @@
             method = cookieMethod
             showOptions = false
         }
+    }
+
+    $effect(() => {
+        init()
     })
 </script>
 
@@ -169,7 +180,7 @@
             {#if method === 'upload'}
                 <FileInput
                     onuploaded={(file) => (filedata = file)}
-                    onremoved={(_) => (filedata = null)}
+                    onremoved={() => (filedata = null)}
                 />
             {:else if method === 'dropbox'}
                 <DropboxLogin
@@ -189,7 +200,7 @@
                 oninput={() => (wrongPassword = false)}
                 type="password"
                 showPasswordStrength={method === 'create'}
-                copy="0"
+                copy={false}
             />
 
             <Button
@@ -301,7 +312,7 @@
         margin-bottom: 30px !important;
     }
 
-    @-webkit-keyframes rotating {
+    @keyframes rotating {
         from {
             -webkit-transform: rotate(0deg);
         }
@@ -313,7 +324,7 @@
     .lock :global(.login-loading) {
         font-size: 18px;
         margin-right: 8px;
-        -webkit-animation: rotating 2s linear infinite;
+        animation: rotating 2s linear infinite;
     }
 
     .dropbox_button {

@@ -1,35 +1,59 @@
-<script>
+<script lang="ts">
     import Button from '../../helpers/Button.svelte'
     import IconButton from '../../helpers/IconButton.svelte'
     import Fab from '../../helpers/Fab.svelte'
+    import Account from '../../models/account.ts'
+    import { Field as FieldType } from '../../models/account.ts'
 
     import Field from '../../helpers/field/Field.svelte'
-    import { copyValue } from '../../helpers/utils.js'
-    import { getTotpCode } from '../../helpers/crypto.js'
+    import { copyValue } from '../../helpers/utils.ts'
+    import { getTotpCode } from '../../helpers/crypto.ts'
     import Icon from '../../helpers/Icon.svelte'
     import ImagePicker from './ImagePicker.svelte'
     import DialogTotpQrCode from './DialogTotpQrCode.svelte'
     import DialogRemoveAccount from './DialogRemoveAccount.svelte'
     import GeneratePassword from './GeneratePassword.svelte'
 
-    let { onsave, onclose, onremove, account, readonly = 0 } = $props()
+    interface Props {
+        account: Account
+        readonly?: boolean
+        onclose: () => void
+        onremove: () => void
+        onsave: (account: Account) => void
+    }
 
-    let qrCodeDialog = $state()
-    let removeAccountDialog = $state()
-    let generatePasswordDialog = $state()
+    let {
+        onsave,
+        onclose,
+        onremove,
+        account,
+        readonly = false,
+    }: Props = $props()
+
+    // Svelte does not track class reactivity
+    let accountDraft = $state(JSON.parse(JSON.stringify(account)))
+    $effect(() => {
+        accountDraft = JSON.parse(JSON.stringify(account))
+    })
+
+    let qrCodeDialog = $state<DialogTotpQrCode | undefined>()
+    let removeAccountDialog = $state<DialogRemoveAccount | undefined>()
+    let generatePasswordDialog = $state<GeneratePassword | undefined>()
 
     // TOTP
     let totpCode = $state(null)
     let time = $state(30)
-    let totpTimeoutHandle = null
+    let totpTimeoutHandle: number | undefined
 
     let totpMessage = $derived(makeTotpMessage(totpCode, time))
 
-    $effect(updateTotp)
+    $effect(() => {
+        void updateTotp()
+    })
 
     let iconSrcs = $state([])
 
-    function makeTotpMessage(totp, time) {
+    function makeTotpMessage(totp: string | null, time: number): string {
         if (!totp) {
             return ''
         }
@@ -39,12 +63,14 @@
 
     async function updateTotp() {
         // Cancel previous call
-        clearTimeout(totpTimeoutHandle)
+        if (totpTimeoutHandle) {
+            clearTimeout(totpTimeoutHandle)
+        }
         if (!account) {
             return
         }
-        if (account.totp && account.totp.length) {
-            totpCode = await getTotpCode(account.totp)
+        if (accountDraft.totp && accountDraft.totp.length) {
+            totpCode = await getTotpCode(accountDraft.totp)
         }
         const timestamp = Math.floor(Date.now() / 1000)
         time = 30 - (timestamp % 30)
@@ -52,26 +78,26 @@
     }
 
     function removeField(fieldIndex) {
-        account.fields.splice(fieldIndex, 1)
-        account.fields = account.fields
+        accountDraft.fields.splice(fieldIndex, 1)
+        accountDraft.fields = accountDraft.fields
     }
 
-    function onEdit(accountEdited) {
+    function onEdit(accountEdited?: Account) {
         readonly = false
         totpCode = null
     }
 
     function onSave() {
-        onsave(account)
+        onsave(Account.fromJson(accountDraft))
         readonly = true
         totpCode = null
     }
 
     function onNewField() {
-        if (!account.fields) {
-            account.fields = []
+        if (!accountDraft.fields) {
+            accountDraft.fields = []
         }
-        account.fields = account.fields.concat({
+        accountDraft.fields = accountDraft.fields.concat({
             name: 'Field',
             type: 'text',
             value: '',
@@ -83,11 +109,12 @@
 
     function onFindImage() {
         if (
-            (!account.icon || account.icon === 'img/accounts/default.svg') &&
+            (!accountDraft.icon ||
+                accountDraft.icon === 'img/accounts/default.svg') &&
             iconSrcs &&
-            account.icon.length > 4
+            (accountDraft.icon?.length || 0) > 4
         ) {
-            const accountName = account.name
+            const accountName = (accountDraft.name || '')
                 .toLowerCase()
                 .replace(/[_\s-]/g, '')
             const findIcon = iconSrcs.find(
@@ -98,7 +125,7 @@
                         .indexOf(accountName) >= 0
             )
             if (findIcon) {
-                account.icon = findIcon
+                accountDraft.icon = findIcon
             }
         }
     }
@@ -113,65 +140,65 @@
     />
     <div class="fields">
         <ImagePicker
-            bind:src={account.icon}
+            bind:src={accountDraft.icon}
             {readonly}
             size="100px"
             bind:srcs={iconSrcs}
-            transitionName="image_{account.id}"
+            transitionName="image_{accountDraft.id}"
         />
 
         <Field
             label="Name"
-            bind:value={account.name}
+            bind:value={accountDraft.name}
             {readonly}
-            copy="0"
+            copy={false}
             onblur={onFindImage}
         />
         <Field
             label="Login"
-            bind:value={account.login}
+            bind:value={accountDraft.login}
             {readonly}
-            oncopy={() => copyValue(account.login)}
+            oncopy={() => copyValue(accountDraft.login)}
         />
         <Field
             label="Password"
-            bind:value={account.password}
+            bind:value={accountDraft.password}
             {readonly}
             type="password"
-            showPasswordStrength="1"
-            oncopy={() => copyValue(account.password)}
-            showGeneratePassword="1"
+            showPasswordStrength={true}
+            oncopy={() => copyValue(accountDraft.password)}
+            showGeneratePassword={true}
         />
         <Field
             label="URL"
-            bind:value={account.url}
+            bind:value={accountDraft.url}
             {readonly}
             type="url"
-            oncopy={() => copyValue(account.url)}
+            oncopy={() => copyValue(accountDraft.url)}
         />
         <Field
             label="2FA"
-            bind:value={account.totp}
+            bind:value={accountDraft.totp}
             {readonly}
             type="totp"
             message={totpMessage}
-            messagePersistent="1"
-            onshow_qrcode={() => qrCodeDialog.open()}
+            messagePersistent={true}
+            onshow_qrcode={() => qrCodeDialog?.open()}
             onchange={updateTotp}
-            oncopy={async () => copyValue(getTotpCode(account.totp))}
+            oncopy={async () => copyValue(getTotpCode(accountDraft.totp))}
         />
 
-        {#each account.fields || [] as field, i}
+        {#each accountDraft.fields as field, i}
             <Field
                 bind:label={field.name}
                 bind:value={field.value}
                 {readonly}
                 bind:type={field.type}
                 index={i}
-                canEditType="1"
+                canEditType={true}
                 onremove={() => removeField(i)}
                 oncopy={() => copyValue(field.value)}
-                showGeneratePassword="1"
+                showGeneratePassword={true}
             />
         {/each}
 
@@ -186,7 +213,7 @@
         <Fab
             class="remove_account"
             color="on-primary"
-            onclick={() => removeAccountDialog.open()}
+            onclick={() => removeAccountDialog?.open()}
             icon="delete"
         />
     {/if}
@@ -198,9 +225,12 @@
     />
 </div>
 
-<DialogTotpQrCode {account} bind:this={qrCodeDialog} />
+<DialogTotpQrCode
+    account={Account.fromJson(accountDraft)}
+    bind:this={qrCodeDialog}
+/>
 
-<DialogRemoveAccount bind:this={removeAccountDialog} {account} {onremove} />
+<DialogRemoveAccount bind:this={removeAccountDialog} {onremove} />
 
 <style>
     .account {

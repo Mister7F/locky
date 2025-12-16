@@ -1,8 +1,21 @@
-<script>
-    let { title, open = $bindable(false), children, actions } = $props()
+<script lang="ts">
+    interface Props {
+        title?: string
+        open?: boolean
+        children?: () => any
+        actions?: () => any
+    }
 
-    function onClose(event) {
-        if (event.target.classList.contains('background')) {
+    let {
+        title = '',
+        open = $bindable(false),
+        children,
+        actions,
+    }: Props = $props()
+
+    function onClose(event: MouseEvent) {
+        const target = event.target as HTMLElement
+        if (target?.classList.contains('background')) {
             open = false
         }
     }

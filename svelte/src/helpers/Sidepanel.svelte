@@ -1,5 +1,15 @@
-<script>
-    let { visible = $bindable(false), onclose = null, children } = $props()
+<script lang="ts">
+    interface Props {
+        visible?: boolean
+        onclose?: () => any
+        children: () => any
+    }
+
+    let {
+        visible = $bindable(false),
+        onclose = null,
+        children,
+    }: Props = $props()
 
     function onClose() {
         visible = false

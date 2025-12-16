@@ -1,18 +1,28 @@
-<script>
-    import { createRipple } from './ripple.js'
+<script lang="ts">
+    import { createRipple } from './ripple.ts'
 
     import IconButton from './IconButton.svelte'
     import Icon from './Icon.svelte'
 
+    interface Props {
+        icon?: string
+        name?: string
+        id?: string
+        edit?: boolean
+        selected?: boolean
+        onedit?: () => void
+        onclick: (event: MouseEvent) => void
+    }
+
     let {
         icon,
         name,
-        id = null,
+        id,
         edit = false,
         selected,
         onedit,
         onclick,
-    } = $props()
+    }: Props = $props()
 </script>
 
 <div
@@ -30,7 +40,7 @@
             icon="create"
             color="on-surface"
             onclick={onedit}
-            bgTransparent="1"
+            bgTransparent={true}
         />
     {/if}
 </div>

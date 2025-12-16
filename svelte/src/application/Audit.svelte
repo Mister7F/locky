@@ -4,16 +4,23 @@
 
     See https://haveibeenpwned.com/API/v3#SearchingPwnedPasswordsByRange
  -->
-<script>
+<script lang="ts">
     import Button from '../helpers/Button.svelte'
     import AccountCard from './AccountCard.svelte'
     import Icon from '../helpers/Icon.svelte'
-
-    import { digest, passwordStrength } from '../helpers/crypto.js'
+    import zxcvbn from 'zxcvbn'
+    import { digest, passwordStrength } from '../helpers/crypto.ts'
+    import Account from '../models/account.ts'
+    import Wallet from '../models/wallet.ts'
 
     const url = 'https://api.pwnedpasswords.com/range/'
 
-    let { wallet, onedit } = $props()
+    interface Props {
+        wallet: Wallet
+        onedit: (account: Account) => void
+    }
+
+    let { wallet, onedit }: Props = $props()
 
     let loading = $state(false)
     let leakedAccountsIndex = $state([])
@@ -63,7 +70,7 @@
 
             if (
                 wallet.accounts[i].password?.length &&
-                passwordStrength(wallet.accounts[i].password) < 90
+                passwordStrength(wallet.accounts[i].password).strength < 90
             ) {
                 weakAccountsIndex.push(i)
             }
@@ -113,7 +120,7 @@
         </span>
         <div class="container">
             {#each leakedAccountsIndex as accountIndex, index}
-                <div {index}>
+                <div>
                     <AccountCard
                         account={wallet.accounts[accountIndex]}
                         onclick={() => onedit(wallet.accounts[accountIndex])}
@@ -132,7 +139,7 @@
         </span>
         <div class="container">
             {#each weakAccountsIndex as accountIndex, index}
-                <div {index}>
+                <div>
                     <AccountCard
                         account={wallet.accounts[accountIndex]}
                         onclick={() => onedit(wallet.accounts[accountIndex])}
@@ -149,7 +156,7 @@
         </span>
         <div class="container">
             {#each duplicatedIndex as accountIndex, index}
-                <div {index}>
+                <div>
                     <AccountCard
                         account={wallet.accounts[accountIndex]}
                         onclick={() => onedit(wallet.accounts[accountIndex])}
@@ -195,7 +202,7 @@
         height: auto;
     }
 
-    @-webkit-keyframes rotating {
+    @keyframes rotating {
         from {
             -webkit-transform: rotate(0deg);
         }
@@ -204,6 +211,6 @@
         }
     }
     .audit :global(.audit-loading .icon_base) {
-        -webkit-animation: rotating 2s linear infinite;
+        animation: rotating 2s linear infinite;
     }
 </style>

@@ -1,7 +1,7 @@
-<script>
+<script lang="ts">
     import Dialog from '../../helpers/Dialog.svelte'
     import Button from '../../helpers/Button.svelte'
-    import * as api from '../api.js'
+    import * as api from '../api.ts'
     import Field from '../../helpers/field/Field.svelte'
 
     let oldPassword = $state('')
@@ -34,21 +34,21 @@
         label="Old password"
         type="password"
         bind:value={oldPassword}
-        copy="0"
+        copy={false}
     />
     <Field
         label="New password"
         type="password"
         bind:value={newPassword}
-        copy="0"
-        showPasswordStrength="1"
+        copy={false}
+        showPasswordStrength={true}
     />
     <Field
         label="Confirm"
         type="password"
         bind:value={confirmPassword}
-        copy="0"
-        showPasswordStrength="1"
+        copy={false}
+        showPasswordStrength={true}
     />
     <div class="action">
         <Button

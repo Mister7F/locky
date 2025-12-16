@@ -1,9 +1,14 @@
-<script>
+<script lang="ts">
     import Switch from '../../helpers/Switch.svelte'
     import Dialog from '../../helpers/Dialog.svelte'
     import IconButton from '../IconButton.svelte'
+    import zxcvbn from 'zxcvbn'
 
-    let { strengthResult } = $props()
+    interface Props {
+        strengthResult: zxcvbn.ZXCVBNResult
+    }
+
+    let { strengthResult }: Props = $props()
 
     let detailDialogOpen = $state(false)
     let visible = $state(false)

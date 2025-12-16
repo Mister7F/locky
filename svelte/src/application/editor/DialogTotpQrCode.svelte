@@ -1,9 +1,14 @@
-<script>
+<script lang="ts">
     import Button from '../../helpers/Button.svelte'
     import Dialog from '../../helpers/Dialog.svelte'
+    import Account from '../../models/account.ts'
     import QRious from 'qrious'
 
-    let { account } = $props()
+    interface Props {
+        account: Account
+    }
+
+    let { account }: Props = $props()
 
     let qrCodeDialogOpen = $state(false)
 
@@ -14,13 +19,13 @@
                 element: document.getElementById('qr_code_canvas'),
                 value:
                     'otpauth://totp/' +
-                    encodeURIComponent(account.name) +
+                    encodeURIComponent(account.name || '') +
                     ':' +
-                    encodeURIComponent(account.login) +
+                    encodeURIComponent(account.login || '') +
                     '?secret=' +
-                    encodeURIComponent(account.totp) +
+                    encodeURIComponent(account.totp || '') +
                     '&issuer=' +
-                    encodeURIComponent(account.name),
+                    encodeURIComponent(account.name || ''),
                 foreground: 'var(--on-primary)',
                 backgroundAlpha: '0',
             })

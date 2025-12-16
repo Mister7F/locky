@@ -1,9 +1,14 @@
-<script>
+<script lang="ts">
     import Button from '../../helpers/Button.svelte'
-    import * as dropbox from './dropbox.js'
-    import { openUrl } from '../../helpers/utils.js'
+    import * as dropbox from './dropbox.ts'
+    import { openUrl } from '../../helpers/utils.ts'
 
-    let { state = $bindable(), logout } = $props()
+    interface Props {
+        state?: string
+        onlogout: () => void
+    }
+
+    let { state = $bindable(''), onlogout }: Props = $props()
 
     let filedata = null
     let authenticationUrl = null
@@ -19,7 +24,7 @@
         onlogout()
     }
 
-    $effect(async () => {
+    const init = async () => {
         let isAuthenticated = await dropbox.isAuthenticated()
         state = isAuthenticated ? 'logged' : 'not_logged'
         authenticationUrl = await dropbox.getAuthenticationUrl()
@@ -35,6 +40,10 @@
                 return
             }
         }
+    }
+
+    $effect(() => {
+        init()
     })
 </script>
 

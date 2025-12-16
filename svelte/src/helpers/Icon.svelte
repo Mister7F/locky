@@ -1,12 +1,19 @@
-<script>
+<script lang="ts">
+    interface Props {
+        onclick?: (event: any) => void
+        title?: string
+        color?: string
+        class?: string
+        children: () => any
+    }
+
     let {
         onclick,
         title = '',
         color = 'on-primary',
-        on = null,
         class: className,
         children,
-    } = $props()
+    }: Props = $props()
 
     let cssColor = $derived(
         {
@@ -23,7 +30,6 @@
 <span
     class="icon_base material-icons {className}"
     {onclick}
-    {on}
     {title}
     {color}
     style="--color: {cssColor}">{@render children()}</span

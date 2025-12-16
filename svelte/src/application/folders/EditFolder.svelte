@@ -1,14 +1,25 @@
-<script>
+<script lang="ts">
     import TextInput from '../../helpers/TextInput.svelte'
     import Button from '../../helpers/Button.svelte'
     import IconButton from '../../helpers/IconButton.svelte'
     import Dialog from '../../helpers/Dialog.svelte'
     import Icon from '../../helpers/Icon.svelte'
+    import FolderType from '../../models/folder.ts'
 
-    let { onsave, ondelete } = $props()
+    interface Props {
+        onsave: (folder: FolderType) => void
+        ondelete: (folder: FolderType) => void
+    }
 
-    let editedFolder = $state(null)
-    let folderDialog = null
+    let { onsave, ondelete }: Props = $props()
+
+    let editedFolder = $state<FolderType | undefined>()
+    let icon: string | undefined = $state()
+
+    $effect(() => {
+        icon = editedFolder?.icon || 'folder'
+    })
+
     let folderDialogOpen = $state(false)
     let folderIconOpen = $state(false)
     let folderIcons = [
@@ -54,9 +65,9 @@
         'family_restroom',
         'free_breakfast',
     ]
-    export function editFolder(folder) {
+    export function editFolder(folder: FolderType) {
         // Deep copy to not change the folder before saving
-        editedFolder = JSON.parse(JSON.stringify(folder))
+        editedFolder = FolderType.fromJson(JSON.parse(JSON.stringify(folder)))
         folderDialogOpen = true
     }
     function onSaveFolder() {
@@ -76,15 +87,15 @@
         <IconButton
             onclick={() => (folderIconOpen = !folderIconOpen)}
             onblur={() => setTimeout(() => (folderIconOpen = false), 100)}
-            icon={editedFolder.icon || 'folder'}
+            {icon}
             color="on-primary"
         />
         {#if folderIconOpen}
-            <div static class="menu_folder_icon">
+            <div class="menu_folder_icon">
                 {#each folderIcons as folderIcon}
                     <div
                         class="folder_icon"
-                        onclick={() => (editedFolder.icon = folderIcon)}
+                        onclick={() => (icon = editedFolder.icon = folderIcon)}
                     >
                         <Icon color="on-surface">{folderIcon}</Icon>
                     </div>
