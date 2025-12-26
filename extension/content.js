@@ -262,9 +262,18 @@ async function _typeText(
     const [elLogin, elPassword] = inputs
 
     elLogin.focus()
-    document.execCommand('insertText', false, login)
+    if (document.activeElement === elLogin) {
+        document.execCommand('insertText', false, login)
+    } else {
+        elLogin.value = login
+    }
+
     elPassword.focus()
-    document.execCommand('insertText', false, password)
+    if (document.activeElement === elPassword) {
+        document.execCommand('insertText', false, password)
+    } else {
+        return null
+    }
     return elPassword
 }
 
@@ -291,7 +300,11 @@ async function _writeSubmitWrite(
     const elLogin = findInputs(loginSelectors, null, alrt)
 
     elLogin.focus()
-    document.execCommand('insertText', false, login)
+    if (document.activeElement === elLogin) {
+        document.execCommand('insertText', false, login)
+    } else {
+        elLogin.value = login
+    }
 
     const submit = elLogin
         .closest(formSelector)
@@ -303,7 +316,7 @@ async function _writeSubmitWrite(
 
     submit.click()
 
-    const elPassword = await waitPasswordInput(passwordSelectors)
+    const elPassword = await waitFocusablePasswordInput(passwordSelectors)
 
     elPassword.focus()
     document.execCommand('insertText', false, password)
@@ -320,12 +333,16 @@ async function _writeEnterWrite(
     const elLogin = findInputs(loginSelectors)
 
     elLogin.focus()
-    document.execCommand('insertText', false, login)
+    if (document.activeElement === elLogin) {
+        document.execCommand('insertText', false, login)
+    } else {
+        elLogin.value = login
+    }
 
     await sleep(200)
     await enter(elLogin)
 
-    const elPassword = await waitPasswordInput(passwordSelectors)
+    const elPassword = await waitFocusablePasswordInput(passwordSelectors)
 
     elPassword.focus()
     document.execCommand('insertText', false, password)
@@ -413,13 +430,16 @@ async function enter(input) {
     input.dispatchEvent(keypup)
 }
 
-async function waitPasswordInput(passwordSelectors) {
+async function waitFocusablePasswordInput(passwordSelectors) {
     let elPassword = null
     for (let i = 0; i < 40; ++i) {
         elPassword = findInputs(passwordSelectors, null, false)
         // Google, Paypal have a hidden input password in its form
         if (elPassword && !isHidden(elPassword)) {
-            return elPassword
+            elPassword.focus()
+            if (document.activeElement === elPassword) {
+                return elPassword
+            }
         }
         await sleep(100)
     }
