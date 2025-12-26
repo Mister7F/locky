@@ -47,12 +47,15 @@
             viewMode = viewModes[nextModeIndex]
             window.localStorage.setItem('viewMode', viewMode)
         }
-        if (!document.startViewTransition) {
-            console.warn('Transition not available')
-            _changeViewMode()
-        } else {
-            document.startViewTransition(() => _changeViewMode())
-        }
+
+        // Disabled until it's fast enough
+        _changeViewMode()
+        // if (!document.startViewTransition) {
+        //     console.warn('Transition not available')
+        //     _changeViewMode()
+        // } else {
+        //     document.startViewTransition(() => _changeViewMode())
+        // }
     }
 
     onMount(() => {
