@@ -12,7 +12,6 @@
         readonly: boolean
         size: string
         srcs: string[]
-        transitionName: string
     }
 
     let {
@@ -21,7 +20,6 @@
         readonly = false,
         size = '100px',
         srcs = $bindable([]),
-        transitionName = '',
     }: Props = $props()
 
     let previewSrc = $state(src || 'img/accounts/default.svg')
@@ -60,11 +58,7 @@
 
 <div class="image_picker" style="--size: {size}">
     <div class="img {readonly ? 'readonly' : ''}" onclick={open}>
-        <Img
-            src={previewSrc}
-            alt={previewSrc}
-            style="view-transition-name: {transitionName}"
-        />
+        <Img src={previewSrc} alt={previewSrc} />
     </div>
     <div class="icons {chooseIcon && !readonly ? 'visible' : ''}">
         <div class="img-header">

@@ -25,7 +25,7 @@
         onchange,
     }: Props = $props()
 
-    let folderDialog: EditFolder | null = null
+    let folderDialog: EditFolder | undefined
 
     async function onEditFolder(folder: FolderType) {
         folderDialog?.editFolder(folder)

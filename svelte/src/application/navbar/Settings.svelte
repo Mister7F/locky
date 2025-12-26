@@ -17,7 +17,7 @@
         visible = $bindable(true),
     }: Props = $props()
 
-    let changePasswordDialog: InstanceType<typeof ChangePassword> = $state()
+    let changePasswordDialog: ChangePassword = $state()
 
     async function onDropboxClick() {
         if (isDropboxAuthenticated) {

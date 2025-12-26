@@ -391,7 +391,7 @@ export async function decryptXChaCha20Poly1305(
  */
 async function derivePassword(
     password: string,
-    salt: Uint8Array | null = null
+    salt?: Uint8Array
 ): Promise<[Uint8Array, Uint8Array]> {
     if (!salt) {
         salt = window.crypto.getRandomValues(new Uint8Array(16))
