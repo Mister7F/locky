@@ -193,7 +193,7 @@
             {#if canEditType && !readonly}
                 <FieldAction bind:type bind:label {onremove} />
             {/if}
-            {#if parseInt(String(copy)) && value}
+            {#if copy && value}
                 <IconButton
                     onclick={onCopyClick}
                     icon={copied ? 'check' : 'content_copy'}
