@@ -52,7 +52,7 @@
     // Do not load all items for performance reason (items will be loaded dynamically when scrolling)
     const minCardSurface = 432 * 78
     const initialSlice =
-        Math.ceil(window.innerWidth * window.innerHeight) / minCardSurface
+        Math.ceil(window.innerWidth * window.innerHeight / minCardSurface)
     let currentSlice = $state(initialSlice)
 
     let draggedIndex = $state(-1)
