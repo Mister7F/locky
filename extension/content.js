@@ -24,6 +24,7 @@ const METHODS = {
 
 const loginSelectors = [
     'input[name="email"]',
+    'input[name="mail"]',
     'input[name="login"]',
     'input[name="loginfmt"]',
     'input[name="var_login"]',
@@ -32,6 +33,7 @@ const loginSelectors = [
     'input[name="account"]',
 
     'input[id="email"]',
+    'input[id="mail"]',
     'input[id="login"]',
     'input[id="loginfmt"]',
     'input[id="var_login"]',
@@ -46,6 +48,7 @@ const loginSelectors = [
     'input[autocomplete~="username"]',
 
     'input[id*="email"]',
+    'input[id*="mail"]',
     'input[id*="login"]',
     'input[id*="username"]',
     'input[id*="account"]',
@@ -55,6 +58,7 @@ const loginSelectors = [
     'input[name*="account"]',
 
     'input[label*="Email"]', // aliexpress
+    'input[placeholder*="email"]',
 ]
 const passwordSelectors = [
     'input[id="password"]',
@@ -260,7 +264,7 @@ async function _typeText(
     alrt = true
 ) {
     const inputs = findInputs(loginSelectors, passwordSelectors, alrt)
-    console.log(inputs)
+    console.log("inputs", inputs)
     if (!inputs) {
         return
     }
