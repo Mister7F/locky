@@ -3,7 +3,7 @@
     "name": "Locky",
     "version": "1.16",
     "description": "Password manager",
-    "permissions": ["activeTab", "scripting", "nativeMessaging", "storage"],
+    "permissions": ["activeTab", "storage"],
     "action": {
         "default_popup": "popup.html",
         "default_icon": {

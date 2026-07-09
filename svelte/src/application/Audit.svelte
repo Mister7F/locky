@@ -77,18 +77,19 @@
         }
 
         // find duplicated passwords
-        const seen = {}
+        const seen = new Map<string, number>()
         const _duplicatedIndex = new Set()
         for (let i = 0; i < wallet.accounts.length; i++) {
             const password = wallet.accounts[i].password
             if (!password?.length) {
                 continue
             }
-            if (seen[password]) {
+            if (seen.has(password)) {
                 _duplicatedIndex.add(i)
-                _duplicatedIndex.add(seen[password])
+                _duplicatedIndex.add(seen.get(password))
+            } else {
+                seen.set(password, i)
             }
-            seen[password] = i
         }
 
         leakedAccountsIndex = leakedAccountsIndex
@@ -114,8 +115,10 @@
     {#if leakedAccountsIndex.length}
         <span class="title">
             The passwords of those accounts have been
-            <a href="https://haveibeenpwned.com/Passwords" target="_blank"
-                >leaked</a
+            <a
+                href="https://haveibeenpwned.com/Passwords"
+                target="_blank"
+                rel="noopener noreferrer">leaked</a
             >, you must change them!
         </span>
         <div class="container">
@@ -134,7 +137,11 @@
     {#if weakAccountsIndex.length}
         <span class="title">
             The passwords of those accounts are
-            <a href="https://github.com/dropbox/zxcvbn" target="_blank">weak</a>
+            <a
+                href="https://github.com/dropbox/zxcvbn"
+                target="_blank"
+                rel="noopener noreferrer">weak</a
+            >
             and must be changed!
         </span>
         <div class="container">

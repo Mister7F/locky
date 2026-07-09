@@ -30,7 +30,7 @@
             ? srcs
             : srcs.filter((url) => {
                   return (
-                      url.toLowerCase().indexOf(searchValue.toLowerCase()) > 0
+                      url.toLowerCase().indexOf(searchValue.toLowerCase()) >= 0
                   )
               })
     )

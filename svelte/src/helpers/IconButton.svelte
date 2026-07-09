@@ -40,7 +40,7 @@
         event.stopPropagation()
         event.preventDefault()
         if (isUrlValid(href)) {
-            window.open(href)
+            window.open(href, '_blank', 'noopener,noreferrer')
         }
         onclick?.(event)
     }

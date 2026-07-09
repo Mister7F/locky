@@ -236,6 +236,10 @@ async function login(login, password, url) {
         }
     }
 
+    if (!elPassword) {
+        return false
+    }
+
     if (settings.submit === 'click') {
         await sleep(50)
         elPassword
@@ -293,7 +297,11 @@ async function _setAttribute(
     loginSelectors,
     passwordSelectors
 ) {
-    const [elLogin, elPassword] = findInputs(loginSelectors, passwordSelectors)
+    const inputs = findInputs(loginSelectors, passwordSelectors)
+    if (!inputs) {
+        return
+    }
+    const [elLogin, elPassword] = inputs
 
     elLogin.value = login
     elPassword.value = password
@@ -386,13 +394,18 @@ async function _twitter(login, password) {
     await enter(elLogin)
 
     // Twitter has no `<form/>`
-    const elPassword = null
+    let elPassword = null
     for (let i = 0; i < 30; i++) {
         elPassword = document.querySelector('input[type="password"]')
         if (elPassword) {
             break
         }
         await sleep(200)
+    }
+
+    if (!elPassword) {
+        showAlert('Failed to find the login form')
+        return
     }
 
     elPassword.focus()

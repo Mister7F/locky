@@ -49,6 +49,7 @@
 
     $effect(() => {
         void updateTotp()
+        return () => clearTimeout(totpTimeoutHandle)
     })
 
     let iconSrcs = $state([])

@@ -68,7 +68,7 @@
 <style>
     .error {
         text-align: center;
-        color: var(--error-color);
+        color: var(--error);
         margin-top: 10px;
     }
 

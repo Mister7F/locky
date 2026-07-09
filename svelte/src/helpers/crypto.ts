@@ -84,31 +84,25 @@ export async function hmac(
 
 export function b32Decode(s: string): Uint8Array {
     const alpha = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567'
-    s = s.toUpperCase().replace(/[^A-Z2-7]/, '')
 
-    let number = BigInt(0)
-    let bitLength = 0
-    for (let l of s) {
-        const value = alpha.indexOf(l)
-        if (value < 0) {
+    const bytes: number[] = []
+    let value = 0
+    let bits = 0
+    for (const char of s.toUpperCase()) {
+        const index = alpha.indexOf(char)
+        if (index < 0) {
             continue
         }
-        number *= BigInt(Math.pow(2, 5))
-        number += BigInt(value)
-        // Each character encode 5 bits
-        bitLength += 5
+        value = (value << 5) | index
+        bits += 5
+        if (bits >= 8) {
+            bits -= 8
+            bytes.push((value >> bits) & 0xff)
+            value &= (1 << bits) - 1
+        }
     }
 
-    // Remove trailing bits
-    number >>= BigInt(bitLength % 8)
-
-    const bytesArray = []
-    while (number) {
-        bytesArray.splice(0, 0, number % BigInt(256))
-        number /= BigInt(256)
-    }
-
-    return new Uint8Array(bytesArray.map((i) => parseInt(i)))
+    return new Uint8Array(bytes)
 }
 
 /**
@@ -181,16 +175,10 @@ export async function encrypt(
     password: string
 ): Promise<[Uint8Array, Uint8Array]> {
     const [key, salt] = await derivePassword(password)
-
     const keyChaCha = key.slice(0, 32)
     const keyAes = key.slice(32, 64)
-
-    password = null
-
     const ciphertext = await encryptXChaCha20Poly1305(plaintext, keyChaCha)
-
     const ciphertext2 = await encryptAES(ciphertext, keyAes)
-
     return [key, concatenate(salt, ciphertext2)]
 }
 
@@ -230,12 +218,12 @@ export async function decrypt(
  *
  * @param {Uint8Array} The plaintext to encrypt
  * @param {Uint8Array} The key to use (32 bytes)
- * @return {Uint8Array} The encrypted message or null if something bad happened
+ * @return {Uint8Array} The encrypted message
  */
 export async function encryptAES(
     plaintext: Uint8Array | ArrayBuffer,
     key: Uint8Array
-): Promise<Uint8Array | undefined> {
+): Promise<Uint8Array> {
     const plainBytes =
         plaintext instanceof Uint8Array ? plaintext : new Uint8Array(plaintext)
     const iv = window.crypto.getRandomValues(new Uint8Array(16))
@@ -244,19 +232,15 @@ export async function encryptAES(
 
     let t = performance.now()
 
-    try {
-        const ciphertext = await window.crypto.subtle.encrypt(
-            { name: 'AES-CBC', iv },
-            cryptoKey,
-            plainBytes as BufferSource
-        )
+    const ciphertext = await window.crypto.subtle.encrypt(
+        { name: 'AES-CBC', iv },
+        cryptoKey,
+        plainBytes as BufferSource
+    )
 
-        console.debug('AES encryption took', performance.now() - t, 'ms')
+    console.debug('AES encryption took', performance.now() - t, 'ms')
 
-        return concatenate(iv, new Uint8Array(ciphertext))
-    } catch {}
-
-    return
+    return concatenate(iv, new Uint8Array(ciphertext))
 }
 
 /**
@@ -312,12 +296,12 @@ export async function decryptAES(
  *
  * @param {Uint8Array} The plaintext to encrypt
  * @param {Uint8Array} The key to use (32 bytes)
- * @return {Uint8Array} The encrypted message or null if something bad happened
+ * @return {Uint8Array} The encrypted message
  */
 export async function encryptXChaCha20Poly1305(
     plaintext: Uint8Array,
     key: Uint8Array
-): Promise<Uint8Array | undefined> {
+): Promise<Uint8Array> {
     // xChaCha20: nonce need 24 bytes
     await _sodium.ready
     const sodium = _sodium
@@ -326,21 +310,17 @@ export async function encryptXChaCha20Poly1305(
 
     let t = performance.now()
 
-    try {
-        const encrypted = sodium.crypto_aead_xchacha20poly1305_ietf_encrypt(
-            plaintext,
-            null,
-            null,
-            nonce,
-            key
-        )
+    const encrypted = sodium.crypto_aead_xchacha20poly1305_ietf_encrypt(
+        plaintext,
+        null,
+        null,
+        nonce,
+        key
+    )
 
-        console.debug('xChacha encryption took', performance.now() - t, 'ms')
+    console.debug('xChacha encryption took', performance.now() - t, 'ms')
 
-        return concatenate(nonce, encrypted)
-    } catch {}
-
-    return
+    return concatenate(nonce, encrypted)
 }
 
 /**

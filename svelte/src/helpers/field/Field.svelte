@@ -140,7 +140,13 @@
         <div class="content">
             {#if readonly}
                 {#if type === 'url' && isUrlValid(value) && urlLeft && urlHost}
-                    <a class="value" href={value} title={value} target="_blank">
+                    <a
+                        class="value"
+                        href={value}
+                        title={value}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                    >
                         <span>{urlLeft}</span><span class="host">{urlHost}</span
                         ><span>{urlPath}</span>
                     </a>

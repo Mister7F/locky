@@ -43,6 +43,8 @@ document.body.onload = () => {
         })
     })
 
+    let checkedTab = null
+
     /**
      * The key is used to encrypt what store in the SW, and to communicate with postMessage
      */
@@ -54,7 +56,8 @@ document.body.onload = () => {
     }
 
     window.addEventListener('message', async (ev) => {
-        if (ev.origin !== new URL(localStorage.getItem('lockyUrl')).origin) {
+        const lockyOrigin = new URL(localStorage.getItem('lockyUrl')).origin
+        if (ev.origin !== lockyOrigin) {
             console.error('Wrong origin: ', ev.origin)
             return
         }
@@ -68,6 +71,7 @@ document.body.onload = () => {
             const pluginKey = await getKey()
             const storage = await chrome.storage.session.get()
             const tab = await getCurrentTab()
+            checkedTab = { id: tab.id, url: tab.url }
             iframe.contentWindow.postMessage(
                 {
                     pluginKey: hex(pluginKey),
@@ -75,7 +79,7 @@ document.body.onload = () => {
                     // Send information about the current tab
                     currentUrl: tab.url,
                 },
-                '*'
+                lockyOrigin // target only the locky origin
             )
             return
         }
@@ -86,12 +90,14 @@ document.body.onload = () => {
         const event = JSON.parse(new TextDecoder().decode(pt))
 
         if (event.action === 'login') {
-            chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-                chrome.tabs.sendMessage(tabs[0].id, {
+            // Check that the tab didn't redirect between now and the check
+            const tab = await chrome.tabs.get(checkedTab.id).catch(() => null)
+            if (tab && new URL(tab.url).host === new URL(checkedTab.url).host) {
+                chrome.tabs.sendMessage(tab.id, {
                     action: 'login',
                     account: event.account,
                 })
-            })
+            }
         } else if (event.action === 'savePassword') {
             await chrome.storage.session.set({
                 encryptedPassword: event.encryptedPassword,

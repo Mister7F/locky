@@ -30,11 +30,13 @@
         }
 
         if (alphabet && passwordLength) {
-            const positions = window.crypto.getRandomValues(
-                new Uint32Array(passwordLength)
-            )
-            for (const pos of positions) {
-                password = password + alphabet[pos % alphabet.length]
+            const limit = 2 ** 32 - (2 ** 32 % alphabet.length)
+            const pos = new Uint32Array(1)
+            while (password.length < passwordLength) {
+                window.crypto.getRandomValues(pos)
+                if (pos[0] < limit) {
+                    password = password + alphabet[pos[0] % alphabet.length]
+                }
             }
         }
         return password

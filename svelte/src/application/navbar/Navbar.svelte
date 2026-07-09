@@ -60,7 +60,7 @@
 
     onMount(() => {
         // Automatically start a search when typing in the application
-        document.addEventListener('keypress', (event) => {
+        const onKeypress = (event) => {
             // check if the navigation bar is on the top level
             let topElement = document.elementFromPoint(0, 0)
             if (
@@ -80,7 +80,9 @@
                     })
                 }
             }
-        })
+        }
+        document.addEventListener('keypress', onKeypress)
+        return () => document.removeEventListener('keypress', onKeypress)
     })
 </script>
 

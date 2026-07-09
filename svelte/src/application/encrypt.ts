@@ -1,7 +1,5 @@
 import { compressSync, decompressSync, strFromU8, strToU8 } from 'fflate'
 import { decrypt, encrypt } from '../helpers/crypto.ts'
-import WebExtension from '../helpers/web_extension.svelte.ts'
-import { savePassword } from '../helpers/web_extension.svelte.ts'
 import Wallet from '../models/wallet.ts'
 
 export async function encryptDatabase(
@@ -20,7 +18,6 @@ export async function encryptDatabase(
     )
 
     const [key, wallet] = await encrypt(compressed, password)
-    savePassword(password, key)
     return [key, wallet]
 }
 

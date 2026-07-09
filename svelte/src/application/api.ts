@@ -8,6 +8,19 @@ import * as indexdb from './indexdb.ts'
 let wallet: Wallet = null
 let masterPassword: string = null
 
+// the key derivation is slow, so we create a queue to run the write / read operation
+// on it synchronously, to avoid any errors (save empty wallet, etc)
+let queueEncryptedWallet: Promise<unknown> = Promise.resolve()
+
+function enqueueEncryptedWallet<T>(fn: () => Promise<T>): Promise<T> {
+    const result = queueEncryptedWallet.then(fn)
+    // keep the queue alive after a failure
+    queueEncryptedWallet = result.catch((error) =>
+        console.error('Wallet storage operation failed', error)
+    )
+    return result
+}
+
 export async function newWallet(password: string): Promise<Wallet> {
     wallet = Wallet.fromJson({
         accounts: [],
@@ -20,7 +33,12 @@ export async function newWallet(password: string): Promise<Wallet> {
 export async function getEncryptedWallet(): Promise<
     ArrayBuffer | Uint8Array | null
 > {
-    return (await indexdb.get('wallet')) as ArrayBuffer | Uint8Array | null
+    // wait for write operation before returning the encrypted wallet
+    // (the key will be regenerated)
+    return (await enqueueEncryptedWallet(() => indexdb.get('wallet'))) as
+        | ArrayBuffer
+        | Uint8Array
+        | null
 }
 
 export async function unlock(
@@ -69,11 +87,14 @@ export async function login(
 }
 
 export async function logout(keepIndexDb?: boolean): Promise<void> {
-    wallet = null
-    masterPassword = null
-    if (!keepIndexDb) {
-        await indexdb.set('wallet', 0)
-    }
+    // wait for the previous write / get operation if any
+    return enqueueEncryptedWallet(async () => {
+        wallet = null
+        masterPassword = null
+        if (!keepIndexDb) {
+            await indexdb.set('wallet', 0)
+        }
+    })
 }
 
 export async function walletInMemory(): Promise<boolean> {
@@ -85,13 +106,15 @@ export async function walletInMemory(): Promise<boolean> {
 }
 
 async function saveWallet(): Promise<Wallet> {
-    setTimeout(async () => {
-        // do not block the UI while encrypting the database
+    // do not block the UI while encrypting the database
+    enqueueEncryptedWallet(async () => {
+        if (!masterPassword) return
         const [key, encryptedWallet] = await encryptDatabase(
             wallet,
             masterPassword
         )
         await indexdb.set('wallet', encryptedWallet)
+        savePassword(masterPassword, key)
     })
     return Wallet.fromJson(JSON.parse(JSON.stringify(wallet)))
 }

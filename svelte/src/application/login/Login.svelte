@@ -36,7 +36,7 @@
     )
 
     let password = $state('')
-    let wrongPassword = false
+    let wrongPassword = $state(false)
     let svgValue = $derived(
         wrongPassword || loading
             ? 0
@@ -45,7 +45,7 @@
                   33
     )
     let fillColor = $derived(
-        wrongPassword ? 'var(--error-color)' : 'var(--secondary)'
+        wrongPassword ? 'var(--error)' : 'var(--secondary)'
     )
 
     async function onLogin() {

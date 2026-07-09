@@ -19,8 +19,8 @@
     let searchText: string = $state('')
 
     async function lock() {
+        locked = true // lock the UI immediately
         await api.logout(true)
-        locked = true
         savePassword('', null)
     }
 

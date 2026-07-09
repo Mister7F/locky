@@ -37,6 +37,21 @@ self.addEventListener('install', (event) => {
     event.waitUntil(preCache())
 })
 
+// Delete every cache from previous versions so they don't pile up forever.
+self.addEventListener('activate', (event) => {
+    event.waitUntil(
+        caches
+            .keys()
+            .then((names) =>
+                Promise.all(
+                    names
+                        .filter((name) => name !== cacheName)
+                        .map((name) => caches.delete(name))
+                )
+            )
+    )
+})
+
 self.addEventListener('fetch', async (event) => {
     const currentHost = self.location.host
     const indexPath = getIndexPath()
@@ -106,14 +121,22 @@ const cacheFirst = async (request) => {
 
     try {
         const cacheResponse = await cache.match(request)
-        if (cacheResponse && cacheResponse.ok) {
+        if (
+            cacheResponse &&
+            (cacheResponse.ok || cacheResponse.type === 'opaque')
+        ) {
+            // `opaque` for google font, etc
             return cacheResponse
         }
     } catch {}
 
     try {
         const networkResponse = await fetch(request)
-        if (networkResponse && networkResponse.ok) {
+        if (
+            networkResponse &&
+            (networkResponse.ok || networkResponse.type === 'opaque')
+        ) {
+            // `opaque` for google font, etc
             cache.put(request, networkResponse.clone())
         }
         return networkResponse

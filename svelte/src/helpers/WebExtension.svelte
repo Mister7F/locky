@@ -56,7 +56,12 @@
     }
     explicitEffect(
         () => {
-            if (WebExtension.inWebExtension) {
+            if (!WebExtension.inWebExtension) {
+                return
+            }
+            if (locked) {
+                window.localStorage.removeItem('extension_state')
+            } else {
                 // Save the current search and the current tab to restore it when we re-open the extension
                 window.localStorage.setItem(
                     'extension_state',
@@ -64,7 +69,7 @@
                 )
             }
         },
-        () => [searchText]
+        () => [searchText, locked]
     )
 
     /**
@@ -81,6 +86,13 @@
             }
             if (!event.isTrusted) {
                 console.error('Received message from un-trusted event')
+                return
+            }
+            if (event.source !== window.parent) {
+                // The message must come from the frame that embeds us (the
+                // extension popup), not from some other window that merely holds a
+                // reference to us. This confirms the *framer* is the extension.
+                console.error('Received message from unexpected source', event)
                 return
             }
 
@@ -288,7 +300,7 @@
             },
         }
         return (await sendToWebExtension(event))
-            ? `Credentials sent${account.totp ? 'and TOTP code copied' : ''}`
+            ? `Credentials sent${account.totp ? ' and TOTP code copied' : ''}`
             : 'Configure the extension before using it'
     }
 

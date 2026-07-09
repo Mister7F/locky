@@ -42,50 +42,23 @@ async function initDb(dbname: string, version: number): Promise<IDBDatabase> {
     })
 }
 
-export async function set(
-    key: IDBValidKey,
-    value: any
-): Promise<IDBValidKey | undefined> {
+export async function set(key: IDBValidKey, value: any): Promise<void> {
+    const db = await getDb()
     return new Promise((resolve, reject) => {
-        getDb().then((db) => {
-            const transaction = db.transaction(['keyStore'], 'readwrite')
-
-            transaction.onerror = (event) => {
-                reject(event)
-            }
-            const objectStore = transaction.objectStore('keyStore')
-            const request = objectStore.put(value, key)
-
-            request.onsuccess = (event) => {
-                resolve(request.result)
-            }
-            request.onerror = (event) => {
-                resolve(undefined)
-            }
-            resolve(undefined)
-        })
+        const transaction = db.transaction(['keyStore'], 'readwrite')
+        transaction.objectStore('keyStore').put(value, key)
+        transaction.oncomplete = () => resolve()
+        transaction.onerror = () => reject(transaction.error)
+        transaction.onabort = () => reject(transaction.error)
     })
 }
 
 export async function get(key: IDBValidKey): Promise<any> {
+    const db = await getDb()
     return new Promise((resolve, reject) => {
-        getDb().then((db) => {
-            const transaction = db.transaction(['keyStore'], 'readwrite')
-
-            transaction.onerror = (event) => {
-                console.error('IndexDB: can not read the key')
-                reject(event)
-            }
-
-            const objectStore = transaction.objectStore('keyStore')
-            const request = objectStore.get(key)
-
-            request.onsuccess = (event) => {
-                resolve(request.result)
-            }
-            request.onerror = (event) => {
-                resolve(event)
-            }
-        })
+        const transaction = db.transaction(['keyStore'], 'readonly')
+        const request = transaction.objectStore('keyStore').get(key)
+        request.onsuccess = () => resolve(request.result)
+        request.onerror = () => reject(request.error)
     })
 }

@@ -319,6 +319,12 @@
         body.addEventListener('touchend', mouseUp, { passive: true })
         body.addEventListener('mousemove', mouseMove, { passive: false })
         body.addEventListener('touchmove', mouseMove, { passive: false })
+        return () => {
+            body.removeEventListener('mouseup', mouseUp)
+            body.removeEventListener('touchend', mouseUp)
+            body.removeEventListener('mousemove', mouseMove)
+            body.removeEventListener('touchmove', mouseMove)
+        }
     })
 </script>
 

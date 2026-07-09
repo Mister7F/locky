@@ -53,7 +53,6 @@ function copyValueFallback(text: string) {
     try {
         const successful = document.execCommand('copy')
         const msg = successful ? 'successful' : 'unsuccessful'
-        console.error('Copy Fallback failed')
     } catch (err) {
         console.error('Copy Fallback failed', err)
     }
@@ -112,7 +111,7 @@ export function fromBytes(bytes: ArrayBuffer | Uint8Array): string {
 
 export function openUrl(url: string) {
     if (WebExtension.inWebExtension) {
-        window.open(url)
+        window.open(url, '_blank', 'noopener,noreferrer')
     } else {
         window.location.href = url
     }
@@ -138,5 +137,5 @@ export function normalizeHost(url?: string): string | undefined {
 }
 
 export function cleanSearchValue(txt: string | null | undefined): string {
-    return (txt || '').replace(' ', '').toLowerCase()
+    return (txt || '').replace(/ /g, '').toLowerCase()
 }
