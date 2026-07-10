@@ -18,6 +18,8 @@
 
     // allow to not render the application in an iframe (that's not an extension) / window.open
     // if we cannot control the HTTP header of the server hosting our page
+    // >>> Content-Security-Policy: frame-ancestors 'self' chrome-extension://* moz-extension://*;
+    // >>> Cross-Origin-Opener-Policy: same-origin
     let iframeAllowed = $state(window.self === window.top)
 
     let searchText: string = $state('')
@@ -26,6 +28,7 @@
         locked = true // lock the UI immediately
         await api.logout(true)
         savePassword('', null)
+        wallet = null
     }
 
     let snackbarText: string = $state('')
@@ -40,6 +43,7 @@
     function onHideNotification() {
         snackbarText = ''
     }
+    api.setOnError(onnotify)
 
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', async () => {

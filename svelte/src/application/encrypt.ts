@@ -31,8 +31,9 @@ export async function decryptDatabase(
         data = new Uint8Array(data)
     }
 
-    if (!data || !data.length) {
-        console.error('Empty file')
+    if (!data || data.length < 16) {
+        // needs at least the 16 bytes salt
+        console.error('Invalid file')
         return [null, null]
     }
 

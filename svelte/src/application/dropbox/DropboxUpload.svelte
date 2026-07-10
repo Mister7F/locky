@@ -38,15 +38,20 @@
         await uploadWallet()
     }
 
-    async function uploadWallet() {
+    async function uploadWallet(overwrite: boolean = false) {
         uploadingState = 'uploading'
         confirmationDialogOpen = false
 
         const encryptedWallet = await api.getEncryptedWallet()
-        const ok = await dropbox.upload('wallet.lck', encryptedWallet)
-        if (!ok) {
-            isAuthenticated = false
+        if (!encryptedWallet?.byteLength) {
+            uploadingState = 'error'
+            return
         }
+        const ok = await dropbox.upload(
+            'wallet.lck',
+            encryptedWallet,
+            overwrite
+        )
         uploadingState = ok ? 'wait' : 'error'
     }
 
@@ -141,13 +146,7 @@
             >
                 No
             </Button>
-            <Button
-                onclick={() => {
-                    confirmationDialogOpen = true
-                    uploadWallet()
-                }}
-                color="primary"
-            >
+            <Button onclick={() => uploadWallet(true)} color="primary">
                 Yes
             </Button>
         {/snippet}

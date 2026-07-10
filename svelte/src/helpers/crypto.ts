@@ -376,7 +376,7 @@ async function derivePassword(
     if (!salt) {
         salt = window.crypto.getRandomValues(new Uint8Array(16))
     } else if (salt.length !== 16) {
-        console.error('Salt length must be 16')
+        throw new Error('Salt length must be 16')
     }
 
     let t = performance.now()

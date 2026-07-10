@@ -31,6 +31,10 @@
     let isDropboxAuthenticated = $state(false)
     let settingsVisible = $state(false)
 
+    onMount(async () => {
+        isDropboxAuthenticated = await dropbox.isAuthenticated()
+    })
+
     const viewModes = ['detail', 'list']
 
     let viewModeIcon = $derived(
@@ -86,7 +90,7 @@
     })
 </script>
 
-<Settings bind:visible={settingsVisible} {isDropboxAuthenticated} {onlock} />
+<Settings bind:visible={settingsVisible} bind:isDropboxAuthenticated {onlock} />
 <div class="wallet-navbar" color="primary">
     <div class="folder_menu">
         {#if floatingFolder}

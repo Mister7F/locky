@@ -56,7 +56,11 @@ document.body.onload = () => {
     }
 
     window.addEventListener('message', async (ev) => {
-        const lockyOrigin = new URL(localStorage.getItem('lockyUrl')).origin
+        const lockyUrl = localStorage.getItem('lockyUrl')
+        if (!lockyUrl) {
+            return
+        }
+        const lockyOrigin = new URL(lockyUrl).origin
         if (ev.origin !== lockyOrigin) {
             console.error('Wrong origin: ', ev.origin)
             return
@@ -92,7 +96,10 @@ document.body.onload = () => {
         if (event.action === 'login') {
             // Check that the tab didn't redirect between now and the check
             const tab = await chrome.tabs.get(checkedTab.id).catch(() => null)
-            if (tab && new URL(tab.url).host === new URL(checkedTab.url).host) {
+            if (
+                tab &&
+                new URL(tab.url).origin === new URL(checkedTab.url).origin
+            ) {
                 chrome.tabs.sendMessage(tab.id, {
                     action: 'login',
                     account: event.account,
@@ -106,9 +113,6 @@ document.body.onload = () => {
         } else {
             console.error('Web Extension: wrong action', event)
         }
-
-        delete event
-        delete pt
     })
 
     async function getCurrentTab() {

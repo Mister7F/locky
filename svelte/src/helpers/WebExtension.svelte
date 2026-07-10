@@ -39,6 +39,7 @@
     }: Props = $props()
 
     let currentTabHost = $state(null)
+    let currentTabOrigin = $state(null)
 
     let confirmationDialogOpen = $state(false)
     let accountHost = $state()
@@ -125,6 +126,7 @@
                 WebExtension.inWebExtension = true
                 iframeAllowed = true
                 currentTabHost = normalizeHost(eventData.currentUrl)
+                currentTabOrigin = normalizeOrigin(eventData.currentUrl)
 
                 // The extension is already loaded, decrypt it and unlock the wallet
                 if (eventData.encryptedPassword?.length) {
@@ -267,8 +269,8 @@
             return
         }
         account = event.detail
-        accountHost = normalizeHost(account.url)
-        if (!accountHost || accountHost === currentTabHost) {
+        accountHost = normalizeOrigin(account.url)
+        if (!accountHost || accountHost === currentTabOrigin) {
             onnotify(await _sendCredentials())
             return
         }
@@ -276,14 +278,18 @@
         // Look for URL in custom fields
         const hosts = (account.fields || [])
             .filter((f) => f.type === 'url' && f.value)
-            .map((f) => normalizeHost(f.value))
-            .filter((h) => h === currentTabHost)
+            .filter((f) => normalizeOrigin(f.value) === currentTabOrigin)
         if (hosts.length) {
             onnotify(await _sendCredentials())
             return
         }
 
         confirmationDialogOpen = true
+    }
+
+    function normalizeOrigin(url) {
+        const host = normalizeHost(url)
+        return host && new URL(url).protocol + '//' + host
     }
 
     /**
@@ -364,7 +370,7 @@
 </script>
 
 <Dialog bind:open={confirmationDialogOpen} title="Are you sure ?">
-    The current domain <b class="host">{currentTabHost}</b>
+    The current domain <b class="host">{currentTabOrigin}</b>
     does not match the URL in your wallet <b class="host">{accountHost}</b>, are
     you sure you are not phished?
     <br />

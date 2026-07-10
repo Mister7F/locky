@@ -35,9 +35,21 @@ export async function isAuthenticated(): Promise<boolean> {
 }
 
 export function logout() {
+    const currentAccessToken = localStorage.getItem('dropboxAccessToken')
+    const refreshToken = localStorage.getItem('dropboxRefreshToken')
+    if (currentAccessToken || refreshToken) {
+        // disable the tokens on Dropbox side
+        const dbx = new Dropbox.Dropbox({
+            clientId: CLIENT_ID,
+            accessToken: currentAccessToken,
+            refreshToken: refreshToken,
+        })
+        dbx.authTokenRevoke().catch(console.error)
+    }
     accessToken = undefined
     setDropboxHash('')
-    localStorage.setItem('dropboxAccessToken', '')
+    localStorage.removeItem('dropboxAccessToken')
+    localStorage.removeItem('dropboxRefreshToken')
 }
 
 export async function listDir(): Promise<any> {
@@ -65,7 +77,7 @@ export async function download(
         return
     }
 
-    setDropboxHash(response.result.content_hash)
+    setDropboxHash(response.result.content_hash, response.result.rev)
 
     const fileContent = await response.result.fileBlob.arrayBuffer()
 
@@ -74,23 +86,31 @@ export async function download(
 
 export async function upload(
     filename: string,
-    content: ArrayBuffer | Uint8Array
+    content: ArrayBuffer | Uint8Array,
+    overwrite: boolean = false
 ): Promise<boolean> {
     const dbx = await getConnection()
+
+    // Overwrite only the revision we last synced with, so a wallet
+    // changed from another device in the meantime is not clobbered.
+    const rev = window.localStorage.getItem('dropboxRev')
 
     let response
     try {
         response = await dbx.filesUpload({
             path: '/' + filename,
             contents: content,
-            mode: 'overwrite',
+            mode:
+                !overwrite && rev
+                    ? { '.tag': 'update', update: rev }
+                    : 'overwrite',
         })
     } catch (error) {
         console.error(error)
         return false
     }
 
-    setDropboxHash(response.result.content_hash)
+    setDropboxHash(response.result.content_hash, response.result.rev)
 
     return response && response.status === 200
 }
@@ -151,8 +171,9 @@ export function getCodeFromUrl(): string | undefined {
     return code && code.length ? code : undefined
 }
 
-export function setDropboxHash(hash: string) {
+export function setDropboxHash(hash: string, rev: string = '') {
     window.localStorage.setItem('dropboxHash', hash)
+    window.localStorage.setItem('dropboxRev', rev)
 }
 
 export function getDropboxHash(hash?: string): string | undefined {

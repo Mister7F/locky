@@ -13,7 +13,7 @@
 
     let {
         onlock,
-        isDropboxAuthenticated,
+        isDropboxAuthenticated = $bindable(false),
         visible = $bindable(true),
     }: Props = $props()
 

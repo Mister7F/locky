@@ -8,6 +8,13 @@ import * as indexdb from './indexdb.ts'
 let wallet: Wallet = null
 let masterPassword: string = null
 
+// called when a background wallet save fails, so the UI can warn the user
+let onSaveError: (message: string) => void = () => {}
+
+export function setOnError(handler: (message: string) => void) {
+    onSaveError = handler
+}
+
 // the key derivation is slow, so we create a queue to run the write / read operation
 // on it synchronously, to avoid any errors (save empty wallet, etc)
 let queueEncryptedWallet: Promise<unknown> = Promise.resolve()
@@ -105,9 +112,8 @@ export async function walletInMemory(): Promise<boolean> {
     return !!(encryptedWallet && encryptedWallet.byteLength)
 }
 
-async function saveWallet(): Promise<Wallet> {
-    // do not block the UI while encrypting the database
-    enqueueEncryptedWallet(async () => {
+async function saveWallet(notifyError: boolean = true): Promise<Wallet> {
+    const saved = enqueueEncryptedWallet(async () => {
         if (!masterPassword) return
         const [key, encryptedWallet] = await encryptDatabase(
             wallet,
@@ -116,6 +122,13 @@ async function saveWallet(): Promise<Wallet> {
         await indexdb.set('wallet', encryptedWallet)
         savePassword(masterPassword, key)
     })
+    if (notifyError) {
+        // do not block the UI while encrypting the database
+        saved.catch(() => onSaveError('Failed to save the wallet!'))
+    } else {
+        // let the caller wait for the write and handle the failure
+        await saved
+    }
     return Wallet.fromJson(JSON.parse(JSON.stringify(wallet)))
 }
 
@@ -185,12 +198,12 @@ export async function updateAccount(
 }
 
 export async function removeAccount(
-    accountIndex: number
+    accountId: string
 ): Promise<Wallet | undefined> {
     if (!wallet) {
         return
     }
-    wallet.accounts.splice(accountIndex, 1)
+    wallet.accounts = wallet.accounts.filter((a) => a.id !== accountId)
     return await saveWallet()
 }
 
@@ -263,8 +276,15 @@ export async function updatePassword(
         return false
     }
     masterPassword = newPassword
-    const encryptedWallet = await saveWallet()
-    return !!encryptedWallet
+    try {
+        // wait for the write, to not tell the user the password
+        // changed while the wallet is still encrypted with the old one
+        await saveWallet(false)
+    } catch {
+        masterPassword = oldPassword
+        return false
+    }
+    return true
 }
 
 // HELPERS //

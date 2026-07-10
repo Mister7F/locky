@@ -113,11 +113,11 @@
         }
     }
     async function onRemoveAccount() {
-        accountEdited = undefined
         if (editedAccountIndex !== null) {
-            wallet = await api.removeAccount(editedAccountIndex)
+            wallet = await api.removeAccount(accountEdited.id)
             editedAccountIndex = null
         }
+        accountEdited = undefined
     }
     async function onAccountAction(event: {
         action: HTMLElement
