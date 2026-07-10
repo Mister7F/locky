@@ -1,0 +1,34 @@
+<script>
+    // Simulate a website that embed our page
+    // and try to initiate the hand shake
+    // origin should be blocked because not an extension
+    window.addEventListener('message', async (ev) => {
+        if (ev.data === 'IFRAME_READY') {
+            iframe.contentWindow.postMessage(
+                {
+                    pluginKey: "aaaaaa",
+                    encryptedPassword: null,
+                    currentUrl: "https://google.com",
+                },
+                "*"
+            )
+            return
+        }
+    })
+    // should not render the application (`window.opener !== null` in locky)
+    const w = window.open("http://localhost:5000/")  // we have the window
+    alert("should not render the application")
+    if (!w) {
+        alert("sanity check failed")
+    }
+
+    // we don't have the window, ok to render the application (`window.opener === null` in locky)
+    const c = window.open('http://localhost:5000/', '_blank', 'noopener')
+    alert("can render the application")
+    if (c) {
+        alert("ERROR! noopener got the window!")
+    }
+
+
+</script>
+<iframe id="iframe" src="http://localhost:5000/"></iframe>

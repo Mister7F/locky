@@ -26,6 +26,7 @@
         wallet: Wallet
         searchText?: string
         locked?: boolean
+        iframeAllowed?: boolean
         onnotify: (message: string) => void
     }
 
@@ -33,7 +34,7 @@
         wallet = $bindable({} as Wallet),
         searchText = $bindable(''),
         locked = $bindable(false),
-
+        iframeAllowed = $bindable(false),
         onnotify,
     }: Props = $props()
 
@@ -122,6 +123,7 @@
                 pluginKey = newPluginKey
                 pluginOrigin = event.origin
                 WebExtension.inWebExtension = true
+                iframeAllowed = true
                 currentTabHost = normalizeHost(eventData.currentUrl)
 
                 // The extension is already loaded, decrypt it and unlock the wallet
@@ -158,6 +160,7 @@
                 localStorage.setItem('pluginKeyHash', newPluginKeyHash)
                 localStorage.setItem('pluginOrigin', pluginOrigin)
                 WebExtension.inWebExtension = true
+                iframeAllowed = true
                 newWebExtensionKeyDialogOk = null
             }
         })

@@ -16,6 +16,10 @@
     let walletElement: SvelteComponent = $state()
     let wallet = $state(null)
 
+    // allow to not render the application in an iframe (that's not an extension) / window.open
+    // if we cannot control the HTTP header of the server hosting our page
+    let iframeAllowed = $state(window.self === window.top)
+
     let searchText: string = $state('')
 
     async function lock() {
@@ -51,27 +55,36 @@
     }, 500)
 </script>
 
-<WebExtension bind:wallet bind:searchText bind:locked {onnotify} />
-
-<div class="root">
-    {#if locked}
-        <Login
-            onwallet_openned={() => {
-                locked = false
-                walletOpened(wallet)
-            }}
-            bind:wallet
-        />
-    {:else}
-        <Wallet
-            bind:wallet
-            onlock={lock}
-            bind:this={walletElement}
-            bind:searchText
-            {onnotify}
-        />
-    {/if}
-</div>
+<WebExtension
+    bind:wallet
+    bind:searchText
+    bind:locked
+    {onnotify}
+    bind:iframeAllowed
+/>
+{#if !iframeAllowed || window.opener !== null}
+    <b>LOCKED</b>
+{:else}
+    <div class="root">
+        {#if locked}
+            <Login
+                onwallet_openned={() => {
+                    locked = false
+                    walletOpened(wallet)
+                }}
+                bind:wallet
+            />
+        {:else}
+            <Wallet
+                bind:wallet
+                onlock={lock}
+                bind:this={walletElement}
+                bind:searchText
+                {onnotify}
+            />
+        {/if}
+    </div>
+{/if}
 
 <!-- Notifications -->
 {#if snackbarText}
