@@ -1,17 +1,16 @@
 document.body.onload = () => {
     const iframe = document.querySelector('iframe')
-    iframe.src = localStorage.getItem('lockyUrl')
+    const storedUrl = localStorage.getItem('lockyUrl')
+    if (isWalletUrlAllowed(storedUrl)) {
+        iframe.src = storedUrl
+    }
 
     document.querySelector('.error-message a').href =
         chrome.runtime.getURL('/options.html')
 
     chrome.storage.sync.get('lockyUrl').then((value) => {
         const newUrl = value.lockyUrl || ''
-        if (
-            !newUrl.startsWith('https://') &&
-            !newUrl.startsWith('http://127.0.0.1:') &&
-            !newUrl.startsWith('http://localhost:')
-        ) {
+        if (!isWalletUrlAllowed(newUrl)) {
             document.querySelector('.error-message').classList.add('show')
             iframe.remove()
             return
@@ -45,14 +44,25 @@ document.body.onload = () => {
 
     let checkedTab = null
 
+    // each time we open the popup, we generate a new random `channelId`
+    // we increment `lastSequence` for each call to prevent replay attack
+    let channelId = null
+    let lastSequence = 0
+
     /**
-     * The key is used to encrypt what store in the SW, and to communicate with postMessage
+     * Return the key used to communicate with the `lockyUrl`.
      */
-    async function getKey() {
-        if (!localStorage.getItem('encryptionKey')?.length) {
-            localStorage.setItem('encryptionKey', hex(await generateKey()))
+    async function getKey(walletUrl) {
+        if (!localStorage.getItem('extensionMasterKey')?.length) {
+            localStorage.setItem('extensionMasterKey', hex(await generateKey()))
         }
-        return await fromHex(localStorage.getItem('encryptionKey'))
+        const masterKey = new Uint8Array(
+            fromHex(localStorage.getItem('extensionMasterKey'))
+        )
+        return await deriveKeyHKDF(
+            masterKey,
+            `locky-wallet-key-v1\0${getWalletScope(walletUrl)}`
+        )
     }
 
     window.addEventListener('message', async (ev) => {
@@ -72,13 +82,16 @@ document.body.onload = () => {
 
         if (ev.data === 'IFRAME_READY') {
             // Send our key, and the encrypted password if it has been saved
-            const pluginKey = await getKey()
+            const pluginKey = await getKey(lockyUrl)
             const storage = await chrome.storage.session.get()
             const tab = await getCurrentTab()
             checkedTab = { id: tab.id, url: tab.url }
+            channelId = hex(window.crypto.getRandomValues(new Uint8Array(16)))
+            lastSequence = 0
             iframe.contentWindow.postMessage(
                 {
                     pluginKey: hex(pluginKey),
+                    channelId,
                     encryptedPassword: storage.encryptedPassword,
                     // Send information about the current tab
                     currentUrl: tab.url,
@@ -89,9 +102,34 @@ document.body.onload = () => {
         }
 
         // Decrypt using the shared key we have with Locky
-        const key = await getKey()
-        const pt = await decryptAES(new Uint8Array(ev.data), key)
-        const event = JSON.parse(new TextDecoder().decode(pt))
+        const key = await getKey(lockyUrl)
+        const pt = await decryptAESGCM(new Uint8Array(ev.data), key)
+        if (!pt) {
+            console.error('Web Extension: invalid authenticated message')
+            return
+        }
+
+        let message
+        try {
+            message = JSON.parse(new TextDecoder().decode(pt))
+        } catch {
+            console.error('Web Extension: malformed message')
+            return
+        }
+
+        if (
+            !channelId ||
+            message.channelId !== channelId ||
+            !Number.isSafeInteger(message.sequence) ||
+            message.sequence <= lastSequence ||
+            !message.event ||
+            typeof message.event !== 'object'
+        ) {
+            console.error('Web Extension: invalid or replayed message')
+            return
+        }
+        lastSequence = message.sequence
+        const event = message.event
 
         if (event.action === 'login') {
             // Check that the tab didn't redirect between now and the check
@@ -128,4 +166,39 @@ document.body.onload = () => {
             )
         })
     }
+}
+
+function isWalletUrlAllowed(value) {
+    if (!value) {
+        return false
+    }
+
+    let url
+    try {
+        url = new URL(value)
+    } catch {
+        return false
+    }
+
+    // Credentials make prefix-based URL checks ambiguous and have no valid use
+    // in a wallet endpoint.
+    if (url.username || url.password) {
+        return false
+    }
+
+    if (url.protocol === 'https:') {
+        return true
+    }
+
+    return (
+        url.protocol === 'http:' &&
+        ['localhost', '127.0.0.1', '[::1]'].includes(url.hostname)
+    )
+}
+
+function getWalletScope(value) {
+    const url = new URL(value)
+    // Remove ending `/`
+    const pathname = url.pathname.replace(/\/+$/, '') || '/'
+    return url.origin + pathname
 }

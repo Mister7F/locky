@@ -292,6 +292,62 @@ export async function decryptAES(
 }
 
 /**
+ * Encrypt with AES-256-GCM and return `nonce || ciphertext || tag`.
+ * WebCrypto appends the 128-bit authentication tag to the ciphertext.
+ */
+export async function encryptAESGCM(
+    plaintext: Uint8Array | ArrayBuffer,
+    key: Uint8Array
+): Promise<Uint8Array> {
+    const plainBytes =
+        plaintext instanceof Uint8Array ? plaintext : new Uint8Array(plaintext)
+    const nonce = window.crypto.getRandomValues(new Uint8Array(12))
+    const cryptoKey = await rawKeyToCryptoKeyGCM(key)
+    const ciphertext = await window.crypto.subtle.encrypt(
+        { name: 'AES-GCM', iv: nonce, tagLength: 128 },
+        cryptoKey,
+        plainBytes as BufferSource
+    )
+    return concatenate(nonce, new Uint8Array(ciphertext))
+}
+
+/**
+ * Decrypt and authenticate a value produced by `encryptAESGCM`.
+ */
+export async function decryptAESGCM(
+    ciphertext: Uint8Array | ArrayBuffer | null,
+    key: Uint8Array
+): Promise<Uint8Array | undefined> {
+    if (!ciphertext) {
+        return
+    }
+
+    const cipherBytes =
+        ciphertext instanceof Uint8Array
+            ? ciphertext
+            : new Uint8Array(ciphertext)
+    // 12-byte nonce, 16-byte authentication tag, and at least one data byte.
+    if (cipherBytes.length < 29) {
+        return
+    }
+
+    const nonce = cipherBytes.slice(0, 12)
+    const encrypted = cipherBytes.slice(12)
+    const cryptoKey = await rawKeyToCryptoKeyGCM(key)
+
+    try {
+        const plaintext = await window.crypto.subtle.decrypt(
+            { name: 'AES-GCM', iv: nonce, tagLength: 128 },
+            cryptoKey,
+            encrypted
+        )
+        return new Uint8Array(plaintext)
+    } catch {
+        return
+    }
+}
+
+/**
  * Encrypt the given plaintext with the given key using xChaCha20
  *
  * @param {Uint8Array} The plaintext to encrypt
@@ -414,6 +470,16 @@ async function rawKeyToCryptoKey(rawKey: Uint8Array): Promise<CryptoKey> {
         rawKey as BufferSource,
         { name: 'AES-CBC' },
         true,
+        ['decrypt', 'encrypt']
+    )
+}
+
+async function rawKeyToCryptoKeyGCM(rawKey: Uint8Array): Promise<CryptoKey> {
+    return await window.crypto.subtle.importKey(
+        'raw',
+        rawKey as BufferSource,
+        { name: 'AES-GCM' },
+        false,
         ['decrypt', 'encrypt']
     )
 }

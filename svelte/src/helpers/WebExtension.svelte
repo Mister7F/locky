@@ -13,7 +13,12 @@
         copyValue,
         cleanSearchValue,
     } from './utils.ts'
-    import { encryptAES, decryptAES, getTotpCode } from './crypto.ts'
+    import {
+        encryptAES,
+        decryptAES,
+        encryptAESGCM,
+        getTotpCode,
+    } from './crypto.ts'
     import Wallet from '../models/wallet.ts'
     import * as api from '../application/api.ts'
     import { normalizeHost } from '../helpers/utils.ts'
@@ -21,6 +26,8 @@
 
     let pluginKey = null
     let pluginOrigin = null
+    let channelId = null
+    let sendSequence = 0
 
     interface Props {
         wallet: Wallet
@@ -102,7 +109,12 @@
             const eventData = JSON.parse(JSON.stringify(event.data))
 
             const newPluginKey = fromHex(eventData.pluginKey)
-            if (!newPluginKey?.byteLength) {
+            const newChannelId = eventData.channelId
+            if (
+                !newPluginKey?.byteLength ||
+                typeof newChannelId !== 'string' ||
+                !/^[0-9a-f]{32}$/.test(newChannelId)
+            ) {
                 return
             }
             let ok = false
@@ -123,6 +135,8 @@
             ) {
                 pluginKey = newPluginKey
                 pluginOrigin = event.origin
+                channelId = newChannelId
+                sendSequence = 0
                 WebExtension.inWebExtension = true
                 iframeAllowed = true
                 currentTabHost = normalizeHost(eventData.currentUrl)
@@ -159,6 +173,8 @@
             newWebExtensionKeyDialogOk = () => {
                 pluginKey = newPluginKey
                 pluginOrigin = event.origin
+                channelId = newChannelId
+                sendSequence = 0
                 localStorage.setItem('pluginKeyHash', newPluginKeyHash)
                 localStorage.setItem('pluginOrigin', pluginOrigin)
                 WebExtension.inWebExtension = true
@@ -356,10 +372,20 @@
     }
 
     async function sendToWebExtension(event) {
-        if (!pluginKey?.byteLength) {
+        if (!pluginKey?.byteLength || !channelId) {
             return false
         }
-        const ct = await encryptAES(toBytes(JSON.stringify(event)), pluginKey)
+        sendSequence += 1
+        const ct = await encryptAESGCM(
+            toBytes(
+                JSON.stringify({
+                    channelId,
+                    sequence: sendSequence,
+                    event,
+                })
+            ),
+            pluginKey
+        )
         window.parent.postMessage(ct, pluginOrigin)
         return true
     }
