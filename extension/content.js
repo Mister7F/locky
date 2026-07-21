@@ -370,15 +370,12 @@ async function _writeEnterWrite(
 }
 
 async function _twitter(login, password) {
-    if (
-        document.location.origin !== 'https://x.com' ||
-        !document.location.pathname.includes('/login')
-    ) {
+    if (document.location.origin !== 'https://x.com') {
         showAlert('Failed to find the login form')
         return
     }
 
-    let elLogin = document.querySelector('input[autocomplete="username"]')
+    let elLogin = document.querySelector('input[autocomplete*="username"]')
     if (!elLogin) {
         elLogin = document.querySelector('input[name="email"]')
     }
