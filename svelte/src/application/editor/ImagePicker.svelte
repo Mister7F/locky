@@ -5,6 +5,8 @@
     import { onMount } from 'svelte'
     import Field from '../../helpers/field/Field.svelte'
     import Img from '../../helpers/Img.svelte'
+    import Dialog from '../../helpers/Dialog.svelte'
+    import Button from '../../helpers/Button.svelte'
 
     interface Props {
         src: string
@@ -24,6 +26,12 @@
 
     let previewSrc = $state(src || 'img/accounts/default.svg')
     let searchValue = $state('')
+    let downloadError = $state('')
+    let svgDialogOpen = $state(false)
+    let svgCode = $state('')
+    let svgError = $state('')
+
+    const MAX_STORED_IMAGE_SIZE = 1024 * 1024
 
     let currentSrcs = $derived(
         !searchValue || !searchValue.length
@@ -50,9 +58,67 @@
 
     function choose(isrc: string) {
         searchValue = ''
+        downloadError = ''
         src = isrc
         previewSrc = isrc || 'img/accounts/default.svg'
         chooseIcon = false
+    }
+
+    async function downloadAndChoose() {
+        downloadError = ''
+
+        try {
+            const response = await fetch(src, {
+                credentials: 'omit',
+                referrerPolicy: 'no-referrer',
+            })
+            if (!response.ok) {
+                throw new Error(`Image download failed (${response.status})`)
+            }
+
+            const image = await response.blob()
+            if (!image.type.startsWith('image/')) {
+                throw new Error('The URL did not return an image')
+            }
+            if (image.size > MAX_STORED_IMAGE_SIZE) {
+                throw new Error('The image is larger than 1 MiB')
+            }
+
+            choose(await blobToDataUri(image))
+        } catch (error) {
+            console.error(error)
+            downloadError =
+                error instanceof TypeError
+                    ? 'The image could not be downloaded (the server may block cross-origin access)'
+                    : error instanceof Error
+                      ? error.message
+                      : 'The image could not be downloaded'
+        }
+    }
+
+    function blobToDataUri(blob: Blob): Promise<string> {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader()
+            reader.onload = () => resolve(reader.result as string)
+            reader.onerror = () => reject(reader.error)
+            reader.readAsDataURL(blob)
+        })
+    }
+
+    async function storeSvg() {
+        svgError = ''
+
+        if (svgCode.length > MAX_STORED_IMAGE_SIZE) {
+            svgError = 'The SVG is larger than 1 MiB'
+            return
+        }
+
+        const dataUri = await blobToDataUri(
+            new Blob([svgCode], { type: 'image/svg+xml' })
+        )
+        svgDialogOpen = false
+        svgCode = ''
+        choose(dataUri)
     }
 </script>
 
@@ -63,8 +129,34 @@
     <div class="icons {chooseIcon && !readonly ? 'visible' : ''}">
         <div class="img-header">
             <div class="url">
-                <Field label="Image URL" copy={false} bind:value={src} />
-                <IconButton onclick={() => choose(src)} icon="save_alt" />
+                <Field
+                    label="Image URL"
+                    copy={false}
+                    bind:value={src}
+                    message={downloadError}
+                    messagePersistent={true}
+                    oninput={() => (downloadError = '')}
+                />
+                <div class="url-actions">
+                    <IconButton
+                        title="Use image URL"
+                        onclick={() => choose(src)}
+                        icon="link"
+                    />
+                    <IconButton
+                        title="Download and store image"
+                        onclick={downloadAndChoose}
+                        icon="download"
+                    />
+                    <IconButton
+                        title="Enter SVG code"
+                        onclick={() => {
+                            svgError = ''
+                            svgDialogOpen = true
+                        }}
+                        icon="code"
+                    />
+                </div>
             </div>
             <Field label="Search" copy={false} bind:value={searchValue} />
         </div>
@@ -79,6 +171,29 @@
         </div>
     </div>
 </div>
+
+<Dialog bind:open={svgDialogOpen} title="Store SVG code">
+    <textarea
+        bind:value={svgCode}
+        oninput={() => (svgError = '')}
+        placeholder="<svg xmlns=&quot;http://www.w3.org/2000/svg&quot;>…</svg>"
+        spellcheck="false"
+    ></textarea>
+    {#if svgError}
+        <div class="svg-error">{svgError}</div>
+    {/if}
+
+    {#snippet actions()}
+        <Button
+            onclick={() => (svgDialogOpen = false)}
+            color="secondary"
+            variant="outlined"
+        >
+            Cancel
+        </Button>
+        <Button onclick={storeSvg} color="primary">Store SVG</Button>
+    {/snippet}
+</Dialog>
 
 <style>
     .image_picker {
@@ -169,6 +284,35 @@
     }
 
     .url > :global(.field) {
-        width: 80%;
+        flex: 1;
+        min-width: 0;
+    }
+
+    .url-actions {
+        display: flex;
+        flex-direction: row;
+    }
+
+    textarea {
+        box-sizing: border-box;
+        width: min(600px, 70vw);
+        height: min(350px, 50vh);
+        resize: vertical;
+        border: 1px solid var(--on-primary);
+        border-radius: 4px;
+        padding: 10px;
+        color: var(--on-primary);
+        background: var(--primary);
+        font-family: monospace;
+    }
+
+    textarea:focus {
+        border-color: var(--secondary);
+        outline: none;
+    }
+
+    .svg-error {
+        margin-top: 8px;
+        color: var(--error);
     }
 </style>
