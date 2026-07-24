@@ -66,6 +66,7 @@ outlook.svg
 ovh.png
 paypal.svg
 pinterest.svg
+proton.svg
 proximus.png
 python.svg
 quora.svg
