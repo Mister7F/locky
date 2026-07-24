@@ -185,6 +185,8 @@ chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
 async function login(login, password, url) {
     const settings = METHODS[normalizeHost(window.location)] || {}
 
+    console.log("Fill settings:", settings)
+
     let elPassword
 
     if (settings.fill === 'set_attribute') {
@@ -235,6 +237,8 @@ async function login(login, password, url) {
             )
         }
     }
+
+    console.log("Password input", elPassword)
 
     if (!elPassword) {
         return false
@@ -334,7 +338,7 @@ async function _writeSubmitWrite(
 
     submit.click()
 
-    const elPassword = await waitFocusablePasswordInput(passwordSelectors)
+    const elPassword = await waitFocusableInput(passwordSelectors)
 
     elPassword.focus()
     document.execCommand('insertText', false, password)
@@ -360,7 +364,7 @@ async function _writeEnterWrite(
     await sleep(200)
     await enter(elLogin)
 
-    const elPassword = await waitFocusablePasswordInput(passwordSelectors)
+    const elPassword = await waitFocusableInput(passwordSelectors)
 
     elPassword.focus()
     document.execCommand('insertText', false, password)
@@ -370,42 +374,39 @@ async function _writeEnterWrite(
 }
 
 async function _twitter(login, password) {
+    console.log("_twitter")
     if (document.location.origin !== 'https://x.com') {
         showAlert('Failed to find the login form')
         return
     }
 
-    let elLogin = document.querySelector('input[autocomplete*="username"]')
-    if (!elLogin) {
-        elLogin = document.querySelector('input[name="email"]')
-    }
+    const elLogin = await waitFocusableInput(['input[autocomplete*="username"]', 'input[name="email"]']);
+    console.log("Login input", elLogin)
     if (!elLogin) {
         showAlert('Failed to find the login form')
         return
     }
 
-    elLogin.focus()
     document.execCommand('insertText', false, login)
     await sleep(500)
 
-    await enter(elLogin)
+    const submit = elLogin
+        .closest(formSelector)
+        .querySelector(submitSelectors.join(','))
+    console.log("Submit button:", submit)
+    if (!submit) {
+
+        return
+    }
+    submit.click()
 
     // Twitter has no `<form/>`
-    let elPassword = null
-    for (let i = 0; i < 30; i++) {
-        elPassword = document.querySelector('input[type="password"]')
-        if (elPassword) {
-            break
-        }
-        await sleep(200)
-    }
-
+    const elPassword = await waitFocusableInput(['input[type="password"]']);
     if (!elPassword) {
         showAlert('Failed to find the login form')
         return
     }
 
-    elPassword.focus()
     document.execCommand('insertText', false, password)
     await sleep(500)
 
@@ -450,15 +451,15 @@ async function enter(input) {
     input.dispatchEvent(keypup)
 }
 
-async function waitFocusablePasswordInput(passwordSelectors) {
-    let elPassword = null
+async function waitFocusableInput(passwordSelectors) {
+    let el = null
     for (let i = 0; i < 40; ++i) {
-        elPassword = findInputs(passwordSelectors, null, false)
+        el = findInputs(passwordSelectors, null, false)
         // Google, Paypal have a hidden input password in its form
-        if (elPassword && !isHidden(elPassword)) {
-            elPassword.focus()
-            if (document.activeElement === elPassword) {
-                return elPassword
+        if (el && !isHidden(el)) {
+            el.focus()
+            if (document.activeElement === el) {
+                return el
             }
         }
         await sleep(100)
