@@ -31,6 +31,9 @@
         oncopy?: () => void
         onshow_qrcode?: () => void
         onremove?: (index?: number) => void
+        actionIcon?: string
+        actionTitle?: string
+        onaction?: () => void
     }
 
     let {
@@ -55,13 +58,20 @@
         oncopy,
         onshow_qrcode,
         onremove,
+        actionIcon = '',
+        actionTitle = '',
+        onaction,
     }: Props = $props()
 
     let copied = $state(false)
     let generatePasswordDialog = $state<any>(null)
 
     let computedType = $derived(
-        passwordVisible || type !== 'password' ? 'text' : 'password'
+        passwordVisible
+            ? 'text'
+            : type === 'password' || type === 'email'
+              ? type
+              : 'text'
     )
 
     let { strength, detail: strengthResult } = $derived(
@@ -198,6 +208,13 @@
             {/if}
             {#if canEditType && !readonly}
                 <FieldAction bind:type bind:label {onremove} />
+            {/if}
+            {#if actionIcon && !readonly}
+                <IconButton
+                    onclick={onaction}
+                    icon={actionIcon}
+                    title={actionTitle}
+                />
             {/if}
             {#if copy && value}
                 <IconButton

@@ -268,6 +268,20 @@ export async function deleteFolder(
     return await saveWallet()
 }
 
+export function getSimpleLoginApiKey(): string {
+    return wallet?.settings.simpleLoginApiKey || ''
+}
+
+export async function setSimpleLoginApiKey(
+    apiKey: string
+): Promise<Wallet | undefined> {
+    if (!wallet) {
+        return
+    }
+    wallet.settings.simpleLoginApiKey = apiKey
+    return await saveWallet()
+}
+
 export async function updatePassword(
     oldPassword: string,
     newPassword: string

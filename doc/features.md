@@ -7,3 +7,4 @@
 - We can add custom fields for each account (text, password, URL...)
 - Download images if the account logo is not in the default list
 - Group account in folder
+- Generates email aliases using [SimpleLogin](https://simplelogin.io)

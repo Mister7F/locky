@@ -62,6 +62,13 @@
         />
         <Button
             class="field_type_button"
+            icon="email"
+            color="secondary"
+            variant={type === 'email' ? '' : 'outlined'}
+            onclick={() => (type = 'email')}
+        />
+        <Button
+            class="field_type_button"
             icon="link"
             color="secondary"
             variant={type === 'url' ? '' : 'outlined'}

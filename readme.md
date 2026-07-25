@@ -36,6 +36,12 @@ Your accounts are encrypted 2 times with modern algorithms;
 You can also install a [Chrome / Firefox extension](./extension) to automatically fill the forms (and prevent phishing)
 > https://youtu.be/Iayjx8GReKw
 
+You can generates email aliases using [SimpleLogin](https://simplelogin.io) to have one different emails per account (service used by [Proton Pass](https://proton.me/pass)).
+
+<p align="center">
+    <img src="doc/img/simple_login.png">
+</p>
+
 ## Summary
 
 - [Installation](doc/installation.md)

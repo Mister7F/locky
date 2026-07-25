@@ -13,6 +13,7 @@
     import DialogTotpQrCode from './DialogTotpQrCode.svelte'
     import DialogRemoveAccount from './DialogRemoveAccount.svelte'
     import GeneratePassword from './GeneratePassword.svelte'
+    import SimpleLoginAlias from './SimpleLoginAlias.svelte'
 
     interface Props {
         account: Account
@@ -39,6 +40,7 @@
     let qrCodeDialog = $state<DialogTotpQrCode | undefined>()
     let removeAccountDialog = $state<DialogRemoveAccount | undefined>()
     let generatePasswordDialog = $state<GeneratePassword | undefined>()
+    let simpleLoginAliasDialog = $state<SimpleLoginAlias | undefined>()
 
     // TOTP
     let totpCode = $state(null)
@@ -159,6 +161,12 @@
             bind:value={accountDraft.login}
             {readonly}
             oncopy={() => copyValue(accountDraft.login)}
+            actionIcon={!accountDraft.login ? 'alternate_email' : ''}
+            actionTitle="Create a SimpleLogin alias"
+            onaction={() =>
+                simpleLoginAliasDialog?.open(
+                    (alias) => (accountDraft.login = alias)
+                )}
         />
         <Field
             label="Password"
@@ -199,6 +207,14 @@
                 onremove={() => removeField(i)}
                 oncopy={() => copyValue(field.value)}
                 showGeneratePassword={true}
+                actionIcon={field.type === 'email' && !field.value
+                    ? 'alternate_email'
+                    : ''}
+                actionTitle="Create a SimpleLogin alias"
+                onaction={() =>
+                    simpleLoginAliasDialog?.open(
+                        (alias) => (field.value = alias)
+                    )}
             />
         {/each}
 
@@ -231,6 +247,8 @@
 />
 
 <DialogRemoveAccount bind:this={removeAccountDialog} {onremove} />
+
+<SimpleLoginAlias bind:this={simpleLoginAliasDialog} />
 
 <style>
     .account {
