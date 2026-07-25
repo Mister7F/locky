@@ -53,6 +53,7 @@
         flex-direction: row;
         justify-content: space-between;
         align-items: center;
+        max-width: 100%;
     }
 
     .left {

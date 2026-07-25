@@ -138,6 +138,7 @@
         --folder-width: 350px;
         width: var(--folder-width);
         min-width: var(--folder-width);
+        max-width: 100%;
         transition: 0.3s;
         box-sizing: border-box;
     }
@@ -150,6 +151,7 @@
         position: absolute;
         left: -360px;
         height: 100%;
+        min-width: 0;
         background-color: var(--surface);
         z-index: 2;
     }

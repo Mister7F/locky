@@ -287,10 +287,10 @@
         flex-direction: row;
     }
     .detail_img {
-        min-height: 70px;
-        min-width: 70px;
-        height: 70px;
-        width: 70px;
+        min-height: 52px;
+        min-width: 52px;
+        height: 52px;
+        width: 52px;
         padding: 8px;
         box-sizing: border-box;
     }
@@ -309,7 +309,7 @@
     .detail_name {
         max-width: 100%;
         font-weight: 600;
-        font-size: 1.5em;
+        font-size: 1.2em;
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;

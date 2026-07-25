@@ -1,3 +1,5 @@
+import { normalizeOrigin } from '../helpers/utils'
+
 export default class Account {
     private __brand!: 'Account'
     id?: string
@@ -44,6 +46,20 @@ export default class Account {
             values.totp,
             (values.fields || []).map((f) => Field.fromJson(f))
         )
+    }
+
+    get urls(): string[] {
+        const urls = this.fields
+            .filter((f) => f.type === 'url' && f.value)
+            .map((f) => normalizeOrigin(f.value))
+        if (this.url?.length) {
+            urls.push(normalizeOrigin(this.url))
+        }
+        return urls
+    }
+
+    get searchableTerms(): string[] {
+        return [this.name, ...this.urls]
     }
 }
 

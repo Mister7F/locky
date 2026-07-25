@@ -144,3 +144,25 @@ export function normalizeOrigin(url) {
 export function cleanSearchValue(txt: string | null | undefined): string {
     return (txt || '').replace(/ /g, '').toLowerCase()
 }
+
+/**
+ * Fuzzy match `pattern` against `text` as a subsequence, i.e. the same match as
+ * the regex `a.*b.*c...`. Returns 0 when it does not match, otherwise a score
+ * where higher is better: each matched character scores 1, or 3 when it
+ * directly follows the previous one, so tighter (and prefix) matches rank up.
+ */
+export function fuzzyScore(text: string, pattern: string): number {
+    let score = 0
+    let from = 0
+    let previous = -1
+    for (const char of pattern) {
+        const index = text.indexOf(char, from)
+        if (index < 0) {
+            return 0
+        }
+        score += index === previous + 1 ? 3 : 1
+        previous = index
+        from = index + 1
+    }
+    return score
+}

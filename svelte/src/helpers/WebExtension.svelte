@@ -143,10 +143,7 @@
                         getMasterPasswordKey()
                     )
                     const { password, key } = JSON.parse(fromBytes(pt))
-                    await unlock(
-                        password,
-                        new Uint8Array(fromHex(key))
-                    )
+                    await unlock(password, new Uint8Array(fromHex(key)))
                 }
                 return
             }
@@ -198,10 +195,7 @@
 
         searchText = ''
         const walletText = JSON.stringify(
-            wallet.accounts.map((a) => [
-                cleanSearchValue(a.name),
-                cleanSearchValue(a.url),
-            ])
+            wallet.accounts.map((a) => a.searchableTerms.map(cleanSearchValue))
         )
 
         if (
@@ -377,8 +371,8 @@
 
 <Dialog bind:open={confirmationDialogOpen} title="Are you sure ?">
     The current domain <b class="host">{currentTabOrigin}</b>
-    does not match the URL in your wallet <b class="host">{accountOrigin}</b>, are
-    you sure you are not phished?
+    does not match the URL in your wallet <b class="host">{accountOrigin}</b>,
+    are you sure you are not phished?
     <br />
     <br />
     Did you get here by yourself, and not through a link you received?

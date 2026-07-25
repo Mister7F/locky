@@ -4,7 +4,7 @@
     import AccountCard from './AccountCard.svelte'
     import AccountEditor from './editor/AccountEditor.svelte'
     import * as api from './api.ts'
-    import { cleanSearchValue } from '../helpers/utils.ts'
+    import { cleanSearchValue, fuzzyScore } from '../helpers/utils.ts'
     import Folders from './folders/Folders.svelte'
     import Navbar from './navbar/Navbar.svelte'
     import Sidepanel from '../helpers/Sidepanel.svelte'
@@ -36,23 +36,34 @@
         if (wallet && wallet.accounts) {
             const folderIds = wallet.folders.map((folder) => folder.id)
 
-            ret = wallet.accounts.filter((account) => {
-                if (searchText.length) {
-                    return [account.name, account.url].some((value: string) => {
-                        return (
-                            cleanSearchValue(value).indexOf(
-                                cleanSearchValue(searchText)
-                            ) >= 0
-                        )
-                    })
-                }
-                if (currentFolderId === 'no_folder') {
-                    return !folderIds.includes(account.folder_id)
-                }
-                return currentFolderId
-                    ? account.folder_id === currentFolderId
-                    : true
-            })
+            if (searchText.length) {
+                // Fuzzy search: keep accounts whose name or a URL matches the
+                // subsequence, then sort by score (stable, so equal scores keep
+                // the wallet order).
+                const pattern = cleanSearchValue(searchText)
+                ret = wallet.accounts
+                    .map((account) => ({
+                        account,
+                        score: Math.max(
+                            0,
+                            ...account.searchableTerms.map((term) =>
+                                fuzzyScore(cleanSearchValue(term), pattern)
+                            )
+                        ),
+                    }))
+                    .filter((match) => match.score > 0)
+                    .sort((a, b) => b.score - a.score)
+                    .map((match) => match.account)
+            } else {
+                ret = wallet.accounts.filter((account) => {
+                    if (currentFolderId === 'no_folder') {
+                        return !folderIds.includes(account.folder_id)
+                    }
+                    return currentFolderId
+                        ? account.folder_id === currentFolderId
+                        : true
+                })
+            }
         }
         return ret
     })
@@ -176,8 +187,8 @@
             class="accountsGrid"
             onmove={onMoveAccount}
             onaction={onAccountAction}
-            onmove_blocked={() =>
-                onnotify('Can not move accounts in this folder')}
+            onmove_blocked={() => onnotify('Cannot move')}
+            movable={!searchText.length}
             items={accounts}
             bind:dragging
             customActions={folderDomIds}

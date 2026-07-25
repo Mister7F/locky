@@ -24,7 +24,7 @@
         viewMode = $bindable('list'),
         floatingFolder,
         searchText = $bindable(''),
-        openSearch = bindable(false),
+        openSearch = $bindable(false),
         onshow_folders,
         onlock,
         onwalletdownloaded,
