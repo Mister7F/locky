@@ -84,6 +84,9 @@
     hr,
     .content {
         color: var(--on-primary);
+        max-width: 100%;
+        overflow: hidden;
+        word-wrap: break-word;
     }
 
     .actions > :global(div) {

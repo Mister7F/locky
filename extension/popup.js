@@ -81,10 +81,12 @@ document.body.onload = () => {
         }
 
         if (ev.data === 'IFRAME_READY') {
-            // Send our key, and the encrypted password if it has been saved
-            const pluginKey = await getKey(lockyUrl)
-            const storage = await chrome.storage.session.get()
-            const tab = await getActiveTab()
+            // Send our key, and the encrypted password if it has been saved.
+            const [pluginKey, storage, tab] = await Promise.all([
+                getKey(lockyUrl),
+                chrome.storage.session.get(),
+                getActiveTab(),
+            ])
             setActiveTab(tab)
             channelId = hex(window.crypto.getRandomValues(new Uint8Array(16)))
             lastSequence = 0
