@@ -117,7 +117,7 @@ export function openUrl(url: string) {
     }
 }
 
-export function normalizeHost(url?: string): string | undefined {
+function normalizeHost(url?: string): string | undefined {
     if (!url) {
         return
     }
@@ -134,6 +134,11 @@ export function normalizeHost(url?: string): string | undefined {
         origin = origin.slice(6)
     }
     return origin
+}
+
+export function normalizeOrigin(url) {
+    const host = normalizeHost(url)
+    return host && new URL(url).protocol + '//' + host
 }
 
 export function cleanSearchValue(txt: string | null | undefined): string {

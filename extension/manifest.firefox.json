@@ -3,7 +3,7 @@
     "name": "Locky",
     "version": "1.17",
     "description": "Password manager",
-    "permissions": ["activeTab", "storage", "sidePanel", "tabs"],
+    "permissions": ["activeTab", "storage", "tabs"],
     "action": {
         "default_icon": {
             "16": "icons/16.png",
@@ -12,10 +12,17 @@
         }
     },
     "background": {
-        "service_worker": "background.js"
+        "scripts": ["background.firefox.js"]
     },
-    "side_panel": {
-        "default_path": "popup.html"
+    "sidebar_action": {
+        "default_title": "Locky",
+        "default_panel": "popup.html",
+        "default_icon": {
+            "16": "icons/16.png",
+            "32": "icons/32.png",
+            "64": "icons/64.png"
+        },
+        "open_at_install": false
     },
     "icons": {
         "16": "icons/16.png",

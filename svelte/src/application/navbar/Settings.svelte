@@ -56,10 +56,11 @@
 
     async function onDropboxClick() {
         if (isDropboxAuthenticated) {
-            dropbox.logout()
+            await dropbox.logout()
             isDropboxAuthenticated = false
         } else {
-            document.location = await dropbox.getAuthenticationUrl()
+            await dropbox.openAuthenticationPage()
+            isDropboxAuthenticated = await dropbox.isAuthenticated()
         }
     }
 
@@ -186,6 +187,13 @@
                 </svg>
                 Dropbox {isDropboxAuthenticated ? 'logout' : 'login'}
             </Button>
+            {#if isDropboxAuthenticated}
+                <Field
+                    label="Dropbox refresh token"
+                    value={api.getDropboxRefreshToken()}
+                    readonly
+                />
+            {/if}
         </div>
 
         <div class="section simplelogin">

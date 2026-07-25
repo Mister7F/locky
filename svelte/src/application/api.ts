@@ -93,6 +93,15 @@ export async function login(
     return await saveWallet()
 }
 
+export async function replaceWallet(
+    filedata: ArrayBuffer | Uint8Array
+): Promise<Wallet | undefined> {
+    if (!masterPassword) {
+        return
+    }
+    return await login(filedata, masterPassword)
+}
+
 export async function logout(keepIndexDb?: boolean): Promise<void> {
     // wait for the previous write / get operation if any
     return enqueueEncryptedWallet(async () => {
@@ -270,6 +279,20 @@ export async function deleteFolder(
 
 export function getSimpleLoginApiKey(): string {
     return wallet?.settings.simpleLoginApiKey || ''
+}
+
+export function getDropboxRefreshToken(): string {
+    return wallet?.settings.dropboxRefreshToken || ''
+}
+
+export async function setDropboxRefreshToken(
+    refreshToken: string
+): Promise<Wallet | undefined> {
+    if (!wallet) {
+        return
+    }
+    wallet.settings.dropboxRefreshToken = refreshToken
+    return await saveWallet()
 }
 
 export async function setSimpleLoginApiKey(

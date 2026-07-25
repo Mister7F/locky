@@ -21,7 +21,7 @@
     } from './crypto.ts'
     import Wallet from '../models/wallet.ts'
     import * as api from '../application/api.ts'
-    import { normalizeHost } from '../helpers/utils.ts'
+    import { normalizeOrigin } from '../helpers/utils.ts'
     import { untrack, onMount, onDestroy } from 'svelte'
 
     let pluginKey = null
@@ -32,6 +32,7 @@
     interface Props {
         wallet: Wallet
         searchText?: string
+        openSearch?: boolean
         locked?: boolean
         iframeAllowed?: boolean
         onnotify: (message: string) => void
@@ -40,46 +41,22 @@
     let {
         wallet = $bindable({} as Wallet),
         searchText = $bindable(''),
+        openSearch = $bindable(false),
         locked = $bindable(false),
         iframeAllowed = $bindable(false),
         onnotify,
     }: Props = $props()
 
-    let currentTabHost = $state(null)
-    let currentTabOrigin = $state(null)
+    let currentTabUrl = $state(null)
+    let currentTabOrigin = $derived(normalizeOrigin(currentTabUrl))
 
     let confirmationDialogOpen = $state(false)
-    let accountHost = $state()
+    let accountOrigin = $state()
     let account = null
     let newWebExtensionKeyDialogMessage = $state('')
     let newWebExtensionKeyDialogOrigin = $state('')
     let newWebExtensionKeyDialogKeyHash = $state('')
     let newWebExtensionKeyDialogOk = $state(null)
-
-    // TODO: remove explicitEffect / untrack and just use `searchText` in dependencies once https://github.com/sveltejs/svelte/issues/9248 is merged
-    function explicitEffect(fn, depsFn) {
-        $effect(() => {
-            depsFn()
-            untrack(fn)
-        })
-    }
-    explicitEffect(
-        () => {
-            if (!WebExtension.inWebExtension) {
-                return
-            }
-            if (locked) {
-                window.localStorage.removeItem('extension_state')
-            } else {
-                // Save the current search and the current tab to restore it when we re-open the extension
-                window.localStorage.setItem(
-                    'extension_state',
-                    JSON.stringify({ url: currentTabHost, search: searchText })
-                )
-            }
-        },
-        () => [searchText, locked]
-    )
 
     /**
      * Parse the URL to check if a key is present, and ask to save it.
@@ -99,7 +76,7 @@
             }
             if (event.source !== window.parent) {
                 // The message must come from the frame that embeds us (the
-                // extension popup), not from some other window that merely holds a
+                // extension sidebar), not from some other window that merely holds a
                 // reference to us. This confirms the *framer* is the extension.
                 console.error('Received message from unexpected source', event)
                 return
@@ -107,6 +84,21 @@
 
             // Force basic types
             const eventData = JSON.parse(JSON.stringify(event.data))
+
+            if (eventData.action === 'CURRENT_TAB_CHANGED') {
+                if (
+                    !WebExtension.inWebExtension ||
+                    event.origin !== pluginOrigin ||
+                    typeof eventData.currentUrl !== 'string'
+                ) {
+                    return
+                }
+                currentTabUrl = eventData.currentUrl
+                if (!locked) {
+                    setSearch({ detail: wallet })
+                }
+                return
+            }
 
             const newPluginKey = fromHex(eventData.pluginKey)
             const newChannelId = eventData.channelId
@@ -139,8 +131,7 @@
                 sendSequence = 0
                 WebExtension.inWebExtension = true
                 iframeAllowed = true
-                currentTabHost = normalizeHost(eventData.currentUrl)
-                currentTabOrigin = normalizeOrigin(eventData.currentUrl)
+                currentTabUrl = eventData.currentUrl
 
                 // The extension is already loaded, decrypt it and unlock the wallet
                 if (eventData.encryptedPassword?.length) {
@@ -154,8 +145,7 @@
                     const { password, key } = JSON.parse(fromBytes(pt))
                     await unlock(
                         password,
-                        new Uint8Array(fromHex(key)),
-                        currentTabHost
+                        new Uint8Array(fromHex(key))
                     )
                 }
                 return
@@ -179,6 +169,7 @@
                 localStorage.setItem('pluginOrigin', pluginOrigin)
                 WebExtension.inWebExtension = true
                 iframeAllowed = true
+                currentTabUrl = eventData.currentUrl
                 newWebExtensionKeyDialogOk = null
             }
         })
@@ -188,7 +179,7 @@
         window.parent.postMessage('IFRAME_READY', '*')
     }
 
-    async function unlock(password, key, host) {
+    async function unlock(password, key) {
         // If we saved the password for the web extension, unlock the wallet
         const newWallet = await api.unlock(password, key)
         if (!newWallet || !password.length) {
@@ -201,19 +192,11 @@
 
     function setSearch(event) {
         const wallet = event.detail
-        if (!currentTabHost || !wallet) {
+        if (!currentTabOrigin || !wallet) {
             return
         }
 
-        const extensionState = JSON.parse(
-            window.localStorage.getItem('extension_state')
-        )
-        if (extensionState?.url === currentTabHost) {
-            // If we are still on the same page, set the old search
-            searchText = extensionState.search || ''
-            return
-        }
-
+        searchText = ''
         const walletText = JSON.stringify(
             wallet.accounts.map((a) => [
                 cleanSearchValue(a.name),
@@ -222,15 +205,15 @@
         )
 
         if (
-            currentTabHost.match(/^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+(:[0-9]+)?$/)
+            currentTabOrigin.match(/^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+(:[0-9]+)?$/)
         ) {
             // IP address
-            if (walletText.includes(cleanSearchValue(currentTabHost))) {
-                searchText = currentTabHost
+            if (walletText.includes(cleanSearchValue(currentTabOrigin))) {
+                searchText = currentTabOrigin
             }
         } else {
             // Domain name
-            let parts = currentTabHost.split('.')
+            let parts = currentTabOrigin.split('.')
             while (
                 parts.length > 2 &&
                 !walletText.includes(cleanSearchValue(parts.join('.')))
@@ -247,6 +230,7 @@
                 searchText = parts.join('.')
             }
         }
+        openSearch = !!searchText.length
     }
 
     // ---------------------------------------------------------------
@@ -285,8 +269,8 @@
             return
         }
         account = event.detail
-        accountHost = normalizeOrigin(account.url)
-        if (!accountHost || accountHost === currentTabOrigin) {
+        accountOrigin = normalizeOrigin(account.url)
+        if (!accountOrigin || accountOrigin === currentTabOrigin) {
             onnotify(await _sendCredentials())
             return
         }
@@ -303,13 +287,8 @@
         confirmationDialogOpen = true
     }
 
-    function normalizeOrigin(url) {
-        const host = normalizeHost(url)
-        return host && new URL(url).protocol + '//' + host
-    }
-
     /**
-     * Send the encrypted account credentials to the Web Extension popup.
+     * Send the encrypted account credentials to the Web Extension sidebar.
      */
     async function _sendCredentials(): Promise<string> {
         if (account.totp) {
@@ -317,6 +296,7 @@
         }
         const event = {
             action: 'login',
+            currentUrl: currentTabUrl,
             account: {
                 login: account.login,
                 password: account.password,
@@ -332,7 +312,7 @@
     /**
      * Save the password in the session storage of the Web Extension, encrypted so
      * - the data is removed when the browser is closed (storage.session)
-     * - the data persist if we close the popup
+     * - the data persist if we close the sidebar
      * - the web extension can not read it, since it does not have the key
      */
     async function savePassword(event) {
@@ -397,7 +377,7 @@
 
 <Dialog bind:open={confirmationDialogOpen} title="Are you sure ?">
     The current domain <b class="host">{currentTabOrigin}</b>
-    does not match the URL in your wallet <b class="host">{accountHost}</b>, are
+    does not match the URL in your wallet <b class="host">{accountOrigin}</b>, are
     you sure you are not phished?
     <br />
     <br />

@@ -10,7 +10,6 @@
     import WebExtension from '../helpers/web_extension.svelte.ts'
     import { sendCredentials } from '../helpers/web_extension.svelte.ts'
 
-    import { normalizeHost } from '../helpers/utils.ts'
     import Account from '../models/account.ts'
 
     interface Props {

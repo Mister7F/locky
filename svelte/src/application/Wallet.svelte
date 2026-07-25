@@ -16,6 +16,7 @@
     interface Props {
         wallet?: Wallet
         searchText?: string
+        openSearch?: boolean
         onlock: () => void
         onnotify: (message: string) => void
     }
@@ -23,6 +24,7 @@
     let {
         wallet = $bindable(),
         searchText = $bindable(''),
+        openSearch = $bindable(false),
         onlock,
         onnotify,
     }: Props = $props()
@@ -63,7 +65,6 @@
 
     let dragging = $state(false)
     let viewMode = $state(window.localStorage.getItem('viewMode') || 'detail')
-    let openSearch = $state(false)
 
     // folders variable
     let walletWidth = $state(null)
@@ -149,11 +150,12 @@
 </Sidepanel>
 <Navbar
     {onlock}
+    onwalletdownloaded={(newWallet) => (wallet = newWallet)}
     onshow_folders={() => (foldersVisible = !foldersVisible)}
     {floatingFolder}
     bind:viewMode
     bind:searchText
-    {openSearch}
+    bind:openSearch
 />
 
 <div class="wallet" bind:clientWidth={walletWidth}>

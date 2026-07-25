@@ -42,9 +42,9 @@ document.body.onload = () => {
         })
     })
 
-    let checkedTab = null
+    let activeTab = null
 
-    // each time we open the popup, we generate a new random `channelId`
+    // Each time we open the sidebar, generate a new random `channelId`.
     // we increment `lastSequence` for each call to prevent replay attack
     let channelId = null
     let lastSequence = 0
@@ -84,8 +84,8 @@ document.body.onload = () => {
             // Send our key, and the encrypted password if it has been saved
             const pluginKey = await getKey(lockyUrl)
             const storage = await chrome.storage.session.get()
-            const tab = await getCurrentTab()
-            checkedTab = { id: tab.id, url: tab.url }
+            const tab = await getActiveTab()
+            setActiveTab(tab)
             channelId = hex(window.crypto.getRandomValues(new Uint8Array(16)))
             lastSequence = 0
             iframe.contentWindow.postMessage(
@@ -94,7 +94,7 @@ document.body.onload = () => {
                     channelId,
                     encryptedPassword: storage.encryptedPassword,
                     // Send information about the current tab
-                    currentUrl: tab.url,
+                    currentUrl: activeTab?.url,
                 },
                 lockyOrigin // target only the locky origin
             )
@@ -132,16 +132,21 @@ document.body.onload = () => {
         const event = message.event
 
         if (event.action === 'login') {
-            // Check that the tab didn't redirect between now and the check
-            const tab = await chrome.tabs.get(checkedTab.id).catch(() => null)
+            // Resolve the tab again because a sidebar stays open while tabs change.
+            const tab = await getActiveTab()
             if (
-                tab &&
-                new URL(tab.url).origin === new URL(checkedTab.url).origin
+                tab?.url &&
+                activeTab &&
+                tab.id === activeTab.id &&
+                sameOrigin(tab.url, activeTab.url) &&
+                sameOrigin(tab.url, event.currentUrl)
             ) {
                 chrome.tabs.sendMessage(tab.id, {
                     action: 'login',
                     account: event.account,
                 })
+            } else {
+                setActiveTab(tab)
             }
         } else if (event.action === 'savePassword') {
             await chrome.storage.session.set({
@@ -153,12 +158,46 @@ document.body.onload = () => {
         }
     })
 
-    async function getCurrentTab() {
-        return new Promise(function (resolve, reject) {
+    function setActiveTab(tab) {
+        if (!tab?.id || !tab.url) {
+            activeTab = null
+            return
+        }
+        activeTab = { id: tab.id, url: tab.url }
+    }
+
+    async function updateCurrentTab() {
+        const tab = await getActiveTab()
+        setActiveTab(tab)
+        const lockyUrl = localStorage.getItem('lockyUrl')
+        if (!channelId || !lockyUrl || !activeTab) {
+            return
+        }
+        iframe.contentWindow.postMessage(
+            {
+                action: 'CURRENT_TAB_CHANGED',
+                currentUrl: activeTab.url,
+            },
+            new URL(lockyUrl).origin
+        )
+    }
+
+    chrome.tabs.onActivated.addListener(updateCurrentTab)
+    chrome.tabs.onUpdated.addListener((_tabId, changeInfo, tab) => {
+        if (
+            tab.active &&
+            (changeInfo.url || changeInfo.status === 'complete')
+        ) {
+            updateCurrentTab()
+        }
+    })
+
+    async function getActiveTab() {
+        return new Promise(function (resolve) {
             chrome.tabs.query(
                 {
                     active: true, // Select active tabs
-                    lastFocusedWindow: true, // In the current window
+                    currentWindow: true, // In the sidebar's browser window
                 },
                 function (tabs) {
                     resolve(tabs[0])
@@ -201,4 +240,12 @@ function getWalletScope(value) {
     // Remove ending `/`
     const pathname = url.pathname.replace(/\/+$/, '') || '/'
     return url.origin + pathname
+}
+
+function sameOrigin(first, second) {
+    try {
+        return new URL(first).origin === new URL(second).origin
+    } catch {
+        return false
+    }
 }

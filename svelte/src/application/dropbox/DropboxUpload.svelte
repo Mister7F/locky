@@ -3,19 +3,20 @@
     import IconButton from '../../helpers/IconButton.svelte'
     import Dialog from '../../helpers/Dialog.svelte'
     import Button from '../../helpers/Button.svelte'
-    import { openUrl } from '../../helpers/utils.ts'
 
     import * as dropbox from './dropbox.ts'
     import * as api from '../api.ts'
     import { onMount } from 'svelte'
+    import type Wallet from '../../models/wallet.ts'
 
     interface Props {
         isAuthenticated?: boolean
+        onwalletdownloaded?: (wallet: Wallet) => void
     }
 
-    let { isAuthenticated = false }: Props = $props()
+    let { isAuthenticated = false, onwalletdownloaded = () => {} }: Props =
+        $props()
 
-    let authenticationUrl: string | undefined
     let uploadingState = $state('wait')
     let confirmationDialogOpen = $state(false)
     let downloadWalletDialogOpen = $state(false)
@@ -24,8 +25,9 @@
         isAuthenticated ? 'Upload your wallet on Dropbox' : 'Login'
     )
 
-    function onLogin() {
-        openUrl(authenticationUrl)
+    async function onLogin() {
+        await dropbox.openAuthenticationPage()
+        await updateDropboxState()
     }
 
     async function onUpload() {
@@ -56,9 +58,20 @@
     }
 
     async function downloadWallet() {
-        await api.logout(false)
-        document.cookie = 'login_method=dropbox'
-        document.location.reload()
+        const download = await dropbox.download('wallet.lck')
+        if (!download) {
+            uploadingState = 'error'
+            return
+        }
+
+        const wallet = await api.replaceWallet(download.content)
+        if (!wallet) {
+            uploadingState = 'error'
+            return
+        }
+
+        dropbox.setDropboxHash(download.hash, download.rev)
+        onwalletdownloaded((await dropbox.persistRefreshToken()) || wallet)
     }
 
     async function shouldAskConfirmation() {
@@ -83,9 +96,8 @@
         return
     }
 
-    onMount(async () => {
+    async function updateDropboxState() {
         isAuthenticated = await dropbox.isAuthenticated()
-        authenticationUrl = await dropbox.getAuthenticationUrl()
 
         if (isAuthenticated) {
             const currentRemoteHash = await getDropboxRemoteHash()
@@ -99,6 +111,10 @@
                 downloadWalletDialogOpen = true
             }
         }
+    }
+
+    onMount(async () => {
+        await updateDropboxState()
     })
 </script>
 

@@ -9,7 +9,6 @@
     import FileInput from '../../helpers/FileInput.svelte'
     import DropboxLogin from '../dropbox/DropboxLogin.svelte'
     import ChooseMethod from './ChooseMethod.svelte'
-    import DropboxUpload from './../dropbox/DropboxUpload.svelte'
     import Wallet from '../../models/wallet.ts'
 
     const maxLen = 8
@@ -26,7 +25,7 @@
     let sessionOpened = $state(false)
 
     let filedata = $state<ArrayBuffer | undefined>() // File uploaded
-    let dropboxFile: ArrayBuffer | undefined
+    let dropboxFile: dropbox.DropboxDownload | undefined
     let dropboxState = $state('')
     let loading = $state(false)
 
@@ -60,7 +59,7 @@
             onwallet_openned()
         } else if (method === 'create') {
             wallet = await api.newWallet(password)
-            dropbox.logout()
+            wallet = await dropbox.logout()
             onwallet_openned()
         } else if (method === 'upload') {
             const newWallet = await api.login(filedata, password)
@@ -68,18 +67,18 @@
                 setWrongPassword()
                 return
             }
-            dropbox.logout()
-            wallet = newWallet
+            wallet = await dropbox.logout()
             onwallet_openned()
         } else if (method === 'dropbox') {
             if (!dropboxFile) {
                 dropboxFile = await dropbox.download('wallet.lck')
             }
-            const newWallet = await api.login(dropboxFile, password)
+            const newWallet = await api.login(dropboxFile.content, password)
             if (!newWallet) {
                 setWrongPassword()
                 return
             }
+            dropbox.setDropboxHash(dropboxFile.hash, dropboxFile.rev)
             wallet = newWallet
             onwallet_openned()
         }
@@ -187,10 +186,6 @@
                     bind:state={dropboxState}
                     onlogout={() => (dropboxFile = null)}
                 />
-            {:else if method === 'login'}
-                <div class="dropbox_button">
-                    <DropboxUpload />
-                </div>
             {/if}
 
             <Field
@@ -325,9 +320,5 @@
         font-size: 18px;
         margin-right: 8px;
         animation: rotating 2s linear infinite;
-    }
-
-    .dropbox_button {
-        width: fit-content;
     }
 </style>

@@ -23,6 +23,7 @@
     let iframeAllowed = $state(window.self === window.top)
 
     let searchText: string = $state('')
+    let openSearch: boolean = $state(false)
 
     async function lock() {
         locked = true // lock the UI immediately
@@ -54,7 +55,7 @@
     }
 
     setTimeout(async () => {
-        // Parse the URL to fetch the access token and store it in the local storage
+        // Complete a pending Dropbox OAuth redirect.
         await dropbox.isAuthenticated()
     }, 500)
 </script>
@@ -62,6 +63,7 @@
 <WebExtension
     bind:wallet
     bind:searchText
+    bind:openSearch
     bind:locked
     {onnotify}
     bind:iframeAllowed
@@ -84,6 +86,7 @@
                 onlock={lock}
                 bind:this={walletElement}
                 bind:searchText
+                bind:openSearch
                 {onnotify}
             />
         {/if}

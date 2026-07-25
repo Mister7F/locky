@@ -2,6 +2,7 @@ import Account from './account'
 import Folder from './folder'
 
 export type WalletSettings = {
+    dropboxRefreshToken: string
     simpleLoginApiKey: string
 }
 
@@ -18,6 +19,7 @@ export default class Wallet {
         wallet.accounts = values.accounts.map((a) => Account.fromJson(a))
         wallet.folders = values.folders.map((a) => Folder.fromJson(a))
         wallet.settings = {
+            dropboxRefreshToken: values.settings?.dropboxRefreshToken || '',
             simpleLoginApiKey: values.settings?.simpleLoginApiKey || '',
         }
         return wallet

@@ -8,6 +8,7 @@
     import Icon from '../../helpers/Icon.svelte'
     import DropboxUpload from './../dropbox/DropboxUpload.svelte'
     import * as dropbox from './../dropbox/dropbox.ts'
+    import type Wallet from '../../models/wallet.ts'
 
     interface Props {
         viewMode: string
@@ -16,15 +17,17 @@
         openSearch: boolean
         onshow_folders: () => void
         onlock: () => void
+        onwalletdownloaded: (wallet: Wallet) => void
     }
 
     let {
         viewMode = $bindable('list'),
         floatingFolder,
         searchText = $bindable(''),
-        openSearch = false,
+        openSearch = bindable(false),
         onshow_folders,
         onlock,
+        onwalletdownloaded,
     }: Props = $props()
 
     let changePassword
@@ -120,7 +123,10 @@
                 icon="download"
                 onclick={async () => await api.downloadWallet()}
             />
-            <DropboxUpload isAuthenticated={isDropboxAuthenticated} />
+            <DropboxUpload
+                isAuthenticated={isDropboxAuthenticated}
+                {onwalletdownloaded}
+            />
         {/if}
         <IconButton
             title="Change mode"
