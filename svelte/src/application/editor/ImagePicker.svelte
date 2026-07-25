@@ -24,7 +24,7 @@
         srcs = $bindable([]),
     }: Props = $props()
 
-    let previewSrc = $state(src || 'img/accounts/default.svg')
+    let editedSrc = $state('')
     let searchValue = $state('')
     let downloadError = $state('')
     let svgDialogOpen = $state(false)
@@ -53,14 +53,25 @@
     })
 
     function open() {
-        chooseIcon = readonly ? false : true
+        if (readonly) {
+            return
+        }
+        editedSrc = src
+        chooseIcon = true
+    }
+
+    function close() {
+        editedSrc = src
+        searchValue = ''
+        downloadError = ''
+        chooseIcon = false
     }
 
     function choose(isrc: string) {
         searchValue = ''
         downloadError = ''
         src = isrc
-        previewSrc = isrc || 'img/accounts/default.svg'
+        editedSrc = isrc
         chooseIcon = false
     }
 
@@ -68,7 +79,7 @@
         downloadError = ''
 
         try {
-            const response = await fetch(src, {
+            const response = await fetch(editedSrc, {
                 credentials: 'omit',
                 referrerPolicy: 'no-referrer',
             })
@@ -124,7 +135,10 @@
 
 <div class="image_picker" style="--size: {size}">
     <div class="img {readonly ? 'readonly' : ''}" onclick={open}>
-        <Img src={previewSrc} alt={previewSrc} />
+        <Img
+            src={src || 'img/accounts/default.svg'}
+            alt={src || 'img/accounts/default.svg'}
+        />
     </div>
     <div class="icons {chooseIcon && !readonly ? 'visible' : ''}">
         <div class="img-header">
@@ -132,7 +146,7 @@
                 <Field
                     label="Image URL"
                     copy={false}
-                    bind:value={src}
+                    bind:value={editedSrc}
                     message={downloadError}
                     messagePersistent={true}
                     oninput={() => (downloadError = '')}
@@ -140,7 +154,7 @@
                 <div class="url-actions">
                     <IconButton
                         title="Use image URL"
-                        onclick={() => choose(src)}
+                        onclick={() => choose(editedSrc)}
                         icon="link"
                     />
                     <IconButton
@@ -155,6 +169,11 @@
                             svgDialogOpen = true
                         }}
                         icon="code"
+                    />
+                    <IconButton
+                        title="Close image picker"
+                        onclick={close}
+                        icon="close"
                     />
                 </div>
             </div>
@@ -226,8 +245,10 @@
         z-index: 99999999;
         top: 0;
         left: 0;
+        display: flex;
+        flex-direction: column;
         width: 100%;
-        overflow-y: scroll;
+        overflow: hidden;
         height: 0;
         transition: 0.4s;
         padding: 0 20px;
@@ -252,14 +273,15 @@
         flex-direction: row;
         justify-content: space-between;
         align-items: flex-start;
+        flex: 1;
         flex-wrap: wrap;
-        margin-top: 10px;
-        max-height: calc(100% - 155px);
+        min-height: 0;
         overflow: hidden;
         overflow-y: auto;
         width: 90%;
-        margin: auto;
+        margin: 0 auto;
         padding-top: 10px;
+        box-sizing: border-box;
     }
 
     .container::after {
@@ -269,10 +291,11 @@
     }
 
     .img-header {
+        flex: none;
         width: 100%;
-        position: sticky;
-        height: 140px;
         padding-top: 15px;
+        background-color: var(--primary);
+        z-index: 1;
     }
 
     .url {
