@@ -45,27 +45,29 @@
 <Dialog bind:open={fieldNameDialogOpen} title="Edit Field">
     Change type
     <br />
-    <Button
-        class="field_type_button"
-        icon="title"
-        color="secondary"
-        variant={type === 'text' ? '' : 'outlined'}
-        onclick={() => (type = 'text')}
-    />
-    <Button
-        class="field_type_button"
-        icon="vpn_key"
-        color="secondary"
-        variant={type === 'password' ? '' : 'outlined'}
-        onclick={() => (type = 'password')}
-    />
-    <Button
-        class="field_type_button"
-        icon="link"
-        color="secondary"
-        variant={type === 'url' ? '' : 'outlined'}
-        onclick={() => (type = 'url')}
-    />
+    <div class="field_types">
+        <Button
+            class="field_type_button"
+            icon="title"
+            color="secondary"
+            variant={type === 'text' ? '' : 'outlined'}
+            onclick={() => (type = 'text')}
+        />
+        <Button
+            class="field_type_button"
+            icon="vpn_key"
+            color="secondary"
+            variant={type === 'password' ? '' : 'outlined'}
+            onclick={() => (type = 'password')}
+        />
+        <Button
+            class="field_type_button"
+            icon="link"
+            color="secondary"
+            variant={type === 'url' ? '' : 'outlined'}
+            onclick={() => (type = 'url')}
+        />
+    </div>
     <br />
     Rename
     <br />
@@ -115,6 +117,14 @@
 </Dialog>
 
 <style>
+    :global(.field_types) {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-around;
+        width: 100%;
+        overflow: hidden;
+        flex-wrap: wrap;
+    }
     :global(.menu_field_type) {
         margin-top: 310px;
         margin-left: -60px;
@@ -124,7 +134,7 @@
         box-sizing: border-box;
     }
     :global(.field_type_button) {
-        margin: 10px 20px;
+        margin-top: 10px;
     }
     :global(.field_name) {
         width: 100%;

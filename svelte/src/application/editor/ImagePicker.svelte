@@ -221,11 +221,24 @@
     }
 
     .img {
+        position: relative;
         cursor: pointer;
         width: var(--size);
+        height: var(--size);
         margin: auto;
         max-width: 100%;
         max-height: 100%;
+        padding: 2px;
+        box-sizing: border-box;
+        overflow: hidden;
+    }
+
+    .img :global(img) {
+        transition: transform 150ms ease;
+    }
+
+    .img:not(.readonly):hover :global(img) {
+        transform: scale(1.03);
     }
 
     .image_picker :global(svg),
