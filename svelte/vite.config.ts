@@ -5,6 +5,9 @@ import { defineConfig } from 'vite'
 export default defineConfig({
     plugins: [svelte()],
     base: './',
+    server: {
+        allowedHosts: ['tunnel.sep.tf'],
+    },
     resolve: {
         dedupe: ['svelte'],
     },

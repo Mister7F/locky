@@ -402,6 +402,9 @@
         width: auto;
         display: block;
         transition: -webkit-filter 0.5s;
+        user-select: none;
+        -webkit-user-select: none;
+        -webkit-touch-callout: none;
     }
 
     .dnd_container > * {
