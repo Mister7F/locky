@@ -1,8 +1,10 @@
 <script lang="ts">
+    import type { IconColor } from './types.ts'
+
     interface Props {
         onclick?: (event: any) => void
         title?: string
-        color?: string
+        color?: IconColor
         class?: string
         children: () => any
     }
@@ -23,6 +25,8 @@
             'on-primary': 'var(--on-primary)',
             'on-secondary': 'var(--on-secondary)',
             'on-surface': 'var(--on-surface)',
+            danger: 'var(--error)',
+            error: 'var(--error)',
         }[color] || 'var(--on-surface)'
     )
 </script>

@@ -160,7 +160,7 @@
                 icon="logout"
                 onclick={onlock}
             >
-                Logout
+                Lock Wallet
             </Button>
             <Button
                 color="secondary"
@@ -259,6 +259,7 @@
                                             />
                                             <IconButton
                                                 title="Move alias to trash"
+                                                color="danger"
                                                 icon="delete"
                                                 onclick={() =>
                                                     confirmTrash(alias)}
@@ -292,7 +293,7 @@
         >
             Cancel
         </Button>
-        <Button color="primary" onclick={onTrashAlias}>Move to trash</Button>
+        <Button color="danger" onclick={onTrashAlias}>Move to trash</Button>
     {/snippet}
 </Dialog>
 

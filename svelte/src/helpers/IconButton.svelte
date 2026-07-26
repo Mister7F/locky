@@ -2,13 +2,14 @@
     import { createRipple } from './ripple.ts'
     import { isUrlValid } from '../helpers/utils.ts'
     import Icon from './Icon.svelte'
+    import type { IconColor } from './types.ts'
 
     interface Props {
         title?: string
         class?: string
         style?: string
-        color?: string
-        bgColor?: string
+        color?: IconColor
+        bgColor?: IconColor
         bgTransparent?: boolean
         href?: string
         icon?: string
@@ -31,9 +32,16 @@
         children,
     }: Props = $props()
 
+    let foregroundColor = $derived(color === 'danger' ? 'error' : color)
     let backgroundColor = $derived(
-        bgColor ||
-            (color.includes('on') ? color.replace('on-', '') : `on-${color}`)
+        bgColor === 'danger'
+            ? 'error'
+            : bgColor ||
+                  (foregroundColor.startsWith('on-')
+                      ? foregroundColor.replace('on-', '')
+                      : foregroundColor === 'error'
+                        ? 'primary'
+                        : `on-${foregroundColor}`)
     )
 
     function onClick(event: MouseEvent) {
@@ -47,7 +55,7 @@
 </script>
 
 <button
-    class="ripple icon-button {className} {color === 'on-surface'
+    class="ripple icon-button {className} {foregroundColor === 'on-surface'
         ? 'ripple_dark'
         : ''} {bgTransparent ? 'bg-transparent' : ''}"
     onclick={onClick}
@@ -57,10 +65,10 @@
     }}
     {onblur}
     {title}
-    style="--background: var(--{backgroundColor});--color: var(--{color}); {style}"
+    style="--background: var(--{backgroundColor});--color: var(--{foregroundColor}); {style}"
 >
     {#if icon}
-        <Icon {color}>{icon}</Icon>
+        <Icon color={foregroundColor}>{icon}</Icon>
     {/if}
     {#if children}
         {@render children()}

@@ -72,7 +72,7 @@
                 useLower = !useLower
                 password = generate()
             }}
-            variant={useLower ? '' : 'outlined'}
+            variant={useLower ? 'standard' : 'outlined'}
             title="Lower case"
         >
             a
@@ -83,7 +83,7 @@
                 useUpper = !useUpper
                 password = generate()
             }}
-            variant={useUpper ? '' : 'outlined'}
+            variant={useUpper ? 'standard' : 'outlined'}
             title="Upper case"
         >
             A
@@ -94,7 +94,7 @@
                 useNumber = !useNumber
                 password = generate()
             }}
-            variant={useNumber ? '' : 'outlined'}
+            variant={useNumber ? 'standard' : 'outlined'}
             title="Digits"
         >
             9
@@ -105,7 +105,7 @@
                 useSymbol = !useSymbol
                 password = generate()
             }}
-            variant={useSymbol ? '' : 'outlined'}
+            variant={useSymbol ? 'standard' : 'outlined'}
             title="Standard symbols"
         >
             !
@@ -116,7 +116,7 @@
                 useComplexSymbol = !useComplexSymbol
                 password = generate()
             }}
-            variant={useComplexSymbol ? '' : 'outlined'}
+            variant={useComplexSymbol ? 'standard' : 'outlined'}
             title="Complex symbols"
         >
             £
@@ -133,22 +133,18 @@
     </div>
     <p>{password}</p>
 
-    <Button
-        style="margin-top: 10px;"
-        color="secondary"
-        variant="outlined"
-        onclick={onUse}
-    >
-        Use
-    </Button>
-    <Button
-        style="margin-top: 10px; margin-left: 20px"
-        color="secondary"
-        variant="outlined"
-        onclick={() => (password = generate())}
-    >
-        Generate
-    </Button>
+    {#snippet actions()}
+        <Button color="secondary" variant="outlined" onclick={onUse}>
+            Use
+        </Button>
+        <Button
+            color="secondary"
+            variant="outlined"
+            onclick={() => (password = generate())}
+        >
+            Generate
+        </Button>
+    {/snippet}
 </Dialog>
 
 <style>
@@ -177,6 +173,8 @@
     .options {
         width: 100%;
         display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
         justify-content: space-between;
         flex-direction: row;
     }
@@ -187,7 +185,8 @@
     .options :global(button) {
         min-width: 0;
         width: 50px;
+        flex: 0 0 50px;
         text-transform: none;
-        margin: 5px 10px;
+        margin: 0;
     }
 </style>

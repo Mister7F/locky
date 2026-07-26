@@ -89,7 +89,7 @@
         word-wrap: break-word;
     }
 
-    .actions > :global(div) {
+    .actions {
         display: flex;
         flex-direction: row;
         align-items: center;

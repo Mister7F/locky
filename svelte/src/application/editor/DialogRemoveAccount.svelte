@@ -21,15 +21,12 @@
 
     {#snippet actions()}
         <Button
-            style="margin-top: 10px; margin-right: 10px;"
             color="secondary"
             variant="outlined"
             onclick={() => (removeAccountDialogOpen = false)}
         >
             No
         </Button>
-        <Button style="margin-top: 10px;" color="secondary" onclick={onremove}>
-            Yes
-        </Button>
+        <Button color="danger" onclick={onremove}>Yes</Button>
     {/snippet}
 </Dialog>

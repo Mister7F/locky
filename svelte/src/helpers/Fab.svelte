@@ -1,13 +1,14 @@
 <script lang="ts">
     import Icon from './Icon.svelte'
     import IconButton from './IconButton.svelte'
+    import type { IconColor } from './types.ts'
 
     interface Props {
         onclick?: (event: MouseEvent) => void
         title?: string
-        color?: string
+        color?: IconColor
         icon?: string
-        bgColor?: string
+        bgColor?: IconColor
         class?: string
         children?: () => any
     }
@@ -17,7 +18,7 @@
         title = '',
         color = 'on-primary',
         icon = '',
-        bgColor = '',
+        bgColor,
         class: className = '',
         children,
     }: Props = $props()

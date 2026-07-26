@@ -1,10 +1,13 @@
 <script lang="ts">
     import Icon from './Icon.svelte'
     import { createRipple } from './ripple.ts'
+    import type { Color, IconColor } from './types.ts'
+
+    type ButtonVariant = 'standard' | 'outlined' | 'text'
 
     interface Props {
-        variant?: string
-        color?: string
+        variant?: ButtonVariant
+        color?: Color
         disabled?: boolean
         icon?: string
         style?: string
@@ -16,7 +19,7 @@
     }
 
     let {
-        variant = '',
+        variant = 'standard',
         color = 'primary',
         disabled = false,
         icon = '',
@@ -29,8 +32,17 @@
         children,
     }: Props = $props()
 
-    let _variant = $derived(variant || 'standard')
-    let iconColor = $derived(_variant === 'standard' ? `on-${color}` : color)
+    let iconColor: IconColor = $derived(
+        color === 'danger'
+            ? variant === 'standard'
+                ? 'on-primary'
+                : 'error'
+            : variant === 'standard'
+              ? color === 'primary'
+                  ? 'on-primary'
+                  : 'on-secondary'
+              : color
+    )
 
     function onClick(event: MouseEvent) {
         if (disabled) {
@@ -41,7 +53,7 @@
 </script>
 
 <button
-    class="ripple {color} {className} {disabled && 'disabled'} {_variant}"
+    class="ripple {color} {className} {disabled && 'disabled'} {variant}"
     {title}
     onclick={onClick}
     onmousedown={(event) => ripple && createRipple(event)}
@@ -95,10 +107,19 @@
         color: var(--on-secondary);
         background-color: var(--secondary);
     }
+    .standard.danger {
+        color: var(--on-primary);
+        background-color: var(--error);
+    }
     .outlined.secondary {
         border: 1px solid var(--secondary);
         color: var(--secondary);
         background-color: var(--on-secondary);
+    }
+    .outlined.danger {
+        border: 1px solid var(--error);
+        color: var(--error);
+        background-color: transparent;
     }
     .text.primary {
         box-shadow: none;
@@ -124,10 +145,19 @@
         color: var(--secondary);
         background-color: var(--on-secondary);
     }
+    .text.danger {
+        box-shadow: none;
+        color: var(--error);
+        background-color: transparent;
+    }
 
     .outlined.secondary:hover,
     .text.secondary:hover {
         background-color: color-mix(in srgb, var(--secondary) 12%, transparent);
+    }
+    .outlined.danger:hover,
+    .text.danger:hover {
+        background-color: color-mix(in srgb, var(--error) 12%, transparent);
     }
 
     :global(.button_icon) {

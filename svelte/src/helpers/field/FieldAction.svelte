@@ -50,28 +50,28 @@
             class="field_type_button"
             icon="title"
             color="secondary"
-            variant={type === 'text' ? '' : 'outlined'}
+            variant={type === 'text' ? 'standard' : 'outlined'}
             onclick={() => (type = 'text')}
         />
         <Button
             class="field_type_button"
             icon="vpn_key"
             color="secondary"
-            variant={type === 'password' ? '' : 'outlined'}
+            variant={type === 'password' ? 'standard' : 'outlined'}
             onclick={() => (type = 'password')}
         />
         <Button
             class="field_type_button"
             icon="email"
             color="secondary"
-            variant={type === 'email' ? '' : 'outlined'}
+            variant={type === 'email' ? 'standard' : 'outlined'}
             onclick={() => (type = 'email')}
         />
         <Button
             class="field_type_button"
             icon="link"
             color="secondary"
-            variant={type === 'url' ? '' : 'outlined'}
+            variant={type === 'url' ? 'standard' : 'outlined'}
             onclick={() => (type = 'url')}
         />
     </div>
@@ -87,32 +87,24 @@
     {#snippet actions()}
         {#if deleteConfirmation}
             <Button
-                style="float: right; margin-top: 10px;"
                 color="secondary"
                 variant="outlined"
                 onclick={() => (deleteConfirmation = false)}
             >
                 Cancel
             </Button>
-            <Button
-                style="float: right; margin-top: 10px;"
-                color="secondary"
-                variant="text"
-                onclick={onDelete}
-            >
+            <Button color="danger" variant="text" onclick={onDelete}>
                 Delete
             </Button>
         {:else}
             <Button
-                style="float: right; margin-top: 10px;"
-                color="secondary"
+                color="danger"
                 variant="text"
                 onclick={() => (deleteConfirmation = true)}
             >
                 Delete
             </Button>
             <Button
-                style="float: right; margin-top: 10px;"
                 color="secondary"
                 variant="outlined"
                 onclick={() => (fieldNameDialogOpen = false)}

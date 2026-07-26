@@ -36,14 +36,16 @@
 <Dialog bind:open={qrCodeDialogOpen} title="2FA QR Code">
     <p>Scan this QR Code with Google Authenticator, FreeOTP...</p>
     <p style="text-align: center"><canvas id="qr_code_canvas"></canvas></p>
-    <Button
-        style="float: right; margin-top: 10px;"
-        color="secondary"
-        variant="text"
-        onclick={() => (qrCodeDialogOpen = false)}
-    >
-        Close
-    </Button>
+
+    {#snippet actions()}
+        <Button
+            color="secondary"
+            variant="text"
+            onclick={() => (qrCodeDialogOpen = false)}
+        >
+            Close
+        </Button>
+    {/snippet}
 </Dialog>
 
 <style>
