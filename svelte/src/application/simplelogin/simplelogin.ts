@@ -10,6 +10,13 @@ type AliasOptions = {
     suffixes: AliasSuffix[]
 }
 
+let aliasDomainsCache:
+    | {
+          apiKey: string
+          promise: Promise<string[]>
+      }
+    | undefined
+
 export type SimpleLoginMailbox = {
     id: number
     email: string
@@ -62,6 +69,31 @@ export async function getAliasOptions(apiKey: string): Promise<{
         mailboxes,
         mailboxIds: [mailbox.id],
     }
+}
+
+export function getAliasDomains(apiKey: string): Promise<string[]> {
+    if (aliasDomainsCache?.apiKey === apiKey) {
+        return aliasDomainsCache.promise
+    }
+
+    const requestPromise = request<AliasOptions>(
+        '/api/v5/alias/options',
+        apiKey
+    ).then((options) => [
+        ...new Set(
+            options.suffixes
+                .map((suffix) => suffix.suffix.split('@').pop()?.toLowerCase())
+                .filter((domain): domain is string => !!domain)
+        ),
+    ])
+    const cachedPromise = requestPromise.catch((error) => {
+        if (aliasDomainsCache?.promise === cachedPromise) {
+            aliasDomainsCache = undefined
+        }
+        throw error
+    })
+    aliasDomainsCache = { apiKey, promise: cachedPromise }
+    return cachedPromise
 }
 
 export async function getMailboxes(
