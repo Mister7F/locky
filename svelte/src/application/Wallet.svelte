@@ -124,7 +124,15 @@
     }
     function onNewAccount() {
         editedAccountIndex = null
-        accountEdited = Account.fromJson({ icon: 'img/accounts/default.svg' })
+        const folderId = wallet.folders.some(
+            (folder) => folder.id === currentFolderId
+        )
+            ? currentFolderId
+            : ''
+        accountEdited = Account.fromJson({
+            icon: 'img/accounts/default.svg',
+            folder_id: folderId,
+        })
 
         accountEditorReadonly = false
     }
@@ -132,7 +140,6 @@
         if (editedAccountIndex !== null) {
             wallet = await api.updateAccount(account)
         } else {
-            account['folder_id'] = currentFolderId
             wallet = await api.newAccount(account)
             // Edit this account to not create one for future "save" event
             editAccount(account)
@@ -182,6 +189,7 @@
     {#if accountEdited}
         <AccountEditor
             account={accountEdited}
+            folders={wallet.folders}
             readonly={accountEditorReadonly}
             onsave={onSaveAccount}
             onremove={onRemoveAccount}

@@ -103,6 +103,7 @@
     .container {
         position: relative;
         width: 100%;
+        height: 50px;
         border: 1px soled green;
     }
     input {
@@ -112,9 +113,10 @@
         border-radius: 0;
         border-bottom: 1px solid var(--disabled-color);
         caret-color: var(--secondary);
-        font-size: 1rem;
+        height: 50px;
+        font-size: 16px;
         font-weight: 400;
-        line-height: 1.75rem;
+        line-height: 29px;
         padding: 10px 0px;
         width: 100%;
         color: var(--color);
@@ -134,9 +136,10 @@
 
     .label {
         color: var(--disabled-color);
-        font-size: 1rem;
-        line-height: 1.2rem;
+        font-size: 16px;
+        line-height: 1.2;
         font-weight: 400;
+        letter-spacing: 0.4px;
         transform-origin: left top;
         font-weight: normal;
         position: absolute;
@@ -146,6 +149,7 @@
         transform-origin: left top;
         transition:
             transform 0.15s cubic-bezier(0.4, 0, 0.2, 1),
+            font-size 0.15s cubic-bezier(0.4, 0, 0.2, 1),
             color 0.15s cubic-bezier(0.4, 0, 0.2, 1);
         width: 300px;
         overflow: hidden;
@@ -155,7 +159,8 @@
 
     input.focused ~ .label,
     input:valid ~ .label {
-        transform: translateY(-70%) scale(0.75);
+        transform: translateY(-10px);
+        font-size: 12px;
         color: var(--disabled-color);
     }
     input.focused ~ .label {

@@ -3,6 +3,7 @@
     import IconButton from '../../helpers/IconButton.svelte'
     import Fab from '../../helpers/Fab.svelte'
     import Account from '../../models/account.ts'
+    import type Folder from '../../models/folder.ts'
 
     import Field from '../../helpers/field/Field.svelte'
     import { copyValue } from '../../helpers/utils.ts'
@@ -13,9 +14,11 @@
     import DialogRemoveAccount from './DialogRemoveAccount.svelte'
     import GeneratePassword from './GeneratePassword.svelte'
     import SimpleLoginAlias from './SimpleLoginAlias.svelte'
+    import Selection from '../../helpers/Selection.svelte'
 
     interface Props {
         account: Account
+        folders?: Folder[]
         readonly?: boolean
         onclose: () => void
         onremove: () => void
@@ -29,6 +32,7 @@
         onremove,
         onrestore,
         account,
+        folders = [],
         readonly = false,
     }: Props = $props()
 
@@ -56,6 +60,13 @@
     })
 
     let iconSrcs = $state([])
+    let folderOptions = $derived([
+        { value: '', label: 'No Folder' },
+        ...folders.map((folder) => ({
+            value: folder.id,
+            label: folder.name,
+        })),
+    ])
 
     function makeTotpMessage(totp: string | null, time: number): string {
         if (!totp) {
@@ -226,6 +237,13 @@
                     )}
             />
         {/each}
+
+        <Selection
+            label="Folder"
+            options={folderOptions}
+            bind:value={accountDraft.folder_id}
+            {readonly}
+        />
 
         {#if !readonly}
             <Button onclick={onNewField} color="secondary" variant="text"

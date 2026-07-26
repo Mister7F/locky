@@ -144,34 +144,37 @@
 
 {#if value || !readonly}
     <div class="field {className} {readonly && 'readonly'}">
-        {#if readonly}
-            <div class="label-readonly">{label}</div>
-        {/if}
-
         <div class="content">
             {#if readonly}
-                {#if type === 'url' && isUrlValid(value) && urlLeft && urlHost}
-                    <a
-                        class="value"
-                        href={value}
-                        title={value}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                    >
-                        <span>{urlLeft}</span><span class="host">{urlHost}</span
-                        ><span>{urlPath}</span>
-                    </a>
-                {:else if type === 'password'}
-                    {#if !passwordVisible}
-                        <div class="value">{'•••••••••'}</div>
+                <div class="readonly-control">
+                    <div class="label-readonly">{label}</div>
+                    {#if type === 'url' &&
+                        isUrlValid(value) &&
+                        urlLeft &&
+                        urlHost}
+                        <a
+                            class="value"
+                            href={value}
+                            title={value}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
+                            <span>{urlLeft}</span><span class="host"
+                                >{urlHost}</span
+                            ><span>{urlPath}</span>
+                        </a>
+                    {:else if type === 'password'}
+                        {#if !passwordVisible}
+                            <div class="value">{'•••••••••'}</div>
+                        {:else}
+                            <div class="multi-line-value">{value}</div>
+                        {/if}
+                    {:else if type === 'totp'}
+                        <div class="value">{message}</div>
                     {:else}
-                        <div class="multi-line-value">{value}</div>
+                        <div class="value">{value}</div>
                     {/if}
-                {:else if type === 'totp'}
-                    <div class="value">{message}</div>
-                {:else}
-                    <div class="value">{value}</div>
-                {/if}
+                </div>
             {:else}
                 <TextInput
                     class="text-field"
@@ -236,9 +239,7 @@
         padding: 16px 0;
     }
     .field.readonly {
-        /* need less space because no help (TOTP / password) */
-        padding: 12px 0;
-        margin-bottom: 6px;
+        padding: 16px 0;
     }
 
     .content {
@@ -252,30 +253,46 @@
         font-size: 16px;
     }
 
+    .readonly-control {
+        position: relative;
+        flex: 1;
+        min-width: 0;
+        height: 50px;
+    }
+
     .label-readonly {
         /* Same style as TextInput */
+        position: absolute;
+        top: -2px;
+        left: 0;
         --color: hsla(200, 5%, 88%, 0.87);
         --disabled-color: color-mix(in srgb, var(--color) 65%, transparent);
         color: var(--disabled-color) !important;
         font-size: 12px;
+        line-height: 1.2;
         font-weight: 400;
 
         min-width: calc(100% - 50px);
         max-width: calc(100% - 50px);
         letter-spacing: 0.4px;
-        margin-bottom: -12px;
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
     }
 
     .value {
+        display: block;
         width: 100%;
+        height: 50px;
+        box-sizing: border-box;
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
         color: var(--on-primary);
-        padding: 12px 0;
+        padding: 10px 0;
+        border-bottom: 1px solid transparent;
+        font-size: 16px;
+        line-height: 29px;
     }
 
     .multi-line-value {
