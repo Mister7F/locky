@@ -12,6 +12,7 @@
 
     let detailDialogOpen = $state(false)
     let visible = $state(false)
+    let entropyBits = $derived(strengthResult.guesses_log10 * Math.log2(10))
 
     function open() {
         detailDialogOpen = true
@@ -23,6 +24,8 @@
 </div>
 
 <Dialog bind:open={detailDialogOpen} title="Weak password">
+    <p>Entropy: {entropyBits.toFixed(1)} bits</p>
+
     <p>Cracking time</p>
 
     <ul>
