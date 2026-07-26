@@ -62,6 +62,7 @@
     let nextDragY = 0
     let nextPointerX = 0
     let nextPointerY = 0
+    let lastDragFrameTime: number | undefined
 
     // Do not load all items for performance reason (items will be loaded dynamically when scrolling)
     const minCardSurface = 432 * 78
@@ -97,11 +98,58 @@
     /**
      * Apply the latest drag position and hit-test once per animation frame.
      */
-    function updateDragFrame() {
+    function updateDragFrame(time: number) {
+        dragAnimationFrame = undefined
         draggedElement?.style.setProperty('--x', `${nextDragX}px`)
         draggedElement?.style.setProperty('--y', `${nextDragY}px`)
         updateDropTarget(nextPointerX, nextPointerY)
-        dragAnimationFrame = undefined
+        if (scrollNearEdge(time)) {
+            updateDropTarget(nextPointerX, nextPointerY)
+            dragAnimationFrame = requestAnimationFrame(updateDragFrame)
+        }
+    }
+
+    /**
+     * Scroll the grid when the pointer is near its top or bottom edge.
+     */
+    function scrollNearEdge(time: number) {
+        if (!gridElement || action) {
+            lastDragFrameTime = time
+            return false
+        }
+
+        const rect = gridElement.getBoundingClientRect()
+        if (nextPointerX < rect.left || nextPointerX > rect.right) {
+            lastDragFrameTime = time
+            return false
+        }
+
+        const edgeSize = Math.min(80, rect.height / 4)
+        let speed = 0
+        if (nextPointerY < rect.top + edgeSize) {
+            speed = -Math.min(
+                1,
+                (rect.top + edgeSize - nextPointerY) / edgeSize
+            )
+        } else if (nextPointerY > rect.bottom - edgeSize) {
+            speed = Math.min(
+                1,
+                (nextPointerY - (rect.bottom - edgeSize)) / edgeSize
+            )
+        }
+
+        const duration = Math.min(
+            32,
+            lastDragFrameTime === undefined ? 16 : time - lastDragFrameTime
+        )
+        lastDragFrameTime = time
+        if (speed === 0) {
+            return false
+        }
+
+        const previousScrollTop = gridElement.scrollTop
+        gridElement.scrollTop += speed * duration
+        return gridElement.scrollTop !== previousScrollTop
     }
 
     /**
@@ -141,7 +189,6 @@
             x: event.clientX,
             y: event.clientY,
         }
-        target.setPointerCapture(event.pointerId)
 
         if (event.pointerType === 'touch') {
             holdTimer = window.setTimeout(startDrag, 300)
@@ -241,6 +288,7 @@
         }
 
         const target = activePointer.target
+        target.setPointerCapture(activePointer.id)
         draggedElement = target
         draggedIndex = getElementIndex(target)
         draggedItem = items[draggedIndex]
@@ -286,6 +334,7 @@
             cancelAnimationFrame(dragAnimationFrame)
             dragAnimationFrame = undefined
         }
+        lastDragFrameTime = undefined
         draggedElement?.style.removeProperty('--x')
         draggedElement?.style.removeProperty('--y')
         draggedElement = undefined
