@@ -112,6 +112,7 @@
             name="No Folder"
         />
         <ListItem
+            id="item_trash"
             onclick={() => setFolder('trash')}
             selected={currentFolderId === 'trash'}
             icon="delete"

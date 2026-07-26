@@ -111,6 +111,14 @@
         )
     }
 
+    function onDelete() {
+        if (accountDraft.in_trash) {
+            removeAccountDialog?.open()
+            return
+        }
+        onremove()
+    }
+
     function onFindImage() {
         if (
             (!accountDraft.icon ||
@@ -230,7 +238,7 @@
         <Fab
             class="remove_account"
             color="on-primary"
-            onclick={() => removeAccountDialog?.open()}
+            onclick={onDelete}
             icon="delete"
         />
     {/if}
@@ -255,11 +263,7 @@
     bind:this={qrCodeDialog}
 />
 
-<DialogRemoveAccount
-    bind:this={removeAccountDialog}
-    permanent={accountDraft.in_trash}
-    {onremove}
-/>
+<DialogRemoveAccount bind:this={removeAccountDialog} {onremove} />
 
 <SimpleLoginAlias bind:this={simpleLoginAliasDialog} />
 

@@ -212,16 +212,7 @@ export async function removeAccount(
     if (!wallet) {
         return
     }
-    const account = wallet.accounts.find((a) => a.id === accountId)
-    if (!account) {
-        console.error('Account not found')
-        return
-    }
-    if (account.in_trash) {
-        wallet.accounts = wallet.accounts.filter((a) => a.id !== accountId)
-    } else {
-        account.in_trash = true
-    }
+    wallet.accounts = wallet.accounts.filter((a) => a.id !== accountId)
     return await saveWallet()
 }
 
@@ -237,6 +228,21 @@ export async function restoreAccount(
         return
     }
     account.in_trash = false
+    return await saveWallet()
+}
+
+export async function moveAccountToTrash(
+    accountId: string
+): Promise<Wallet | undefined> {
+    if (!wallet) {
+        return
+    }
+    const account = wallet.accounts.find((a) => a.id === accountId)
+    if (!account) {
+        console.error('Account not found')
+        return
+    }
+    account.in_trash = true
     return await saveWallet()
 }
 

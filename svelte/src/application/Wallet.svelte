@@ -96,7 +96,7 @@
     let foldersVisible = $state(false)
     let floatingFolder = $derived(walletWidth < 870)
     let folderDomIds = $derived.by(() => {
-        let ret = ['item_no_folder']
+        let ret = ['item_no_folder', 'item_trash']
         for (let folder of wallet['folders'] || []) {
             ret = ret.concat(['item_folder_' + folder.id])
         }
@@ -140,7 +140,9 @@
     }
     async function onRemoveAccount() {
         if (editedAccountIndex !== null) {
-            wallet = await api.removeAccount(accountEdited.id)
+            wallet = accountEdited.in_trash
+                ? await api.removeAccount(accountEdited.id)
+                : await api.moveAccountToTrash(accountEdited.id)
             editedAccountIndex = null
         }
         accountEdited = undefined
@@ -159,6 +161,8 @@
         const actionElement = event.action
         if (actionElement.id === 'item_no_folder') {
             wallet = await api.changeFolder(event.item, '')
+        } else if (actionElement.id === 'item_trash') {
+            wallet = await api.moveAccountToTrash(event.item.id)
         } else if (
             actionElement.id &&
             actionElement.id.startsWith('item_folder_')
