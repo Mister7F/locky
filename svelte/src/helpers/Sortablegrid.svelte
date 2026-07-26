@@ -54,8 +54,10 @@
     let pressedElementEvent: MouseEvent | TouchEvent | undefined
     let desktopDragMove = [0, 0]
 
-    let dragX = $state<number | undefined>()
-    let dragY = $state<number | undefined>()
+    let draggedElement: HTMLElement | undefined
+    let dragAnimationFrame: number | undefined
+    let nextDragX = 0
+    let nextDragY = 0
 
     // Do not load all items for performance reason (items will be loaded dynamically when scrolling)
     const minCardSurface = 432 * 78
@@ -94,8 +96,15 @@
             // mouse move event on mobile, must ignore
             return [null, null]
         }
-        dragX = mouseX - xPosElement
-        dragY = mouseY - yPosElement
+        nextDragX = mouseX - xPosElement
+        nextDragY = mouseY - yPosElement
+        if (dragAnimationFrame === undefined) {
+            dragAnimationFrame = requestAnimationFrame(() => {
+                draggedElement?.style.setProperty('--x', `${nextDragX}px`)
+                draggedElement?.style.setProperty('--y', `${nextDragY}px`)
+                dragAnimationFrame = undefined
+            })
+        }
         return [mouseX, mouseY]
     }
 
@@ -133,37 +142,41 @@
             return
         }
         if (action) {
-            onaction?.({
-                action: action,
-                item: draggedItem,
-            })
+            if (draggedItem) {
+                onaction?.({
+                    action: action,
+                    item: draggedItem,
+                })
+            }
         } else if (
             draggedIndex !== destIndexItem &&
             destIndexItem >= 0 &&
             draggedIndex >= 0
         ) {
-            if (!draggedItem || !items[destIndexItem]) {
-                return
+            if (draggedItem && items[destIndexItem]) {
+                onmove?.({
+                    from: draggedIndex,
+                    to: destIndexItem,
+                    fromItem: draggedItem,
+                    destItem: items[destIndexItem],
+                })
             }
-            onmove?.({
-                from: draggedIndex,
-                to: destIndexItem,
-                fromItem: draggedItem,
-                destItem: items[destIndexItem],
-            })
         }
 
         // clean the state
+        if (dragAnimationFrame !== undefined) {
+            cancelAnimationFrame(dragAnimationFrame)
+            dragAnimationFrame = undefined
+        }
+        draggedElement?.style.removeProperty('--x')
+        draggedElement?.style.removeProperty('--y')
+        draggedElement = undefined
         draggedItem = undefined
         draggedIndex = -1
         destIndex = -1
         destIndexItem = -1
         dragging = false
-        action = undefined
-        const previousFolder = document.querySelector('.move_into')
-        if (previousFolder) {
-            previousFolder.classList.remove('move_into')
-        }
+        setAction()
     }
 
     function mouseMove(event) {
@@ -201,21 +214,15 @@
         let hoverElements = document.elementsFromPoint(mouseX, mouseY)
 
         /* Check for custom actions */
-        let customActionElement = hoverElements.filter(
+        let customActionElement = hoverElements.find(
             (el) => customActions.indexOf(el.id) >= 0
         )
-        if (customActionElement.length) {
-            action = customActionElement[0] as HTMLElement
-            // Todo: rename `move_into` into `action_hover`
-            let previousFolder = document.querySelector('.move_into')
-            if (previousFolder) {
-                previousFolder.classList.remove('move_into')
-            }
-            action.classList.add('move_into')
+        if (customActionElement) {
+            setAction(customActionElement as HTMLElement)
             return
         }
         // no action
-        action = null
+        setAction()
         // check if we will move the item
         const destItemsFiltered = hoverElements.filter(
             (el) =>
@@ -236,17 +243,16 @@
             }
             destIndexItem = nextIndex > draggedIndex ? nextIndex - 1 : nextIndex
             destIndex = nextIndex
-
-            const previousFolder = document.querySelector('.move_into')
-            if (previousFolder) {
-                previousFolder.classList.remove('move_into')
-            }
-        } else {
-            const previousFolder = document.querySelector('.move_into')
-            if (previousFolder) {
-                previousFolder.classList.remove('move_into')
-            }
         }
+    }
+
+    function setAction(newAction?: HTMLElement) {
+        if (action === newAction) {
+            return
+        }
+        action?.classList.remove('move_into')
+        action = newAction
+        action?.classList.add('move_into')
     }
 
     /**
@@ -271,6 +277,7 @@
             return
         }
 
+        draggedElement = target
         draggedIndex = getElementIndex(target)
 
         draggedItem = items[draggedIndex]
@@ -349,7 +356,6 @@
                 onmousedown={mouseDown}
                 ontouchstart={touchStart}
                 oncontextmenu={(event) => event.preventDefault()}
-                style="--x: {dragX}px; --y: {dragY}px;"
             >
                 {#if card}
                     {@render card(item)}
