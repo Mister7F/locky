@@ -148,10 +148,7 @@
             {#if readonly}
                 <div class="readonly-control">
                     <div class="label-readonly">{label}</div>
-                    {#if type === 'url' &&
-                        isUrlValid(value) &&
-                        urlLeft &&
-                        urlHost}
+                    {#if type === 'url' && isUrlValid(value) && urlLeft && urlHost}
                         <a
                             class="value"
                             href={value}
@@ -190,42 +187,44 @@
                     helpPersistent={!!messagePersistent}
                 />
             {/if}
-            {#if type === 'password'}
-                <IconButton
-                    onclick={() => (passwordVisible = !passwordVisible)}
-                    icon={passwordVisible ? 'visibility' : 'visibility_off'}
-                />
-                {#if showGeneratePassword && !value?.length}
-                    <GeneratePassword
-                        bind:this={generatePasswordDialog}
-                        onuse={(password) => (value = password)}
-                    />
+            <div class="field-actions">
+                {#if type === 'password'}
                     <IconButton
-                        onclick={() => generatePasswordDialog.open()}
-                        icon="refresh"
+                        onclick={() => (passwordVisible = !passwordVisible)}
+                        icon={passwordVisible ? 'visibility' : 'visibility_off'}
                     />
-                {:else if strengthResult && strengthResult.feedback}
-                    <PasswordWarning {strengthResult} />
+                    {#if showGeneratePassword && !value?.length}
+                        <GeneratePassword
+                            bind:this={generatePasswordDialog}
+                            onuse={(password) => (value = password)}
+                        />
+                        <IconButton
+                            onclick={() => generatePasswordDialog.open()}
+                            icon="refresh"
+                        />
+                    {:else if strengthResult && strengthResult.feedback}
+                        <PasswordWarning {strengthResult} />
+                    {/if}
+                {:else if type === 'totp' && value}
+                    <IconButton onclick={onshow_qrcode} icon="qr_code" />
                 {/if}
-            {:else if type === 'totp' && value}
-                <IconButton onclick={onshow_qrcode} icon="qr_code" />
-            {/if}
-            {#if canEditType && !readonly}
-                <FieldAction bind:type bind:label {onremove} />
-            {/if}
-            {#if actionIcon && !readonly}
-                <IconButton
-                    onclick={onaction}
-                    icon={actionIcon}
-                    title={actionTitle}
-                />
-            {/if}
-            {#if copy && value}
-                <IconButton
-                    onclick={onCopyClick}
-                    icon={copied ? 'check' : 'content_copy'}
-                />
-            {/if}
+                {#if canEditType && !readonly}
+                    <FieldAction bind:type bind:label {onremove} />
+                {/if}
+                {#if actionIcon && !readonly}
+                    <IconButton
+                        onclick={onaction}
+                        icon={actionIcon}
+                        title={actionTitle}
+                    />
+                {/if}
+                {#if copy && value}
+                    <IconButton
+                        onclick={onCopyClick}
+                        icon={copied ? 'check' : 'content_copy'}
+                    />
+                {/if}
+            </div>
         </div>
     </div>
 {/if}
@@ -257,7 +256,7 @@
         position: relative;
         flex: 1;
         min-width: 0;
-        height: 50px;
+        min-height: 50px;
     }
 
     .label-readonly {
@@ -300,6 +299,14 @@
         color: var(--on-primary);
         padding: 12px 0;
         word-break: break-all;
+    }
+
+    .field-actions {
+        display: flex;
+        align-items: center;
+        align-self: flex-start;
+        flex-shrink: 0;
+        height: 50px;
     }
 
     a {
