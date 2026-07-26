@@ -156,9 +156,11 @@
     }
 
     .foldersList.floating {
-        position: absolute;
+        position: fixed;
+        top: 57px;
+        bottom: 0;
         left: -360px;
-        height: 100%;
+        height: auto;
         min-width: 0;
         background-color: var(--surface);
         z-index: 2;
@@ -173,7 +175,7 @@
         flex-direction: column;
         height: 100%;
         overflow: hidden;
-        padding-bottom: 12px;
+        padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px));
         box-sizing: border-box;
     }
 
@@ -188,12 +190,10 @@
     }
 
     .folders-overlay {
-        position: absolute;
+        position: fixed;
         z-index: 1;
-        height: 100%;
-        width: 100%;
+        inset: 57px 0 0;
         background-color: var(--primary);
-        top: 0;
         opacity: 0.4;
     }
 </style>

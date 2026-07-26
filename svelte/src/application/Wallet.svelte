@@ -268,6 +268,7 @@
         box-sizing: border-box;
         overflow-y: scroll;
         height: calc(100vh - 57px);
+        height: calc(100dvh - 57px);
         display: flex;
         flex-direction: row;
         overflow: hidden;
