@@ -92,7 +92,7 @@
     )
 
     // folders variable
-    let walletWidth = $state(null)
+    let walletWidth = $state(window.innerWidth)
     let foldersVisible = $state(false)
     let floatingFolder = $derived(walletWidth < 870)
     let folderDomIds = $derived.by(() => {

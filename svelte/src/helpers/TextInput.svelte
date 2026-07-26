@@ -10,6 +10,7 @@
         helpPersistent?: boolean
         value?: string
         type?: HTMLInputAttributes['type']
+        autofocus?: boolean
         onkeypress?: InputEventHandler
         onchange?: InputEventHandler
         oninput?: InputEventHandler
@@ -25,6 +26,7 @@
         helpPersistent = true,
         value = $bindable(),
         type = 'text',
+        autofocus = false,
         onkeypress,
         onchange,
         oninput,
@@ -37,6 +39,13 @@
     let selectionIndex = $state(-1)
     let timeoutHandle: number | undefined
     let loosingFocus = $state(false)
+    let inputElement = $state<HTMLInputElement>()
+
+    $effect(() => {
+        if (autofocus && inputElement) {
+            inputElement.focus()
+        }
+    })
 
     function onFocus(event: FocusEvent) {
         focused = true
@@ -66,6 +75,7 @@
 
 <div class="container {className}">
     <input
+        bind:this={inputElement}
         required
         class="
             {focused ? 'focused' : ''}

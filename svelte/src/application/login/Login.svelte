@@ -44,6 +44,12 @@
         (method === 'upload' && !filedata) ||
             (method === 'dropbox' && dropboxState !== 'logged')
     )
+    let passwordAutofocus = $derived(
+        method === 'login' ||
+            method === 'create' ||
+            (method === 'upload' && !!filedata) ||
+            (method === 'dropbox' && dropboxState === 'logged')
+    )
 
     let password = $state('')
     let wrongPassword = $state(false)
@@ -205,6 +211,7 @@
                 onenter={onLogin}
                 oninput={() => (wrongPassword = false)}
                 type="password"
+                autofocus={passwordAutofocus}
                 showPasswordStrength={method === 'create'}
                 copy={false}
             />

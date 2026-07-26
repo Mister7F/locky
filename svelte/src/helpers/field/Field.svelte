@@ -14,6 +14,7 @@
         label?: string
         readonly?: boolean
         type?: FieldType
+        autofocus?: boolean
         showPasswordStrength?: boolean
         value?: string
         message?: string
@@ -41,6 +42,7 @@
         label = $bindable(''),
         readonly = false,
         type = $bindable('text'),
+        autofocus = false,
         showPasswordStrength = false,
         value = $bindable(),
         message = '',
@@ -178,6 +180,7 @@
                     {label}
                     bind:value
                     type={computedType}
+                    {autofocus}
                     onkeypress={onKeyPress}
                     {onchange}
                     {oninput}
