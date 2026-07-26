@@ -10,6 +10,18 @@
     import DropboxLogin from '../dropbox/DropboxLogin.svelte'
     import ChooseMethod from './ChooseMethod.svelte'
     import Wallet from '../../models/wallet.ts'
+    import type { DropboxState, LoginMethod } from '../../helpers/types.ts'
+
+    const LOGIN_METHODS: LoginMethod[] = [
+        'login',
+        'create',
+        'upload',
+        'dropbox',
+    ]
+
+    function isLoginMethod(value: unknown): value is LoginMethod {
+        return LOGIN_METHODS.some((method) => method === value)
+    }
 
     const maxLen = 8
     interface Props {
@@ -19,14 +31,13 @@
 
     let { wallet = $bindable(), onwallet_openned }: Props = $props()
 
-    const allowed_methods = ['login', 'create', 'upload', 'dropbox', null]
-    let method = $state<string | undefined>()
+    let method = $state<LoginMethod | undefined>()
     let showOptions = $state(false)
     let sessionOpened = $state(false)
 
     let filedata = $state<ArrayBuffer | undefined>() // File uploaded
     let dropboxFile: dropbox.DropboxDownload | undefined
-    let dropboxState = $state('')
+    let dropboxState = $state<DropboxState>('checking')
     let loading = $state(false)
 
     let loginDisabled = $derived(
@@ -96,7 +107,7 @@
         }, 1000)
     }
 
-    async function setMethod(newMethod) {
+    async function setMethod(newMethod: LoginMethod) {
         loading = false
         wrongPassword = false
         dropboxFile = null
@@ -104,7 +115,7 @@
         if (newMethod === 'login') {
             showOptions = false
             method = newMethod
-        } else if (allowed_methods.indexOf(newMethod) >= 0) {
+        } else {
             showOptions = false
             method = newMethod
             document.cookie = `login_method=${method}`
@@ -130,7 +141,7 @@
         if (
             cookieMethod &&
             cookieMethod.length &&
-            allowed_methods.indexOf(cookieMethod) >= 0
+            isLoginMethod(cookieMethod)
         ) {
             method = cookieMethod
             showOptions = false

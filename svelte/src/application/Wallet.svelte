@@ -12,6 +12,10 @@
     import Account from '../models/account.ts'
 
     import Wallet from '../models/wallet.ts'
+    import {
+        isAccountViewMode,
+        type AccountViewMode,
+    } from '../helpers/types.ts'
 
     interface Props {
         wallet?: Wallet
@@ -75,7 +79,10 @@
     let editedAccountIndex = $state(null)
 
     let dragging = $state(false)
-    let viewMode = $state(window.localStorage.getItem('viewMode') || 'detail')
+    const storedViewMode = window.localStorage.getItem('viewMode')
+    let viewMode = $state<AccountViewMode>(
+        isAccountViewMode(storedViewMode) ? storedViewMode : 'detail'
+    )
 
     // folders variable
     let walletWidth = $state(null)

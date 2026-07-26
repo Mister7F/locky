@@ -8,11 +8,12 @@
     import Icon from '../Icon.svelte'
     import GeneratePassword from '../../application/editor/GeneratePassword.svelte'
     import zxcvbn from 'zxcvbn'
+    import type { FieldType } from '../types.ts'
 
     interface Props {
         label?: string
         readonly?: boolean
-        type?: string
+        type?: FieldType
         showPasswordStrength?: boolean
         value?: string
         message?: string

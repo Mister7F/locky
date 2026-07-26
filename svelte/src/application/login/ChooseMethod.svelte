@@ -1,9 +1,10 @@
 <script lang="ts">
     import Button from '../../helpers/Button.svelte'
+    import type { LoginMethod } from '../../helpers/types.ts'
 
     interface Props {
         sessionOpened?: boolean
-        onclick: (method: 'login' | 'create' | 'upload' | 'dropbox') => void
+        onclick: (method: LoginMethod) => void
     }
 
     let { sessionOpened = false, onclick }: Props = $props()

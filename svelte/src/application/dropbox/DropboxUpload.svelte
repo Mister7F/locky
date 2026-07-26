@@ -19,7 +19,9 @@
         onwalletdownloaded = () => {},
     }: Props = $props()
 
-    let uploadingState = $state('wait')
+    type DropboxUploadState = 'wait' | 'uploading' | 'error'
+
+    let uploadingState = $state<DropboxUploadState>('wait')
     let confirmationDialogOpen = $state(false)
     let downloadWalletDialogOpen = $state(false)
 

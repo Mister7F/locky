@@ -1,4 +1,11 @@
 import { normalizeOrigin } from '../helpers/utils'
+import type { FieldType } from '../helpers/types.ts'
+
+const FIELD_TYPES: FieldType[] = ['text', 'password', 'email', 'url', 'totp']
+
+function isFieldType(value: unknown): value is FieldType {
+    return FIELD_TYPES.some((type) => type === value)
+}
 
 export default class Account {
     private __brand!: 'Account'
@@ -66,16 +73,20 @@ export default class Account {
 export class Field {
     private __brand!: 'Field'
     name: string
-    type: string
+    type: FieldType
     value?: string
 
-    constructor(name?: string, type?: string, value?: string) {
+    constructor(name?: string, type?: FieldType, value?: string) {
         this.name = name || ''
-        this.type = type || ''
+        this.type = type || 'text'
         this.value = value || ''
     }
 
     static fromJson(values: any): Field {
-        return new Field(values.name, values.type, values.value)
+        return new Field(
+            values.name,
+            isFieldType(values.type) ? values.type : 'text',
+            values.value
+        )
     }
 }

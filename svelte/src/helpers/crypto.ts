@@ -2,6 +2,8 @@ import scrypt from 'scrypt-async'
 import _sodium from 'libsodium-wrappers'
 import zxcvbn from 'zxcvbn'
 
+type HashAlgorithm = 'SHA-1' | 'SHA-256' | 'SHA-384' | 'SHA-512'
+
 export async function getTotpCode(token: string): Promise<string | undefined> {
     const epoch = Math.floor(Date.now() / 1000 / 30)
 
@@ -39,7 +41,7 @@ export async function getTotpCode(token: string): Promise<string | undefined> {
  */
 export async function digest(
     message: string,
-    algorithm: string = 'SHA-1'
+    algorithm: HashAlgorithm = 'SHA-1'
 ): Promise<string> {
     const encoder = new TextEncoder()
     const data = encoder.encode(message)
@@ -61,7 +63,7 @@ export async function digest(
 export async function hmac(
     key: Uint8Array,
     data: Uint8Array,
-    hash: string = 'SHA-1'
+    hash: HashAlgorithm = 'SHA-1'
 ): Promise<Uint8Array> {
     const hmac = await window.crypto.subtle.importKey(
         'raw',

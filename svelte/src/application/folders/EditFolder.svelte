@@ -107,9 +107,7 @@
     </div>
 
     {#snippet actions()}
-        <Button onclick={onDeleteFolder} color="danger" variant="outlined">
-            Delete
-        </Button>
+        <Button onclick={onDeleteFolder} color="danger">Delete</Button>
 
         <Button onclick={onSaveFolder} color="secondary" variant="outlined">
             Save

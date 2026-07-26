@@ -3,7 +3,6 @@
     import IconButton from '../../helpers/IconButton.svelte'
     import Fab from '../../helpers/Fab.svelte'
     import Account from '../../models/account.ts'
-    import { Field as FieldType } from '../../models/account.ts'
 
     import Field from '../../helpers/field/Field.svelte'
     import { copyValue } from '../../helpers/utils.ts'

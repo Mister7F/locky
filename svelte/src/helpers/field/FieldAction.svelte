@@ -4,9 +4,10 @@
     import IconButton from '../IconButton.svelte'
     import Button from '../Button.svelte'
     import Dialog from '../../helpers/Dialog.svelte'
+    import type { FieldType } from '../types.ts'
 
     interface Props {
-        type?: string
+        type?: FieldType
         label?: string
         onremove?: () => void
     }
@@ -93,15 +94,9 @@
             >
                 Cancel
             </Button>
-            <Button color="danger" variant="text" onclick={onDelete}>
-                Delete
-            </Button>
+            <Button color="danger" onclick={onDelete}>Delete</Button>
         {:else}
-            <Button
-                color="danger"
-                variant="text"
-                onclick={() => (deleteConfirmation = true)}
-            >
+            <Button color="danger" onclick={() => (deleteConfirmation = true)}>
                 Delete
             </Button>
             <Button

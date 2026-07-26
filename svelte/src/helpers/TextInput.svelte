@@ -1,4 +1,6 @@
 <script lang="ts">
+    import type { HTMLInputAttributes } from 'svelte/elements'
+
     type InputEventHandler = (event: Event) => void
 
     interface Props {
@@ -7,7 +9,7 @@
         help?: string
         helpPersistent?: boolean
         value?: string
-        type?: string
+        type?: HTMLInputAttributes['type']
         onkeypress?: InputEventHandler
         onchange?: InputEventHandler
         oninput?: InputEventHandler

@@ -11,10 +11,11 @@
     import { sendCredentials } from '../helpers/web_extension.svelte.ts'
 
     import Account from '../models/account.ts'
+    import type { AccountViewMode } from '../helpers/types.ts'
 
     interface Props {
         account: Account
-        viewMode?: string
+        viewMode?: AccountViewMode
         onclick: (event: MouseEvent) => void
         onnotify?: (message: string) => void
         minimalist?: boolean

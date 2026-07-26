@@ -1,13 +1,14 @@
 <script lang="ts">
     import Button from '../../helpers/Button.svelte'
     import * as dropbox from './dropbox.ts'
+    import type { DropboxState } from '../../helpers/types.ts'
 
     interface Props {
-        state?: string
+        state?: DropboxState
         onlogout: () => void
     }
 
-    let { state = $bindable(''), onlogout }: Props = $props()
+    let { state = $bindable('checking'), onlogout }: Props = $props()
 
     let filedata = null
     async function onLogin() {
@@ -23,6 +24,7 @@
     }
 
     const init = async () => {
+        state = 'checking'
         let isAuthenticated = await dropbox.isAuthenticated()
         state = isAuthenticated ? 'logged' : 'not_logged'
         if (isAuthenticated) {

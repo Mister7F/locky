@@ -9,9 +9,13 @@
     import DropboxUpload from './../dropbox/DropboxUpload.svelte'
     import * as dropbox from './../dropbox/dropbox.ts'
     import type Wallet from '../../models/wallet.ts'
+    import {
+        ACCOUNT_VIEW_MODES,
+        type AccountViewMode,
+    } from '../../helpers/types.ts'
 
     interface Props {
-        viewMode: string
+        viewMode: AccountViewMode
         floatingFolder: boolean
         searchText: string
         openSearch: boolean
@@ -38,20 +42,20 @@
         isDropboxAuthenticated = await dropbox.isAuthenticated()
     })
 
-    const viewModes = ['detail', 'list']
-
     let viewModeIcon = $derived(
         {
             detail: 'view_module',
             list: 'list',
+            minimalist: 'view_headline',
         }[viewMode] || 'view_module'
     )
 
     function changeViewMode() {
         const _changeViewMode = () => {
             const nextModeIndex =
-                (viewModes.indexOf(viewMode) + 1) % viewModes.length
-            viewMode = viewModes[nextModeIndex]
+                (ACCOUNT_VIEW_MODES.indexOf(viewMode) + 1) %
+                ACCOUNT_VIEW_MODES.length
+            viewMode = ACCOUNT_VIEW_MODES[nextModeIndex]
             window.localStorage.setItem('viewMode', viewMode)
         }
 

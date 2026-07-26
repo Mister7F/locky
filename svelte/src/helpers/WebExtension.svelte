@@ -24,6 +24,64 @@
     import { normalizeOrigin } from '../helpers/utils.ts'
     import { untrack, onMount, onDestroy } from 'svelte'
 
+    interface ExtensionAccount {
+        login?: string
+        password?: string
+        url?: string
+        totp?: string
+    }
+
+    type WalletToExtensionEvent =
+        | {
+              action: 'login'
+              currentUrl: string | null
+              account: ExtensionAccount
+          }
+        | {
+              action: 'savePassword'
+              encryptedPassword: string
+          }
+
+    interface ExtensionHandshakeMessage {
+        pluginKey: string
+        channelId: string
+        encryptedPassword?: string
+        currentUrl?: string
+    }
+
+    interface CurrentTabChangedMessage {
+        action: 'CURRENT_TAB_CHANGED'
+        currentUrl: string
+    }
+
+    function isCurrentTabChangedMessage(
+        value: unknown
+    ): value is CurrentTabChangedMessage {
+        return (
+            isRecord(value) &&
+            value.action === 'CURRENT_TAB_CHANGED' &&
+            typeof value.currentUrl === 'string'
+        )
+    }
+
+    function isExtensionHandshakeMessage(
+        value: unknown
+    ): value is ExtensionHandshakeMessage {
+        return (
+            isRecord(value) &&
+            typeof value.pluginKey === 'string' &&
+            typeof value.channelId === 'string' &&
+            (value.encryptedPassword === undefined ||
+                typeof value.encryptedPassword === 'string') &&
+            (value.currentUrl === undefined ||
+                typeof value.currentUrl === 'string')
+        )
+    }
+
+    function isRecord(value: unknown): value is Record<string, unknown> {
+        return typeof value === 'object' && value !== null
+    }
+
     let pluginKey = null
     let pluginOrigin = null
     let channelId = null
@@ -47,7 +105,7 @@
         onnotify,
     }: Props = $props()
 
-    let currentTabUrl = $state(null)
+    let currentTabUrl = $state<string | null>(null)
     let currentTabOrigin = $derived(normalizeOrigin(currentTabUrl))
 
     let confirmationDialogOpen = $state(false)
@@ -83,13 +141,12 @@
             }
 
             // Force basic types
-            const eventData = JSON.parse(JSON.stringify(event.data))
+            const eventData: unknown = JSON.parse(JSON.stringify(event.data))
 
-            if (eventData.action === 'CURRENT_TAB_CHANGED') {
+            if (isCurrentTabChangedMessage(eventData)) {
                 if (
                     !WebExtension.inWebExtension ||
-                    event.origin !== pluginOrigin ||
-                    typeof eventData.currentUrl !== 'string'
+                    event.origin !== pluginOrigin
                 ) {
                     return
                 }
@@ -97,6 +154,10 @@
                 if (!locked) {
                     setSearch({ detail: wallet })
                 }
+                return
+            }
+
+            if (!isExtensionHandshakeMessage(eventData)) {
                 return
             }
 
@@ -288,7 +349,7 @@
         if (account.totp) {
             copyValue(getTotpCode(account.totp))
         }
-        const event = {
+        const event: WalletToExtensionEvent = {
             action: 'login',
             currentUrl: currentTabUrl,
             account: {
@@ -345,7 +406,7 @@
         return token
     }
 
-    async function sendToWebExtension(event) {
+    async function sendToWebExtension(event: WalletToExtensionEvent) {
         if (!pluginKey?.byteLength || !channelId) {
             return false
         }
