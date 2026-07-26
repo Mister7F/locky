@@ -30,6 +30,9 @@
         card,
     }: Props = $props()
 
+    /**
+     * Return an element's index while ignoring drag placeholders.
+     */
     function getElementIndex(element) {
         // Return the index of the element in its parent
         const children = [...element.parentNode.children].filter(
@@ -58,6 +61,8 @@
     let dragAnimationFrame: number | undefined
     let nextDragX = 0
     let nextDragY = 0
+    let nextPointerX = 0
+    let nextPointerY = 0
 
     // Do not load all items for performance reason (items will be loaded dynamically when scrolling)
     const minCardSurface = 432 * 78
@@ -76,41 +81,80 @@
     // Position of the mouse on the dragged element
     let xPosElement = 0
     let yPosElement = 0
-    let mouseTimer: number = 0
+    let mouseTimer: number | undefined
     let mobile = false
 
+    /**
+     * Save the latest pointer position and schedule a visual/drop-target update.
+     */
     function moveDraggedElement(event: MouseEvent | TouchEvent) {
-        // move the dragged element to the mouse position
-        let mouseX
-        let mouseY
-
-        if (isTouchEvent(event)) {
-            // mobile
-            mouseX = event.touches[0].clientX
-            mouseY = event.touches[0].clientY
-        } else if (!mobile) {
-            // desktop
-            mouseX = event.x
-            mouseY = event.y
-        } else {
-            // mouse move event on mobile, must ignore
-            return [null, null]
+        const position = getPointerPosition(event)
+        if (!position) {
+            return false
         }
+        const [mouseX, mouseY] = position
+        nextPointerX = mouseX
+        nextPointerY = mouseY
         nextDragX = mouseX - xPosElement
         nextDragY = mouseY - yPosElement
         if (dragAnimationFrame === undefined) {
-            dragAnimationFrame = requestAnimationFrame(() => {
-                draggedElement?.style.setProperty('--x', `${nextDragX}px`)
-                draggedElement?.style.setProperty('--y', `${nextDragY}px`)
-                dragAnimationFrame = undefined
-            })
+            dragAnimationFrame = requestAnimationFrame(updateDragFrame)
         }
-        return [mouseX, mouseY]
+        return true
     }
 
+    /**
+     * Read viewport coordinates from either a mouse or touch event.
+     */
+    function getPointerPosition(
+        event: MouseEvent | TouchEvent
+    ): [number, number] | undefined {
+        if (isTouchEvent(event)) {
+            const touch = event.touches[0] || event.changedTouches[0]
+            return touch && [touch.clientX, touch.clientY]
+        }
+        if (mobile) {
+            // Ignore synthetic mouse events generated after a touch.
+            return
+        }
+        return [event.clientX, event.clientY]
+    }
+
+    /**
+     * Apply the latest drag position and hit-test once per animation frame.
+     */
+    function updateDragFrame() {
+        draggedElement?.style.setProperty('--x', `${nextDragX}px`)
+        draggedElement?.style.setProperty('--y', `${nextDragY}px`)
+        updateDropTarget(nextPointerX, nextPointerY)
+        dragAnimationFrame = undefined
+    }
+
+    /**
+     * Process the final pointer position synchronously before completing a drop.
+     */
+    function flushDragFrame(event: MouseEvent | TouchEvent) {
+        const position = getPointerPosition(event)
+        if (position) {
+            nextPointerX = position[0]
+            nextPointerY = position[1]
+        }
+        if (dragAnimationFrame !== undefined) {
+            cancelAnimationFrame(dragAnimationFrame)
+            dragAnimationFrame = undefined
+        }
+        updateDropTarget(nextPointerX, nextPointerY)
+    }
+
+    /**
+     * Start a touch drag after a short hold, while preserving normal scrolling.
+     */
     function touchStart(event) {
         if (event.button !== 0 && !event.touches) {
             return
+        }
+        if (mouseTimer !== undefined) {
+            clearTimeout(mouseTimer)
         }
 
         // on mobile, should press and wait a bit before dragging
@@ -121,6 +165,9 @@
         }, 300)
     }
 
+    /**
+     * Remember the initial press until desktop movement exceeds the threshold.
+     */
     function mouseDown(event: MouseEvent | TouchEvent) {
         if (!isTouchEvent(event) && event.button !== 0) {
             return
@@ -131,16 +178,20 @@
         desktopDragMove = [0, 0]
     }
 
+    /**
+     * Complete the current move or custom drop action, then reset drag state.
+     */
     function mouseUp(event: MouseEvent | TouchEvent) {
         pressedElementEvent = null
 
         if (mouseTimer) {
             clearTimeout(mouseTimer)
-            mouseTimer = null
+            mouseTimer = undefined
         }
         if (!dragging || (isMouseEvent(event) && event.button !== 0)) {
             return
         }
+        flushDragFrame(event)
         if (action) {
             if (draggedItem) {
                 onaction?.({
@@ -162,8 +213,25 @@
                 })
             }
         }
+        resetDrag()
+    }
 
-        // clean the state
+    /**
+     * Abort a drag when the browser cancels the gesture or loses focus.
+     */
+    function cancelDrag() {
+        resetDrag()
+    }
+
+    /**
+     * Remove transient styles, timers, highlights, and drag state.
+     */
+    function resetDrag() {
+        pressedElementEvent = undefined
+        if (mouseTimer !== undefined) {
+            clearTimeout(mouseTimer)
+            mouseTimer = undefined
+        }
         if (dragAnimationFrame !== undefined) {
             cancelAnimationFrame(dragAnimationFrame)
             dragAnimationFrame = undefined
@@ -176,9 +244,13 @@
         destIndex = -1
         destIndexItem = -1
         dragging = false
+        mobile = false
         setAction()
     }
 
+    /**
+     * Start or update a drag in response to pointer movement.
+     */
     function mouseMove(event) {
         if (pressedElementEvent) {
             desktopDragMove[0] += event.movementX
@@ -195,21 +267,25 @@
             }
         }
 
-        if (mouseTimer) {
+        if (mouseTimer !== undefined) {
             clearTimeout(mouseTimer)
+            mouseTimer = undefined
         }
         if (!dragging) {
             return
         }
-        let [mouseX, mouseY] = moveDraggedElement(event)
-
-        if (mouseX === null || mouseY === null) {
+        if (!moveDraggedElement(event)) {
             return
         }
 
         event.stopPropagation()
         event.preventDefault()
+    }
 
+    /**
+     * Hit-test the pointer and update the custom action or reorder destination.
+     */
+    function updateDropTarget(mouseX: number, mouseY: number) {
         // move the ghost element if necessary
         let hoverElements = document.elementsFromPoint(mouseX, mouseY)
 
@@ -246,6 +322,9 @@
         }
     }
 
+    /**
+     * Update the highlighted custom drop action.
+     */
     function setAction(newAction?: HTMLElement) {
         if (action === newAction) {
             return
@@ -281,15 +360,16 @@
         draggedIndex = getElementIndex(target)
 
         draggedItem = items[draggedIndex]
+        const targetRect = target.getBoundingClientRect()
         if (isTouchEvent(event)) {
             // mobile
-            xPosElement = target.offsetWidth / 2
-            yPosElement = target.offsetHeight / 2
+            xPosElement = targetRect.width / 2
+            yPosElement = targetRect.height / 2
             mobile = true
         } else {
             // desktop
-            xPosElement = event.x - target.offsetLeft
-            yPosElement = event.y - target.getBoundingClientRect().top
+            xPosElement = event.clientX - targetRect.left
+            yPosElement = event.clientY - targetRect.top
             mobile = false
         }
         moveDraggedElement(event)
@@ -297,6 +377,9 @@
         dragging = true
     }
 
+    /**
+     * Snapshot an event whose browser-owned properties may become unavailable.
+     */
     function cloneEvent(e) {
         if (e === undefined || e === null) return undefined
         function ClonedEvent() {}
@@ -310,6 +393,9 @@
         return clone
     }
 
+    /**
+     * Load the next item batch when the grid reaches its scroll boundary.
+     */
     function onScroll(event: Event) {
         const element = event.currentTarget as HTMLElement
         if (
@@ -326,13 +412,18 @@
         const body = document.body
         body.addEventListener('mouseup', mouseUp, { passive: true })
         body.addEventListener('touchend', mouseUp, { passive: true })
+        body.addEventListener('touchcancel', cancelDrag, { passive: true })
         body.addEventListener('mousemove', mouseMove, { passive: false })
         body.addEventListener('touchmove', mouseMove, { passive: false })
+        window.addEventListener('blur', cancelDrag)
         return () => {
+            cancelDrag()
             body.removeEventListener('mouseup', mouseUp)
             body.removeEventListener('touchend', mouseUp)
+            body.removeEventListener('touchcancel', cancelDrag)
             body.removeEventListener('mousemove', mouseMove)
             body.removeEventListener('touchmove', mouseMove)
+            window.removeEventListener('blur', cancelDrag)
         }
     })
 </script>
@@ -416,11 +507,12 @@
     }
 
     .dragged {
-        position: absolute;
-        left: var(--x);
-        top: var(--y);
+        position: fixed;
+        left: 0;
+        top: 0;
         opacity: 0.2;
-        transform: rotate(-3deg);
+        transform: translate3d(var(--x), var(--y), 0) rotate(-3deg);
+        will-change: transform;
         z-index: 99;
         pointer-events: none;
     }
