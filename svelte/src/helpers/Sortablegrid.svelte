@@ -310,14 +310,16 @@
         return clone
     }
 
-    function onScroll(event) {
-        const element = event.target
-        if (element.scrollTop !== element.scrollHeight - element.offsetHeight) {
+    function onScroll(event: Event) {
+        const element = event.currentTarget as HTMLElement
+        if (
+            element.scrollTop + element.clientHeight <
+            element.scrollHeight - 1
+        ) {
             return
         }
 
-        // scrolled to bottom
-        currentSlice = currentSlice + initialSlice
+        currentSlice = Math.min(items.length, currentSlice + initialSlice)
     }
 
     $effect(() => {
@@ -442,7 +444,11 @@
     }
 
     .load_more {
-        width: 100%;
+        display: block;
+        flex: 0 0 100%;
+        min-height: 48px;
+        padding: 12px 0 20px;
+        box-sizing: border-box;
         text-align: center;
         cursor: pointer;
     }
