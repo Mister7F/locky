@@ -16,6 +16,7 @@
         type SimpleLoginMailbox,
     } from '../simplelogin/simplelogin.ts'
     import { untrack } from 'svelte'
+    import { copyValue } from '../../helpers/utils.ts'
 
     interface Props {
         visible?: boolean
@@ -30,6 +31,7 @@
     }: Props = $props()
 
     let changePasswordDialog: ChangePassword = $state()
+    let dropboxRefreshToken = $state(api.getDropboxRefreshToken())
     let simpleLoginApiKey = $state(api.getSimpleLoginApiKey())
     let simpleLoginAliases: SimpleLoginAlias[] = $state([])
     let simpleLoginMailboxes: SimpleLoginMailbox[] = $state([])
@@ -50,7 +52,11 @@
 
     $effect(() => {
         if (visible) {
-            untrack(() => loadSimpleLoginAliases())
+            untrack(() => {
+                dropboxRefreshToken = api.getDropboxRefreshToken()
+                simpleLoginApiKey = api.getSimpleLoginApiKey()
+                loadSimpleLoginAliases()
+            })
         }
     })
 
@@ -58,9 +64,11 @@
         if (isDropboxAuthenticated) {
             await dropbox.logout()
             isDropboxAuthenticated = false
+            dropboxRefreshToken = ''
         } else {
             await dropbox.openAuthenticationPage()
             isDropboxAuthenticated = await dropbox.isAuthenticated()
+            dropboxRefreshToken = api.getDropboxRefreshToken()
         }
     }
 
@@ -190,8 +198,11 @@
             {#if isDropboxAuthenticated}
                 <Field
                     label="Dropbox refresh token"
-                    value={api.getDropboxRefreshToken()}
+                    type="password"
+                    value={dropboxRefreshToken}
                     readonly
+                    showGeneratePassword={false}
+                    oncopy={() => copyValue(dropboxRefreshToken)}
                 />
             {/if}
         </div>
@@ -230,6 +241,12 @@
                                             >{alias.email}</span
                                         >
                                         <div class="alias-actions">
+                                            <IconButton
+                                                title="Copy alias"
+                                                icon="content_copy"
+                                                onclick={() =>
+                                                    copyValue(alias.email)}
+                                            />
                                             <IconButton
                                                 title={alias.enabled
                                                     ? 'Disable alias'

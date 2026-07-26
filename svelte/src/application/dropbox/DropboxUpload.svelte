@@ -14,8 +14,10 @@
         onwalletdownloaded?: (wallet: Wallet) => void
     }
 
-    let { isAuthenticated = false, onwalletdownloaded = () => {} }: Props =
-        $props()
+    let {
+        isAuthenticated = $bindable(false),
+        onwalletdownloaded = () => {},
+    }: Props = $props()
 
     let uploadingState = $state('wait')
     let confirmationDialogOpen = $state(false)
@@ -71,7 +73,9 @@
         }
 
         dropbox.setDropboxHash(download.hash, download.rev)
-        onwalletdownloaded((await dropbox.persistRefreshToken()) || wallet)
+        dropbox.useRefreshToken(wallet.settings.dropboxRefreshToken)
+        isAuthenticated = await dropbox.isAuthenticated()
+        onwalletdownloaded(wallet)
     }
 
     async function shouldAskConfirmation() {

@@ -124,7 +124,7 @@
                 onclick={async () => await api.downloadWallet()}
             />
             <DropboxUpload
-                isAuthenticated={isDropboxAuthenticated}
+                bind:isAuthenticated={isDropboxAuthenticated}
                 {onwalletdownloaded}
             />
         {/if}

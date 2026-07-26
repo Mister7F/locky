@@ -164,6 +164,12 @@ export async function getConnection(): Promise<any | undefined> {
     return connectionPromise
 }
 
+export function useRefreshToken(refreshToken: string): void {
+    connection = undefined
+    connectionPromise = undefined
+    pendingRefreshToken = refreshToken || undefined
+}
+
 async function createConnection(): Promise<any | undefined> {
     window.localStorage.removeItem('dropboxAccessToken')
     window.localStorage.removeItem('dropboxRefreshToken')
