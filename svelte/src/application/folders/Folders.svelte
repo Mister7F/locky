@@ -67,7 +67,7 @@
 <div
     class="foldersList {visible ? 'visible' : ''} {floating ? 'floating' : ''}"
 >
-    <div>
+    <div class="folder-items">
         <div class="header">
             <span class="header_title">Folders</span>
             <IconButton
@@ -105,10 +105,17 @@
             </Sortablegrid>
         {/if}
         <ListItem
+            id="item_no_folder"
             onclick={() => setFolder('no_folder')}
             selected={currentFolderId === 'no_folder'}
             icon="folder_off"
             name="No Folder"
+        />
+        <ListItem
+            onclick={() => setFolder('trash')}
+            selected={currentFolderId === 'trash'}
+            icon="delete"
+            name="Trash"
         />
     </div>
 
@@ -160,10 +167,20 @@
         left: 0;
     }
 
+    .folder-items {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        overflow: hidden;
+        padding-bottom: 12px;
+        box-sizing: border-box;
+    }
+
     .foldersList :global(.folders) {
+        flex: 1;
+        min-height: 0;
         width: 100%;
-        height: auto;
-        max-height: calc(100vh - 260px) !important;
+        max-height: none !important;
     }
     .foldersList :global(.folders .dnd_container) {
         width: 100%;

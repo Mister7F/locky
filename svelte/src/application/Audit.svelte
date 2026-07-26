@@ -22,6 +22,9 @@
 
     let { wallet, onedit }: Props = $props()
 
+    let accounts = $derived(
+        wallet.accounts.filter((account) => !account.in_trash)
+    )
     let loading = $state(false)
     let leakedAccountsIndex = $state([])
     let weakAccountsIndex = $state([])
@@ -51,7 +54,7 @@
         leakedAccountsIndex = []
         weakAccountsIndex = []
 
-        const passwords = wallet.accounts
+        const passwords = accounts
             .map((account) => account.password)
             .filter((password) => password && password.length)
             .filter((v, i, a) => a.indexOf(v) === i) // keep only unique values
@@ -63,14 +66,14 @@
             }
         }
 
-        for (let i = 0; i < wallet.accounts.length; i++) {
-            if (leakedPassword.includes(wallet.accounts[i].password)) {
+        for (let i = 0; i < accounts.length; i++) {
+            if (leakedPassword.includes(accounts[i].password)) {
                 leakedAccountsIndex.push(i)
             }
 
             if (
-                wallet.accounts[i].password?.length &&
-                passwordStrength(wallet.accounts[i].password).strength < 90
+                accounts[i].password?.length &&
+                passwordStrength(accounts[i].password).strength < 90
             ) {
                 weakAccountsIndex.push(i)
             }
@@ -79,8 +82,8 @@
         // find duplicated passwords
         const seen = new Map<string, number>()
         const _duplicatedIndex = new Set()
-        for (let i = 0; i < wallet.accounts.length; i++) {
-            const password = wallet.accounts[i].password
+        for (let i = 0; i < accounts.length; i++) {
+            const password = accounts[i].password
             if (!password?.length) {
                 continue
             }
@@ -125,8 +128,8 @@
             {#each leakedAccountsIndex as accountIndex, index}
                 <div>
                     <AccountCard
-                        account={wallet.accounts[accountIndex]}
-                        onclick={() => onedit(wallet.accounts[accountIndex])}
+                        account={accounts[accountIndex]}
+                        onclick={() => onedit(accounts[accountIndex])}
                         viewMode="minimalist"
                     />
                 </div>
@@ -148,8 +151,8 @@
             {#each weakAccountsIndex as accountIndex, index}
                 <div>
                     <AccountCard
-                        account={wallet.accounts[accountIndex]}
-                        onclick={() => onedit(wallet.accounts[accountIndex])}
+                        account={accounts[accountIndex]}
+                        onclick={() => onedit(accounts[accountIndex])}
                         viewMode="minimalist"
                     />
                 </div>
@@ -165,8 +168,8 @@
             {#each duplicatedIndex as accountIndex, index}
                 <div>
                     <AccountCard
-                        account={wallet.accounts[accountIndex]}
-                        onclick={() => onedit(wallet.accounts[accountIndex])}
+                        account={accounts[accountIndex]}
+                        onclick={() => onedit(accounts[accountIndex])}
                         viewMode="minimalist"
                     />
                 </div>

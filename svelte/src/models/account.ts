@@ -18,6 +18,7 @@ export default class Account {
     icon?: string
     totp?: string
     fields: Field[]
+    in_trash: boolean
 
     constructor(
         id?: string,
@@ -28,7 +29,8 @@ export default class Account {
         url?: string,
         icon?: string,
         totp?: string,
-        fields?: Field[]
+        fields?: Field[],
+        in_trash?: boolean
     ) {
         this.id = id || crypto.randomUUID()
         this.name = name || ''
@@ -39,6 +41,7 @@ export default class Account {
         this.icon = icon || ''
         this.totp = totp || ''
         this.fields = fields || []
+        this.in_trash = in_trash === true
     }
 
     static fromJson(values: any): Account {
@@ -51,7 +54,8 @@ export default class Account {
             values.url,
             values.icon,
             values.totp,
-            (values.fields || []).map((f) => Field.fromJson(f))
+            (values.fields || []).map((f) => Field.fromJson(f)),
+            values.in_trash
         )
     }
 

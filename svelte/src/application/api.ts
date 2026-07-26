@@ -212,7 +212,31 @@ export async function removeAccount(
     if (!wallet) {
         return
     }
-    wallet.accounts = wallet.accounts.filter((a) => a.id !== accountId)
+    const account = wallet.accounts.find((a) => a.id === accountId)
+    if (!account) {
+        console.error('Account not found')
+        return
+    }
+    if (account.in_trash) {
+        wallet.accounts = wallet.accounts.filter((a) => a.id !== accountId)
+    } else {
+        account.in_trash = true
+    }
+    return await saveWallet()
+}
+
+export async function restoreAccount(
+    accountId: string
+): Promise<Wallet | undefined> {
+    if (!wallet) {
+        return
+    }
+    const account = wallet.accounts.find((a) => a.id === accountId)
+    if (!account) {
+        console.error('Account not found')
+        return
+    }
+    account.in_trash = false
     return await saveWallet()
 }
 
@@ -223,7 +247,10 @@ export async function changeFolder(
     if (!wallet) {
         return
     }
-    if (wallet.folders.findIndex((folder) => folder.id === newFolderId) < 0) {
+    if (
+        newFolderId &&
+        wallet.folders.findIndex((folder) => folder.id === newFolderId) < 0
+    ) {
         console.error("The folder doesn't exist")
         return
     }
@@ -233,6 +260,7 @@ export async function changeFolder(
         return
     }
     toUpdate.folder_id = newFolderId
+    toUpdate.in_trash = false
     return await saveWallet()
 }
 

@@ -5,9 +5,10 @@
 
     interface Props {
         onremove: () => void
+        permanent?: boolean
     }
 
-    let { onremove }: Props = $props()
+    let { onremove, permanent = false }: Props = $props()
 
     let removeAccountDialogOpen = $state(false)
 
@@ -16,8 +17,13 @@
     }
 </script>
 
-<Dialog bind:open={removeAccountDialogOpen} title="Delete this account">
-    Are you sure you want to remove the account ?
+<Dialog
+    bind:open={removeAccountDialogOpen}
+    title={permanent ? 'Delete this account permanently' : 'Move to Trash'}
+>
+    {permanent
+        ? 'This account will be permanently deleted. This action cannot be undone.'
+        : 'Are you sure you want to move this account to Trash?'}
 
     {#snippet actions()}
         <Button
@@ -27,6 +33,8 @@
         >
             No
         </Button>
-        <Button color="danger" onclick={onremove}>Yes</Button>
+        <Button color="danger" onclick={onremove}>
+            {permanent ? 'Delete' : 'Move to Trash'}
+        </Button>
     {/snippet}
 </Dialog>

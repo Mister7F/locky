@@ -19,6 +19,7 @@
         readonly?: boolean
         onclose: () => void
         onremove: () => void
+        onrestore: () => void
         onsave: (account: Account) => void
     }
 
@@ -26,6 +27,7 @@
         onsave,
         onclose,
         onremove,
+        onrestore,
         account,
         readonly = false,
     }: Props = $props()
@@ -232,6 +234,14 @@
             icon="delete"
         />
     {/if}
+    {#if readonly && accountDraft.in_trash}
+        <Fab
+            class="restore_account"
+            color="on-primary"
+            onclick={onrestore}
+            icon="restore_from_trash"
+        />
+    {/if}
     <Fab
         class="save_account"
         color="on-secondary"
@@ -245,7 +255,11 @@
     bind:this={qrCodeDialog}
 />
 
-<DialogRemoveAccount bind:this={removeAccountDialog} {onremove} />
+<DialogRemoveAccount
+    bind:this={removeAccountDialog}
+    permanent={accountDraft.in_trash}
+    {onremove}
+/>
 
 <SimpleLoginAlias bind:this={simpleLoginAliasDialog} />
 
@@ -283,7 +297,8 @@
         right: 20px;
     }
     .account :global(.generate_password),
-    .account :global(.remove_account) {
+    .account :global(.remove_account),
+    .account :global(.restore_account) {
         position: absolute;
         bottom: 20px;
         left: 20px;

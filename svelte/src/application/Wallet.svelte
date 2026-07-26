@@ -39,13 +39,17 @@
         let ret = []
         if (wallet && wallet.accounts) {
             const folderIds = wallet.folders.map((folder) => folder.id)
+            const trashVisible = currentFolderId === 'trash'
+            const visibleAccounts = wallet.accounts.filter(
+                (account) => account.in_trash === trashVisible
+            )
 
             if (searchText.length) {
                 // Fuzzy search: keep accounts whose name or a URL matches the
                 // subsequence, then sort by score (stable, so equal scores keep
                 // the wallet order).
                 const pattern = cleanSearchValue(searchText)
-                ret = wallet.accounts
+                ret = visibleAccounts
                     .map((account) => ({
                         account,
                         score: Math.max(
@@ -59,7 +63,10 @@
                     .sort((a, b) => b.score - a.score)
                     .map((match) => match.account)
             } else {
-                ret = wallet.accounts.filter((account) => {
+                ret = visibleAccounts.filter((account) => {
+                    if (trashVisible) {
+                        return true
+                    }
                     if (currentFolderId === 'no_folder') {
                         return !folderIds.includes(account.folder_id)
                     }
@@ -89,7 +96,7 @@
     let foldersVisible = $state(false)
     let floatingFolder = $derived(walletWidth < 870)
     let folderDomIds = $derived.by(() => {
-        let ret = []
+        let ret = ['item_no_folder']
         for (let folder of wallet['folders'] || []) {
             ret = ret.concat(['item_folder_' + folder.id])
         }
@@ -138,12 +145,24 @@
         }
         accountEdited = undefined
     }
+    async function onRestoreAccount() {
+        if (editedAccountIndex !== null) {
+            wallet = await api.restoreAccount(accountEdited.id)
+            editedAccountIndex = null
+        }
+        accountEdited = undefined
+    }
     async function onAccountAction(event: {
         action: HTMLElement
         item: Account
     }) {
         const actionElement = event.action
-        if (actionElement.id && actionElement.id.startsWith('item_folder_')) {
+        if (actionElement.id === 'item_no_folder') {
+            wallet = await api.changeFolder(event.item, '')
+        } else if (
+            actionElement.id &&
+            actionElement.id.startsWith('item_folder_')
+        ) {
             const folderId = actionElement.id.split('item_folder_')[1]
             wallet = await api.changeFolder(event.item, folderId)
         } else {
@@ -162,6 +181,7 @@
             readonly={accountEditorReadonly}
             onsave={onSaveAccount}
             onremove={onRemoveAccount}
+            onrestore={onRestoreAccount}
             onclose={() => (accountEdited = undefined)}
         />
     {/if}
@@ -209,12 +229,14 @@
                 />
             {/snippet}
         </Sortablegrid>
-        <Fab
-            class="new_account {dragging ? '' : 'visible'}"
-            onclick={onNewAccount}
-            icon="add"
-            color="on-secondary"
-        />
+        {#if currentFolderId !== 'trash'}
+            <Fab
+                class="new_account {dragging ? '' : 'visible'}"
+                onclick={onNewAccount}
+                icon="add"
+                color="on-secondary"
+            />
+        {/if}
     {/if}
 </div>
 

@@ -256,7 +256,9 @@
 
         searchText = ''
         const walletText = JSON.stringify(
-            wallet.accounts.map((a) => a.searchableTerms.map(cleanSearchValue))
+            wallet.accounts
+                .filter((account) => !account.in_trash)
+                .map((account) => account.searchableTerms.map(cleanSearchValue))
         )
 
         if (
