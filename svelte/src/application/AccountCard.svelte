@@ -373,6 +373,7 @@
         align-items: center;
         max-height: 100%;
         min-width: 110px;
+        text-align: left;
     }
     .account_list_item_title h5,
     .account_list_item_title p {
