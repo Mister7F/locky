@@ -151,23 +151,25 @@
 
 <style>
     .modal-content {
-        width: min(500px, 70vw);
+        width: 500px;
+        max-width: 100%;
         min-height: 250px;
     }
 
     .alias {
-        display: flex;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr));
         align-items: center;
         gap: 12px;
         width: 100%;
     }
 
     .alias > :global(.field) {
-        flex: 1;
+        min-width: 0;
     }
 
     select {
-        max-width: 240px;
+        width: 100%;
         padding: 10px;
         border: 1px solid var(--on-primary);
         border-radius: 4px;

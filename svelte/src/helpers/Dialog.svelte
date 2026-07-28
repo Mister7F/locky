@@ -49,13 +49,10 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        width: 100%;
-        height: 100%;
-        position: absolute;
-        top: 0;
-        left: 0;
-        height: 100vh;
+        inset: 0;
         width: 100vw;
+        height: 100vh;
+        height: 100dvh;
         background-color: rgba(74, 101, 114, 0.32);
         z-index: 99999;
     }
@@ -73,9 +70,11 @@
         box-shadow:
             0 19px 38px rgba(0, 0, 0, 0.3),
             0 15px 12px rgba(0, 0, 0, 0.22);
+        box-sizing: border-box;
         border-radius: 4px;
-        padding: 20px 30px;
-        max-width: 50%;
+        padding: clamp(20px, 4vw, 30px);
+        max-width: calc(100vw - 32px);
+        max-height: calc(100dvh - 32px);
         min-width: 100px;
         min-height: 100px;
         margin: auto;
