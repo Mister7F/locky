@@ -404,6 +404,7 @@
     function onScroll(event: Event) {
         const element = event.currentTarget as HTMLElement
         if (
+            currentSlice >= items.length ||
             element.scrollTop + element.clientHeight <
             element.scrollHeight - 1
         ) {
