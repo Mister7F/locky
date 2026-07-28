@@ -5,6 +5,7 @@ import { resolve } from 'node:path'
 
 function updateServiceWorkerCacheKey() {
     let serviceWorkerPath: string
+    let updated = false
 
     return {
         name: 'update-service-worker-cache-key',
@@ -17,6 +18,8 @@ function updateServiceWorkerCacheKey() {
             )
         },
         async closeBundle() {
+            if (updated) return
+
             const serviceWorker = await readFile(serviceWorkerPath, 'utf8')
             const updatedServiceWorker = serviceWorker.replace(
                 '__CACHE_KEY__',
@@ -28,6 +31,7 @@ function updateServiceWorkerCacheKey() {
                 )
             }
             await writeFile(serviceWorkerPath, updatedServiceWorker)
+            updated = true
         },
     }
 }

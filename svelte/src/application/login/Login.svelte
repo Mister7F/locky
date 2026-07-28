@@ -1,6 +1,6 @@
 <script lang="ts">
     import Icon from '../../helpers/Icon.svelte'
-    import * as dropbox from '../dropbox/dropbox.ts'
+    import dropbox, { type DropboxDownload } from '../dropbox/dropbox.svelte.ts'
     import * as api from '../api.ts'
     import Field from '../../helpers/field/Field.svelte'
     import Button from '../../helpers/Button.svelte'
@@ -36,7 +36,7 @@
     let sessionOpened = $state(false)
 
     let filedata = $state<ArrayBuffer | undefined>() // File uploaded
-    let dropboxFile: dropbox.DropboxDownload | undefined
+    let dropboxFile: DropboxDownload | undefined
     let dropboxState = $state<DropboxState>('checking')
     let loading = $state(false)
 
@@ -87,15 +87,18 @@
             wallet = await dropbox.logout()
             onwallet_openned()
         } else if (method === 'dropbox') {
+            dropboxFile ||= await dropbox.downloadWallet()
             if (!dropboxFile) {
-                dropboxFile = await dropbox.download('wallet.lck')
+                setWrongPassword()
+                return
             }
+
             const newWallet = await api.login(dropboxFile.content, password)
             if (!newWallet) {
                 setWrongPassword()
                 return
             }
-            dropbox.setDropboxHash(dropboxFile.hash, dropboxFile.rev)
+            dropbox.useDownloadedWallet(dropboxFile, newWallet)
             wallet = newWallet
             onwallet_openned()
         }

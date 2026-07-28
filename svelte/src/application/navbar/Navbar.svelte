@@ -7,7 +7,6 @@
     import Field from '../../helpers/field/Field.svelte'
     import Icon from '../../helpers/Icon.svelte'
     import DropboxUpload from './../dropbox/DropboxUpload.svelte'
-    import * as dropbox from './../dropbox/dropbox.ts'
     import type Wallet from '../../models/wallet.ts'
     import {
         ACCOUNT_VIEW_MODES,
@@ -35,12 +34,7 @@
     }: Props = $props()
 
     let changePassword
-    let isDropboxAuthenticated = $state(false)
     let settingsVisible = $state(false)
-
-    onMount(async () => {
-        isDropboxAuthenticated = await dropbox.isAuthenticated()
-    })
 
     let viewModeIcon = $derived(
         {
@@ -97,7 +91,7 @@
     })
 </script>
 
-<Settings bind:visible={settingsVisible} bind:isDropboxAuthenticated {onlock} />
+<Settings bind:visible={settingsVisible} {onlock} {onwalletdownloaded} />
 <div class="wallet-navbar" color="primary">
     <div class="folder_menu">
         {#if floatingFolder}
@@ -127,10 +121,7 @@
                 icon="download"
                 onclick={async () => await api.downloadWallet()}
             />
-            <DropboxUpload
-                bind:isAuthenticated={isDropboxAuthenticated}
-                {onwalletdownloaded}
-            />
+            <DropboxUpload {onwalletdownloaded} />
         {/if}
         <IconButton
             title="Change mode"

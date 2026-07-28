@@ -1,6 +1,5 @@
 <script lang="ts">
     import * as api from './api.ts'
-    import * as dropbox from './dropbox/dropbox.ts'
     import Login from './login/Login.svelte'
     import Wallet from './Wallet.svelte'
     import IconButton from '../helpers/IconButton.svelte'
@@ -53,11 +52,6 @@
     } else {
         console.error('Service Worker will not work')
     }
-
-    setTimeout(async () => {
-        // Complete a pending Dropbox OAuth redirect.
-        await dropbox.isAuthenticated()
-    }, 500)
 </script>
 
 <WebExtension

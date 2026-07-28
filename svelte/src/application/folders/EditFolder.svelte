@@ -14,11 +14,7 @@
     let { onsave, ondelete }: Props = $props()
 
     let editedFolder = $state<FolderType | undefined>()
-    let icon: string | undefined = $state()
-
-    $effect(() => {
-        icon = editedFolder?.icon || 'folder'
-    })
+    let icon = $state('folder')
 
     let folderDialogOpen = $state(false)
     let folderIconOpen = $state(false)
@@ -68,7 +64,16 @@
     export function editFolder(folder: FolderType) {
         // Deep copy to not change the folder before saving
         editedFolder = FolderType.fromJson(JSON.parse(JSON.stringify(folder)))
+        icon = editedFolder.icon || 'folder'
+        folderIconOpen = false
         folderDialogOpen = true
+    }
+    function selectFolderIcon(folderIcon: string) {
+        if (!editedFolder) return
+
+        editedFolder.icon = folderIcon
+        icon = folderIcon
+        folderIconOpen = false
     }
     function onSaveFolder() {
         onsave(editedFolder)
@@ -86,7 +91,6 @@
     <div class="container">
         <IconButton
             onclick={() => (folderIconOpen = !folderIconOpen)}
-            onblur={() => setTimeout(() => (folderIconOpen = false), 100)}
             {icon}
             color="on-primary"
         />
@@ -95,7 +99,7 @@
                 {#each folderIcons as folderIcon}
                     <div
                         class="folder_icon"
-                        onclick={() => (icon = editedFolder.icon = folderIcon)}
+                        onclick={() => selectFolderIcon(folderIcon)}
                     >
                         <Icon color="on-surface">{folderIcon}</Icon>
                     </div>

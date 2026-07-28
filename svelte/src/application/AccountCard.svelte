@@ -29,7 +29,7 @@
         minimalist = false,
     }: Props = $props()
 
-    const strength = passwordStrength(account.password || '').strength
+    let strength = $derived(passwordStrength(account.password || '').strength)
 </script>
 
 {#if viewMode === 'detail'}

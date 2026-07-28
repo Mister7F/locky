@@ -3,7 +3,7 @@
     import IconButton from '../../helpers/IconButton.svelte'
     import Sidepanel from '../../helpers/Sidepanel.svelte'
     import ChangePassword from './ChangePassword.svelte'
-    import * as dropbox from './../dropbox/dropbox.ts'
+    import dropbox from '../dropbox/dropbox.svelte.ts'
     import * as api from '../api.ts'
     import Field from '../../helpers/field/Field.svelte'
     import Dialog from '../../helpers/Dialog.svelte'
@@ -17,16 +17,18 @@
     } from '../simplelogin/simplelogin.ts'
     import { untrack } from 'svelte'
     import { copyValue } from '../../helpers/utils.ts'
+    import type Wallet from '../../models/wallet.ts'
+    import DropboxDownloadDialog from '../dropbox/DropboxDownloadDialog.svelte'
 
     interface Props {
         visible?: boolean
         onlock: () => any
-        isDropboxAuthenticated: boolean
+        onwalletdownloaded: (wallet: Wallet) => void
     }
 
     let {
         onlock,
-        isDropboxAuthenticated = $bindable(false),
+        onwalletdownloaded,
         visible = $bindable(true),
     }: Props = $props()
 
@@ -49,6 +51,7 @@
     let loadingSimpleLoginAliases = $state(false)
     let aliasToTrash: SimpleLoginAlias | undefined = $state()
     let trashDialogOpen = $state(false)
+    let fetchDropboxDialogOpen = $state(false)
 
     $effect(() => {
         if (visible) {
@@ -61,15 +64,20 @@
     })
 
     async function onDropboxClick() {
-        if (isDropboxAuthenticated) {
+        if (dropbox.authenticated) {
             await dropbox.logout()
-            isDropboxAuthenticated = false
             dropboxRefreshToken = ''
         } else {
-            await dropbox.openAuthenticationPage()
-            isDropboxAuthenticated = await dropbox.isAuthenticated()
+            await dropbox.login()
             dropboxRefreshToken = api.getDropboxRefreshToken()
         }
+    }
+
+    async function onDropboxWalletDownloaded(wallet: Wallet) {
+        dropboxRefreshToken = api.getDropboxRefreshToken()
+        simpleLoginApiKey = api.getSimpleLoginApiKey()
+        await loadSimpleLoginAliases()
+        onwalletdownloaded(wallet)
     }
 
     async function saveSimpleLoginApiKey() {
@@ -193,9 +201,17 @@
                         28.377,54.405 43.005,45.638 43.005,42.427 38.621,45.29 "
                     ></polygon>
                 </svg>
-                Dropbox {isDropboxAuthenticated ? 'logout' : 'login'}
+                Dropbox {dropbox.authenticated ? 'logout' : 'login'}
             </Button>
-            {#if isDropboxAuthenticated}
+            {#if dropbox.authenticated}
+                <Button
+                    color="primary"
+                    variant="standard"
+                    icon="cloud_download"
+                    onclick={() => (fetchDropboxDialogOpen = true)}
+                >
+                    Fetch from Dropbox
+                </Button>
                 <Field
                     label="Dropbox refresh token"
                     type="password"
@@ -296,6 +312,11 @@
         <Button color="danger" onclick={onTrashAlias}>Move to trash</Button>
     {/snippet}
 </Dialog>
+
+<DropboxDownloadDialog
+    bind:open={fetchDropboxDialogOpen}
+    onwalletdownloaded={onDropboxWalletDownloaded}
+/>
 
 <style>
     .container {

@@ -2,6 +2,7 @@
     interface Props {
         title?: string
         open?: boolean
+        dismissible?: boolean
         children?: () => any
         actions?: () => any
     }
@@ -9,13 +10,14 @@
     let {
         title = '',
         open = $bindable(false),
+        dismissible = true,
         children,
         actions,
     }: Props = $props()
 
     function onClose(event: MouseEvent) {
         const target = event.target as HTMLElement
-        if (target?.classList.contains('background')) {
+        if (dismissible && target?.classList.contains('background')) {
             open = false
         }
     }

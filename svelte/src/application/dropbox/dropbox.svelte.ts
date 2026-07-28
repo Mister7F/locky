@@ -15,34 +15,18 @@ export type DropboxDownload = {
 }
 
 const CLIENT_ID = 'c53nc5eenquwokp'
-const CODE_VERIFIER_KEY = 'dropboxCodeVerifier'
-const AUTH_STATE_KEY = 'dropboxAuthState'
-const POPUP_CALLBACK_KEY = 'dropboxPopupCallback'
+const WALLET_FILE = 'wallet.lck'
 
 let connection: any | undefined
 let connectionPromise: Promise<any | undefined> | undefined
-let pendingRefreshToken: string | undefined
+let codeVerifier: string | undefined
+const state = $state({ authenticated: false })
 
 const redirectUrl = (
     document.location.origin + document.location.pathname
 ).replace(/\/+$/, '')
 
-async function getAuthenticationUrl(state: string): Promise<string> {
-    const dbx = new Dropbox.Dropbox({ clientId: CLIENT_ID })
-    const authUrl = await dbx.auth.getAuthenticationUrl(
-        redirectUrl,
-        state,
-        'code',
-        'offline',
-        undefined,
-        undefined,
-        true
-    )
-    window.sessionStorage.setItem(CODE_VERIFIER_KEY, dbx.auth.codeVerifier)
-    return authUrl
-}
-
-export async function openAuthenticationPage(): Promise<void> {
+async function openAuthenticationPage(): Promise<void> {
     const authenticationWindow = window.open(
         '',
         'dropbox-auth',
@@ -53,63 +37,69 @@ export async function openAuthenticationPage(): Promise<void> {
     }
 
     try {
-        const state = crypto.randomUUID()
-        window.sessionStorage.setItem(AUTH_STATE_KEY, state)
-        const authenticationUrl = await getAuthenticationUrl(state)
-        authenticationWindow.sessionStorage.setItem(POPUP_CALLBACK_KEY, 'true')
+        const expectedState = crypto.randomUUID()
+        const dbx = new Dropbox.Dropbox({ clientId: CLIENT_ID })
+        const authenticationUrl = await dbx.auth.getAuthenticationUrl(
+            redirectUrl,
+            expectedState,
+            'code',
+            'offline',
+            undefined,
+            undefined,
+            true
+        )
+        codeVerifier = dbx.auth.codeVerifier
         authenticationWindow.opener = null
         authenticationWindow.location.href = authenticationUrl
-        await completePopupAuthentication(authenticationWindow, state)
+        await completePopupAuthentication(authenticationWindow, expectedState)
     } catch (error) {
         authenticationWindow.close()
+        codeVerifier = undefined
         throw error
     }
 }
 
-export async function isAuthenticated(): Promise<boolean> {
+async function refresh(): Promise<boolean> {
     const dbx = await getConnection()
     if (dbx) {
         await persistRefreshToken()
     }
-    return !!dbx
+    state.authenticated = !!dbx
+    return state.authenticated
 }
 
-export async function logout() {
+async function login(): Promise<void> {
+    await openAuthenticationPage()
+    await refresh()
+}
+
+async function logout() {
     const dbx = connection
     if (dbx) {
         dbx.authTokenRevoke().catch(console.error)
     }
     connection = undefined
     connectionPromise = undefined
-    pendingRefreshToken = undefined
-    window.sessionStorage.removeItem(CODE_VERIFIER_KEY)
-    window.sessionStorage.removeItem(AUTH_STATE_KEY)
+    codeVerifier = undefined
     const wallet = await api.setDropboxRefreshToken('')
-    setDropboxHash('')
+    window.localStorage.removeItem('dropboxHash')
+    window.localStorage.removeItem('dropboxRev')
+    state.authenticated = false
     return wallet
 }
 
-export async function listDir(): Promise<any> {
+async function getRemoteWalletHash(): Promise<string | undefined> {
     const dbx = await getConnection()
     const response = await dbx.filesListFolder({ path: '' })
-    return response.result.entries as DropboxEntry[]
+    return (response.result.entries as DropboxEntry[]).find(
+        (file) => file.name === WALLET_FILE
+    )?.content_hash
 }
 
-export async function fileExist(filename: string): Promise<any> {
-    const files = await listDir()
-    const file = files && files.find((f: any) => f.name === filename)
-    if (file) {
-        return file
-    }
-    return
-}
-
-export async function download(
-    filename: string
-): Promise<DropboxDownload | undefined> {
+async function downloadWallet(): Promise<DropboxDownload | undefined> {
     const dbx = await getConnection()
 
-    const response = await dbx.filesDownload({ path: '/' + filename })
+    const response = await dbx.filesDownload({ path: `/${WALLET_FILE}` })
     if (response.status !== 200) {
         return
     }
@@ -121,8 +111,29 @@ export async function download(
     }
 }
 
-export async function upload(
-    filename: string,
+async function replaceWalletFromDropbox(): Promise<Wallet | undefined> {
+    const download = await downloadWallet()
+    if (!download) {
+        return
+    }
+
+    const wallet = await api.replaceWallet(download.content)
+    if (!wallet) {
+        return
+    }
+
+    useDownloadedWallet(download, wallet)
+    return wallet
+}
+
+function useDownloadedWallet(download: DropboxDownload, wallet: Wallet): void {
+    setDropboxHash(download.hash, download.rev)
+    connection = undefined
+    connectionPromise = undefined
+    state.authenticated = !!wallet.settings.dropboxRefreshToken
+}
+
+async function uploadWallet(
     content: ArrayBuffer | Uint8Array,
     overwrite: boolean = false
 ): Promise<boolean> {
@@ -135,7 +146,7 @@ export async function upload(
     let response
     try {
         response = await dbx.filesUpload({
-            path: '/' + filename,
+            path: `/${WALLET_FILE}`,
             contents: content,
             mode:
                 !overwrite && rev
@@ -149,10 +160,10 @@ export async function upload(
 
     setDropboxHash(response.result.content_hash, response.result.rev)
 
-    return response && response.status === 200
+    return response.status === 200
 }
 
-export async function getConnection(): Promise<any | undefined> {
+async function getConnection(): Promise<any | undefined> {
     if (connection) {
         return connection
     }
@@ -164,45 +175,12 @@ export async function getConnection(): Promise<any | undefined> {
     return connectionPromise
 }
 
-export function useRefreshToken(refreshToken: string): void {
-    connection = undefined
-    connectionPromise = undefined
-    pendingRefreshToken = refreshToken || undefined
-}
-
 async function createConnection(): Promise<any | undefined> {
-    window.localStorage.removeItem('dropboxAccessToken')
-    window.localStorage.removeItem('dropboxRefreshToken')
-
-    const codeFromUrl = getCodeFromUrl()
-    if (codeFromUrl) {
-        if (window.sessionStorage.getItem(POPUP_CALLBACK_KEY)) {
-            return
-        }
-
-        const callbackState = new URL(window.location.href).searchParams.get(
-            'state'
-        )
-        if (callbackState !== window.sessionStorage.getItem(AUTH_STATE_KEY)) {
-            window.history.replaceState(null, '', redirectUrl)
-            return
-        }
-
-        try {
-            await exchangeAuthorizationCode(codeFromUrl)
-        } finally {
-            window.history.replaceState(null, '', redirectUrl)
-        }
-        return connection
-    }
-
-    const refreshToken =
-        pendingRefreshToken || api.getDropboxRefreshToken() || undefined
+    const refreshToken = api.getDropboxRefreshToken() || undefined
     if (!refreshToken) {
         return
     }
 
-    pendingRefreshToken = refreshToken
     connection = new Dropbox.Dropbox({
         clientId: CLIENT_ID,
         refreshToken,
@@ -210,17 +188,12 @@ async function createConnection(): Promise<any | undefined> {
     return connection
 }
 
-export async function persistRefreshToken(): Promise<Wallet | undefined> {
-    const refreshToken =
-        pendingRefreshToken || connection?.auth.getRefreshToken()
+async function persistRefreshToken(): Promise<void> {
+    const refreshToken = connection?.auth.getRefreshToken()
     if (!refreshToken || refreshToken === api.getDropboxRefreshToken()) {
         return
     }
-    return await api.setDropboxRefreshToken(refreshToken)
-}
-
-export function getCodeFromUrl(): string | undefined {
-    return new URL(window.location.href).searchParams.get('code') || undefined
+    await api.setDropboxRefreshToken(refreshToken)
 }
 
 async function completePopupAuthentication(
@@ -250,12 +223,10 @@ async function completePopupAuthentication(
         }
         await new Promise((resolve) => setTimeout(resolve, 250))
     }
-    window.sessionStorage.removeItem(CODE_VERIFIER_KEY)
-    window.sessionStorage.removeItem(AUTH_STATE_KEY)
+    codeVerifier = undefined
 }
 
 async function exchangeAuthorizationCode(code: string): Promise<void> {
-    const codeVerifier = window.sessionStorage.getItem(CODE_VERIFIER_KEY)
     if (!codeVerifier) {
         throw new Error('Missing Dropbox PKCE code verifier')
     }
@@ -266,30 +237,46 @@ async function exchangeAuthorizationCode(code: string): Promise<void> {
     try {
         token = await dbx.auth.getAccessTokenFromCode(redirectUrl, code)
     } finally {
-        window.sessionStorage.removeItem(CODE_VERIFIER_KEY)
-        window.sessionStorage.removeItem(AUTH_STATE_KEY)
+        codeVerifier = undefined
     }
 
     if (token.status !== 200 || !token.result.refresh_token) {
         throw new Error('Dropbox did not return a refresh token')
     }
 
-    pendingRefreshToken = token.result.refresh_token
     connection = new Dropbox.Dropbox({
         clientId: CLIENT_ID,
         accessToken: token.result.access_token,
         accessTokenExpiresAt: new Date(
             Date.now() + token.result.expires_in * 1000
         ),
-        refreshToken: pendingRefreshToken,
+        refreshToken: token.result.refresh_token,
     })
 }
 
-export function setDropboxHash(hash: string, rev: string = '') {
+function setDropboxHash(hash: string, rev: string) {
     window.localStorage.setItem('dropboxHash', hash)
     window.localStorage.setItem('dropboxRev', rev)
 }
 
-export function getDropboxHash(hash?: string): string | undefined {
-    return window.localStorage.getItem('dropboxHash')
+function getDropboxHash(): string {
+    return window.localStorage.getItem('dropboxHash') || ''
+}
+
+export default {
+    get authenticated() {
+        return state.authenticated
+    },
+    set authenticated(value: boolean) {
+        state.authenticated = value
+    },
+    refresh,
+    login,
+    logout,
+    getRemoteWalletHash,
+    downloadWallet,
+    replaceWalletFromDropbox,
+    useDownloadedWallet,
+    uploadWallet,
+    getDropboxHash,
 }

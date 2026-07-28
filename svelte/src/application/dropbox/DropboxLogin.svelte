@@ -1,6 +1,6 @@
 <script lang="ts">
     import Button from '../../helpers/Button.svelte'
-    import * as dropbox from './dropbox.ts'
+    import dropbox from './dropbox.svelte.ts'
     import type { DropboxState } from '../../helpers/types.ts'
 
     interface Props {
@@ -10,11 +10,10 @@
 
     let { state = $bindable('checking'), onlogout }: Props = $props()
 
-    let filedata = null
     async function onLogin() {
         await dropbox.logout()
-        await dropbox.openAuthenticationPage()
-        await init()
+        await dropbox.login()
+        await init(false)
     }
 
     async function onLogout() {
@@ -23,14 +22,15 @@
         onlogout()
     }
 
-    const init = async () => {
+    async function init(refresh: boolean = true) {
         state = 'checking'
-        let isAuthenticated = await dropbox.isAuthenticated()
-        state = isAuthenticated ? 'logged' : 'not_logged'
-        if (isAuthenticated) {
+        if (refresh) {
+            await dropbox.refresh()
+        }
+        state = dropbox.authenticated ? 'logged' : 'not_logged'
+        if (dropbox.authenticated) {
             try {
-                const walletExist = await dropbox.fileExist('wallet.lck')
-                if (!walletExist) {
+                if (!(await dropbox.getRemoteWalletHash())) {
                     state = 'no_wallet'
                     return
                 }
