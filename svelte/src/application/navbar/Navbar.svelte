@@ -65,29 +65,41 @@
 
     onMount(() => {
         // Automatically start a search when typing in the application
-        const onKeypress = (event) => {
-            // check if the navigation bar is on the top level
-            let topElement = document.elementFromPoint(0, 0)
+        const onKeydown = (event: KeyboardEvent) => {
+            const target = event.target
+            const editing =
+                target instanceof HTMLElement &&
+                (target.isContentEditable ||
+                    ['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName))
+            const overlayOpen = document.querySelector(
+                '.panel:not(.hidden), .dialog'
+            )
+
             if (
-                topElement &&
-                topElement.classList.contains('wallet-navbar') &&
-                event.target instanceof HTMLElement &&
-                event.target.tagName !== 'INPUT'
+                editing ||
+                overlayOpen ||
+                event.defaultPrevented ||
+                event.isComposing ||
+                event.ctrlKey ||
+                event.metaKey ||
+                event.altKey ||
+                event.key.length !== 1 ||
+                !event.key.trim()
             ) {
-                openSearch = true
-                const input = document.querySelector<HTMLInputElement>(
-                    '.search_field input'
-                )
-                if (input !== document.activeElement) {
-                    setTimeout(() => {
-                        input.focus()
-                        searchText += event.key
-                    })
-                }
+                return
             }
+
+            event.preventDefault()
+            openSearch = true
+            searchText += event.key
+            requestAnimationFrame(() => {
+                document
+                    .querySelector<HTMLInputElement>('.search_field input')
+                    ?.focus()
+            })
         }
-        document.addEventListener('keypress', onKeypress)
-        return () => document.removeEventListener('keypress', onKeypress)
+        document.addEventListener('keydown', onKeydown)
+        return () => document.removeEventListener('keydown', onKeydown)
     })
 </script>
 
