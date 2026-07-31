@@ -11,6 +11,11 @@
             "64": "icons/64.png"
         }
     },
+    "commands": {
+        "_execute_action": {
+            "description": "Toggle the Locky sidebar"
+        }
+    },
     "background": {
         "service_worker": "background.js"
     },

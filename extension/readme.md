@@ -22,6 +22,9 @@ Phishing protection.
 
 Clicking the extension icon opens Locky in the browser sidebar.
 
+A keyboard shortcut can be assigned from `chrome://extensions/shortcuts` in
+Chrome or "Manage Extension Shortcuts" in Firefox.
+
 ## Development
 
 ### Chrome
