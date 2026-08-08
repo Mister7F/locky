@@ -126,6 +126,52 @@ export function concatenate(...arrays: Uint8Array[]): Uint8Array {
     return result
 }
 
+/**
+ * Generate a password from browser randomness mixed with additional entropy.
+ */
+export async function generatePassword(
+    alphabet: string,
+    length: number,
+    additionalEntropy: Uint8Array
+): Promise<string> {
+    const characters = [...new Set(alphabet)]
+    if (!characters.length || !length) {
+        return ''
+    }
+
+    const additionalEntropyHash = new Uint8Array(
+        await window.crypto.subtle.digest(
+            'SHA-512',
+            additionalEntropy as BufferSource
+        )
+    )
+    const domain = new TextEncoder().encode('locky-password-generator-v1')
+
+    const password: string[] = []
+    let counter = 0
+    const limit = 2 ** 32 - (2 ** 32 % characters.length)
+    while (password.length < length) {
+        const random = window.crypto.getRandomValues(new Uint8Array(64))
+        const counterBytes = new Uint8Array(4)
+        // Keep blocks distinct if an RNG failure returns the same value repeatedly.
+        new DataView(counterBytes.buffer).setUint32(0, counter++)
+        const block = await hmac(
+            concatenate(random, additionalEntropyHash),
+            concatenate(domain, counterBytes),
+            'SHA-512'
+        )
+        for (const pos of new Uint32Array(block)) {
+            if (pos < limit) {
+                password.push(characters[pos % characters.length])
+                if (password.length === length) {
+                    break
+                }
+            }
+        }
+    }
+    return password.join('')
+}
+
 // 32 bits representation of the given string
 function passwordKey(s: string): number {
     let h = 0,

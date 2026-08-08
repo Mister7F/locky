@@ -1,7 +1,3 @@
-// chrome.storage.session
-//     .get().catch()
-//     .then((x) => alert('Should not be able to access storage session!'))
-
 const METHODS = {
     // Amazon
     'amazon.fr': { fill: 'set_attribute', submit: 'submit' },
@@ -159,27 +155,49 @@ function findInputs(selectorsInput1, selectorsInput2 = null, alrt = true) {
     }
 }
 
-chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
-    if (
-        sender.origin !== `moz-extension://${chrome.runtime.id}` &&
-        sender.origin !== `chrome-extension://${chrome.runtime.id}` &&
-        `${sender.origin}/` !== chrome.runtime.getURL('/')
-    ) {
-        console.error(
-            'Wrong origin:',
-            chrome.runtime.id,
-            chrome.runtime.getURL('/'),
-            sender.origin
-        )
+/**
+ * Return true if we run on the wallet itself.
+ *
+ * `chrome.storage.session` is out of reach here (trusted contexts only), but
+ * the wallet page's `localStorage` is not, and it holds the key that encrypts
+ * the master password kept in that session storage. Staying out of the wallet
+ * origin keeps both halves apart.
+ */
+async function isWalletOrigin() {
+    const { lockyUrl } = await chrome.storage.sync.get('lockyUrl')
+    try {
+        return new URL(lockyUrl).origin === window.location.origin
+    } catch {
+        return false
+    }
+}
+
+isWalletOrigin().then((isWallet) => {
+    if (isWallet) {
         return
     }
 
-    if (message.action === 'login') {
-        const ok = await login(message.account.login, message.account.password)
-        if (ok && message.account.totp) {
-            showAlert(`${message.account.totp} copied`)
+    chrome.runtime.onMessage.addListener(async (message, sender) => {
+        // On Firefox the origin holds a random UUID, not `chrome.runtime.id`
+        if (`${sender.origin}/` !== chrome.runtime.getURL('/')) {
+            console.error(
+                'Wrong origin:',
+                chrome.runtime.getURL('/'),
+                sender.origin
+            )
+            return
         }
-    }
+
+        if (message.action === 'login') {
+            const ok = await login(
+                message.account.login,
+                message.account.password
+            )
+            if (ok && message.account.totp) {
+                showAlert(`${message.account.totp} copied`)
+            }
+        }
+    })
 })
 
 async function login(login, password, url) {

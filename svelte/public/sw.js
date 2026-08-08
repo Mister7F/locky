@@ -69,11 +69,6 @@ self.addEventListener('fetch', async (event) => {
         strategy = 'network-only'
     } else if (host === 'content.dropboxapi.com') {
         strategy = 'network-only'
-    } else if (
-        host === 'fonts.gstatic.com' ||
-        host === 'fonts.googleapis.com'
-    ) {
-        strategy = 'cache-first'
     } else if (currentHost === host) {
         const cachableExtension = [
             'css',
@@ -121,22 +116,14 @@ const cacheFirst = async (request) => {
 
     try {
         const cacheResponse = await cache.match(request)
-        if (
-            cacheResponse &&
-            (cacheResponse.ok || cacheResponse.type === 'opaque')
-        ) {
-            // `opaque` for google font, etc
+        if (cacheResponse && cacheResponse.ok) {
             return cacheResponse
         }
     } catch {}
 
     try {
         const networkResponse = await fetch(request)
-        if (
-            networkResponse &&
-            (networkResponse.ok || networkResponse.type === 'opaque')
-        ) {
-            // `opaque` for google font, etc
+        if (networkResponse && networkResponse.ok) {
             cache.put(request, networkResponse.clone())
         }
         return networkResponse

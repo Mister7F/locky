@@ -405,8 +405,7 @@
         const element = event.currentTarget as HTMLElement
         if (
             currentSlice >= items.length ||
-            element.scrollTop + element.clientHeight <
-            element.scrollHeight - 1
+            element.scrollTop + element.clientHeight < element.scrollHeight - 1
         ) {
             return
         }
