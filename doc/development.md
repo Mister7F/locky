@@ -10,7 +10,7 @@ Then you can start the container
 
 Then,
 
-> `npm install`
+> `npm ci`
 
 To run your development server just run,
 
