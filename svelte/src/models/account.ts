@@ -1,7 +1,14 @@
 import { normalizeOrigin } from '../helpers/utils'
 import type { FieldType } from '../helpers/types.ts'
 
-const FIELD_TYPES: FieldType[] = ['text', 'password', 'email', 'url', 'totp']
+const FIELD_TYPES: FieldType[] = [
+    'text',
+    'text-multiline',
+    'password',
+    'email',
+    'url',
+    'totp',
+]
 
 function isFieldType(value: unknown): value is FieldType {
     return FIELD_TYPES.some((type) => type === value)

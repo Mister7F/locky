@@ -9,7 +9,7 @@
         help?: string
         helpPersistent?: boolean
         value?: string
-        type?: HTMLInputAttributes['type']
+        type?: HTMLInputAttributes['type'] | 'textarea'
         autofocus?: boolean
         onkeypress?: InputEventHandler
         onchange?: InputEventHandler
@@ -39,7 +39,7 @@
     let selectionIndex = $state(-1)
     let timeoutHandle: number | undefined
     let loosingFocus = $state(false)
-    let inputElement = $state<HTMLInputElement>()
+    let inputElement = $state<HTMLInputElement | HTMLTextAreaElement>()
 
     $effect(() => {
         if (autofocus && inputElement) {
@@ -54,7 +54,10 @@
             clearTimeout(timeoutHandle)
             timeoutHandle = null
         }
-        const target = event.target as HTMLInputElement | null
+        const target = event.target as
+            | HTMLInputElement
+            | HTMLTextAreaElement
+            | null
         selectionIndex = target?.selectionStart ?? -1
         onfocus?.()
     }
@@ -73,25 +76,45 @@
     }
 </script>
 
-<div class="container {className}">
-    <input
-        bind:this={inputElement}
-        required
-        class="
-            {focused ? 'focused' : ''}
-            {selectionIndex === 0 ? 'selection-zero' : ''}
-            {loosingFocus ? 'loosing-focus' : ''}
-            {helpPersistent ? 'help-persistent' : ''}
-        "
-        {...{ type }}
-        bind:value
-        onfocus={onFocus}
-        onblur={onBlur}
-        {onkeypress}
-        {onchange}
-        {oninput}
-        {onkeydown}
-    />
+<div class="container {type === 'textarea' ? 'multiline' : ''} {className}">
+    {#if type === 'textarea'}
+        <textarea
+            bind:this={inputElement}
+            required
+            class="
+                {focused ? 'focused' : ''}
+                {selectionIndex === 0 ? 'selection-zero' : ''}
+                {loosingFocus ? 'loosing-focus' : ''}
+                {helpPersistent ? 'help-persistent' : ''}
+            "
+            bind:value
+            onfocus={onFocus}
+            onblur={onBlur}
+            {onkeypress}
+            {onchange}
+            {oninput}
+            {onkeydown}
+        ></textarea>
+    {:else}
+        <input
+            bind:this={inputElement}
+            required
+            class="
+                {focused ? 'focused' : ''}
+                {selectionIndex === 0 ? 'selection-zero' : ''}
+                {loosingFocus ? 'loosing-focus' : ''}
+                {helpPersistent ? 'help-persistent' : ''}
+            "
+            {...{ type }}
+            bind:value
+            onfocus={onFocus}
+            onblur={onBlur}
+            {onkeypress}
+            {onchange}
+            {oninput}
+            {onkeydown}
+        />
+    {/if}
     <span class="bar"></span>
     {#if label}
         <span class="label">{label}</span>
@@ -116,7 +139,11 @@
         height: 50px;
         border: 1px soled green;
     }
-    input {
+    .container.multiline {
+        height: 100px;
+    }
+    input,
+    textarea {
         background: none;
         display: block;
         border: none;
@@ -133,11 +160,36 @@
         width: 100%;
     }
 
-    .container:hover input {
+    textarea {
+        height: calc(100% - 16px);
+        min-height: 0;
+        margin-top: 16px;
+        padding: 0;
+        resize: none;
+        font-family: inherit;
+        scrollbar-color: var(--scrollbar-color) transparent;
+        scrollbar-width: thin;
+    }
+
+    textarea::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    textarea::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    textarea::-webkit-scrollbar-thumb {
+        background: var(--scrollbar-color);
+    }
+
+    .container:hover input,
+    .container:hover textarea {
         border-bottom: 1px solid var(--color);
     }
 
-    input.focused {
+    input.focused,
+    textarea.focused {
         outline: none;
     }
     input[type='password'] {
@@ -168,12 +220,15 @@
     }
 
     input.focused ~ .label,
-    input:valid ~ .label {
+    input:valid ~ .label,
+    textarea.focused ~ .label,
+    textarea:valid ~ .label {
         transform: translateY(-10px);
         font-size: 12px;
         color: var(--disabled-color);
     }
-    input.focused ~ .label {
+    input.focused ~ .label,
+    textarea.focused ~ .label {
         color: var(--secondary);
     }
 
@@ -193,18 +248,21 @@
         width: 100%;
         left: 0%;
     }
-    input.selection-zero ~ .bar {
+    input.selection-zero ~ .bar,
+    textarea.selection-zero ~ .bar {
         /* Focusing the zero index change the animation
            We can use the caret position in all cases like:
            > https://sveltematerialui.com/demo/textfield
            but it will add a lot of complexity */
         transform-origin: left center;
     }
-    input.focused ~ .bar {
+    input.focused ~ .bar,
+    textarea.focused ~ .bar {
         transform: scaleX(1);
         opacity: 1;
     }
-    input.loosing-focus ~ .bar {
+    input.loosing-focus ~ .bar,
+    textarea.loosing-focus ~ .bar {
         transform: scaleX(1) !important;
         opacity: 0 !important;
     }
@@ -217,7 +275,8 @@
         font-size: 0.75rem;
         font-weight: 400;
     }
-    input:not(.focused):not(.help-persistent) ~ .help {
+    input:not(.focused):not(.help-persistent) ~ .help,
+    textarea:not(.focused):not(.help-persistent) ~ .help {
         display: none;
     }
 </style>

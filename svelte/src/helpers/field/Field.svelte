@@ -70,11 +70,13 @@
     let generatePasswordDialog = $state<any>(null)
 
     let computedType = $derived(
-        passwordVisible
-            ? 'text'
-            : type === 'password' || type === 'email'
-              ? type
-              : 'text'
+        type === 'text-multiline'
+            ? 'textarea'
+            : passwordVisible
+              ? 'text'
+              : type === 'password' || type === 'email'
+                ? type
+                : 'text'
     )
 
     let { strength, detail: strengthResult } = $derived(
@@ -170,6 +172,8 @@
                         {/if}
                     {:else if type === 'totp'}
                         <div class="value">{message}</div>
+                    {:else if type === 'text-multiline'}
+                        <div class="multi-line-value">{value}</div>
                     {:else}
                         <div class="value">{value}</div>
                     {/if}
@@ -181,7 +185,9 @@
                     bind:value
                     type={computedType}
                     {autofocus}
-                    onkeypress={onKeyPress}
+                    onkeypress={type === 'text-multiline'
+                        ? undefined
+                        : onKeyPress}
                     {onchange}
                     {oninput}
                     {onkeydown}
@@ -300,8 +306,9 @@
     .multi-line-value {
         width: 100%;
         color: var(--on-primary);
-        padding: 12px 0;
-        word-break: break-all;
+        padding: 18px 0 12px;
+        overflow-wrap: anywhere;
+        white-space: pre-wrap;
     }
 
     .field-actions {

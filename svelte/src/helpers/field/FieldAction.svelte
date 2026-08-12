@@ -53,6 +53,15 @@
             color="secondary"
             variant={type === 'text' ? 'standard' : 'outlined'}
             onclick={() => (type = 'text')}
+            title="Text"
+        />
+        <Button
+            class="field_type_button"
+            icon="notes"
+            color="secondary"
+            variant={type === 'text-multiline' ? 'standard' : 'outlined'}
+            onclick={() => (type = 'text-multiline')}
+            title="Text multi-line"
         />
         <Button
             class="field_type_button"

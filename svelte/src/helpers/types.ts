@@ -8,7 +8,13 @@ export type IconColor =
     | 'on-surface'
     | 'error'
 
-export type FieldType = 'text' | 'password' | 'email' | 'url' | 'totp'
+export type FieldType =
+    | 'text'
+    | 'text-multiline'
+    | 'password'
+    | 'email'
+    | 'url'
+    | 'totp'
 
 export const ACCOUNT_VIEW_MODES = ['detail', 'list', 'minimalist'] as const
 export type AccountViewMode = (typeof ACCOUNT_VIEW_MODES)[number]
